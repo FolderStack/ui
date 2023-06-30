@@ -1,3 +1,7 @@
+.ant-btn {
+  box-shadow: none !important;
+}
+
 :root {
   --max-width: 1100px;
   --border-radius: 12px;

@@ -1,0 +1,1 @@
+export { default as ThemeToken } from './token.json';

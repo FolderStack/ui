@@ -21,7 +21,7 @@ const FilterContext = createContext({
     clear() {
         //
     },
-    toSearchParams(): URLSearchParams {
+    toSearchParams(qs?: URLSearchParams): URLSearchParams {
         return new URLSearchParams();
     },
     isVisible: false,
@@ -72,9 +72,7 @@ export function FilterProvider({ children }: PropsWithChildren) {
         return _filters as Filters;
     }
 
-    function toSearchParams() {
-        const qs = new URLSearchParams();
-
+    function toSearchParams(qs = new URLSearchParams()) {
         for (const key in filter) {
             const k = key as keyof Filters;
             if (!filter[k]) continue;

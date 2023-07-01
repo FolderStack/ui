@@ -1,14 +1,12 @@
 "use client";
 import { DropZone } from "@/components";
-import { useFileUpload } from "@/hooks";
-import { useParams } from "next/navigation";
+import { useUpload } from "@/hooks";
 
 export default function FilePage() {
-    const params = useParams();
-    const onFileDrop = useFileUpload(params.folderId);
+    const upload = useUpload();
 
     return (
-        <DropZone onDrop={onFileDrop}>
+        <DropZone onDrop={upload.openModal}>
             <div>Hi page</div>
         </DropZone>
     );

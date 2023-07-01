@@ -1,18 +1,21 @@
 "use client";
+import { PageData } from "@/types";
 import { useParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { useFilter } from "./Filter";
 import { usePagination } from "./Pagination";
 import { useSort } from "./Sort";
+import { useBoolean } from "./useBoolean";
 const dummyData = require('../../dummy-data.json');
 
 export function useFetchPageData() {
+    const [isLoading, loading] = useBoolean(false);
     const params = useParams();
     const filter = useFilter();
     const sort = useSort();
-    const { page, pageSize } = usePagination();
+    const pagination = usePagination();
 
-    const [data, setData] = useState<any | null>(null);
+    const [data, setData] = useState<PageData | null>(null);
     const [folderId, setFolderId] = useState<string | null>(null);
     const [fileId, setFileId] = useState<string | null>(null);
 
@@ -30,12 +33,19 @@ export function useFetchPageData() {
     }, [params])
 
     const request = useCallback(async () => {
-        const params = filter.toSearchParams();
-        params.set('page', page.toString());
-        params.set('pageSize', pageSize.toString());
+        loading.on()
+        const url = new URL(window.location.href);
+        filter.toSearchParams(url.searchParams);
+        sort.toSearchParams(url.searchParams);
+        pagination.toSearchParams(url.searchParams);
+        const qs = url.searchParams.toString();
 
-
-    }, [])
+        loading.off();
+        
+        // Using filter.filter to avoid triggering a call every time
+        // filter.isVisible is changed etc..
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [filter.filter, sort, pagination])
 
     const dummyRequest = useCallback(async function() {
         if (!folderId && !fileId) return;
@@ -53,5 +63,9 @@ export function useFetchPageData() {
         return {};
     }, [folderId, fileId]);
 
-    return data;
+    useEffect(() => {
+        request()
+    }, [request])
+
+    return { data, isLoading };
 }

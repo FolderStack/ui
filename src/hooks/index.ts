@@ -1,4 +1,5 @@
 export * from './DisplayType';
+export * from './FileUpload';
 export * from './Filter';
 export * from './PageData';
 export * from './Pagination';
@@ -6,5 +7,4 @@ export * from './Selection';
 export * from './Sort';
 export * from './User';
 export * from './useBoolean';
-export * from './useFileUpload';
-export * from './usePageData';
+export * from './useFetchPageData';

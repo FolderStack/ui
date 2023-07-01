@@ -12,21 +12,25 @@ interface SortContext {
     sort: "asc" | "desc";
     sortBy?: string;
     change(sortBy?: string, sort?: "asc" | "desc"): void;
+    toSearchParams(qs?: URLSearchParams): URLSearchParams;
 }
 
 const SortContext = createContext<SortContext>({
     sort: "desc",
-    change(sortBy?: string, sort?: "asc" | "desc") {
+    change(sortBy, sort) {
         //
+    },
+    toSearchParams(qs) {
+        return new URLSearchParams();
     },
 });
 
 const SORT_KEYS = ["name", "size", "createdAt", "updatedAt"];
 
 export function SortProvider({ children }: PropsWithChildren) {
-    const [isLoading, loading] = useBoolean();
     const [sortBy, setSortBy] = useState<string>();
     const [sort, setSort] = useState<"asc" | "desc">("desc");
+    const [isLoading, loading] = useBoolean();
 
     function change(sb?: string, st?: "asc" | "desc") {
         if (sb !== sortBy && sb) {
@@ -83,7 +87,7 @@ export function SortProvider({ children }: PropsWithChildren) {
     }, [toSearchParams, isLoading]);
 
     return (
-        <SortContext.Provider value={{ sortBy, sort, change }}>
+        <SortContext.Provider value={{ sortBy, sort, change, toSearchParams }}>
             {children}
         </SortContext.Provider>
     );

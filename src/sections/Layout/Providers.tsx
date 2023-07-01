@@ -1,5 +1,6 @@
 import {
     DisplayTypeProvider,
+    FileUploadProvider,
     FilterProvider,
     PageDataProvider,
     PaginationProvider,
@@ -14,11 +15,13 @@ export function MainLayoutProviders({ children }: PropsWithChildren) {
             <SortProvider>
                 <FilterProvider>
                     <PageDataProvider>
-                        <SelectionProvider>
-                            <DisplayTypeProvider>
-                                {children}
-                            </DisplayTypeProvider>
-                        </SelectionProvider>
+                        <FileUploadProvider>
+                            <SelectionProvider>
+                                <DisplayTypeProvider>
+                                    {children}
+                                </DisplayTypeProvider>
+                            </SelectionProvider>
+                        </FileUploadProvider>
                     </PageDataProvider>
                 </FilterProvider>
             </SortProvider>

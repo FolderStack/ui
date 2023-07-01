@@ -1,15 +1,22 @@
+import { PageData } from "@/types";
 import { PropsWithChildren, createContext, useContext } from "react";
-import { useFetchPageData } from "../usePageData";
+import { useFetchPageData } from "../useFetchPageData";
 
-const PageDataContext = createContext<{ data: any }>({
+interface PageDataContext {
+    data: PageData;
+    isLoading: boolean;
+}
+
+const PageDataContext = createContext<PageDataContext>({
     data: {},
+    isLoading: false,
 });
 
 export function PageDataProvider({ children }: PropsWithChildren) {
-    const data = useFetchPageData();
+    const { data, isLoading } = useFetchPageData();
 
     return (
-        <PageDataContext.Provider value={{ data }}>
+        <PageDataContext.Provider value={{ data, isLoading }}>
             {children}
         </PageDataContext.Provider>
     );

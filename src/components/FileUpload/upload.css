@@ -1,0 +1,27 @@
+.upload-file-item {
+    cursor: pointer;
+    padding-left: 4px;
+    height: 24px;
+}
+
+.upload-file-item > .upload-file-item-uploaded {
+    color: #52c41a;
+    padding-right: 4px;
+}
+
+.upload-file-item > .upload-file-item-error {
+    color: #ff4d4f;
+    padding-right: 4px;
+}
+
+.upload-file-item > .upload-file-item-delete {
+    display: none;
+}
+
+.upload-file-item:hover {
+    background: rgba(0, 0, 0, 0.04);
+}
+
+.upload-file-item:hover > .upload-file-item-delete {
+    display: block;
+}

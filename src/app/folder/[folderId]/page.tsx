@@ -1,17 +1,15 @@
 "use client";
 import { DropZone, File, Folder } from "@/components";
-import { useFileUpload, usePageData } from "@/hooks";
+import { usePageData, useUpload } from "@/hooks";
 import { withMainLayout } from "@/sections";
 import { Row } from "antd";
-import { useParams } from "next/navigation";
 
 function FolderPage() {
-    const params = useParams();
     const data = usePageData();
-    const onFileDrop = useFileUpload(params.folderId);
+    const upload = useUpload();
 
     return (
-        <DropZone onDrop={onFileDrop}>
+        <DropZone onDrop={upload.openModal}>
             <Row style={{ gap: "24px", flexWrap: "wrap" }}>
                 {data?.data?.children?.map?.((c: any, idx: number) => {
                     if (c.type === "folder") {

@@ -1,6 +1,7 @@
 import { useSelection, useUser } from "@/hooks";
-import { PlusOutlined, UploadOutlined } from "@ant-design/icons";
 import { Button } from "antd";
+import { UploadAction } from "../FileUpload";
+import { CreateFolderModal } from "../Folder/CreateFolderModal";
 
 export function AdminActions() {
     const selection = useSelection();
@@ -10,8 +11,8 @@ export function AdminActions() {
 
     return (
         <>
-            <Button icon={<PlusOutlined />}>New Folder</Button>
-            <Button icon={<UploadOutlined />}>Upload Files</Button>
+            <CreateFolderModal />
+            <UploadAction />
             <Button danger disabled={!selection.selected.length}>
                 Delete Selected
             </Button>

@@ -1,4 +1,5 @@
-import { Header, Layout, TopBar } from "@/components";
+import { Header, TopBar } from "@/components";
+import { Shell } from "@/sections";
 import { PropsWithChildren } from "react";
 import "./globals.css";
 import { Providers } from "./providers";
@@ -8,12 +9,12 @@ export default function RootLayout({ children }: PropsWithChildren) {
         <html lang="en" className="h-full bg-white">
             <body className="h-full">
                 <Providers>
-                    <Layout>
+                    <Shell>
                         <Header>
                             <TopBar />
                         </Header>
                         {children}
-                    </Layout>
+                    </Shell>
                 </Providers>
             </body>
         </html>

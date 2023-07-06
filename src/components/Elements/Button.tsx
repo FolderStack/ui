@@ -6,6 +6,7 @@ interface ButtonProps extends PropsWithChildren, PressableProps {
     type?: string;
     danger?: boolean;
     disabled?: boolean;
+    groupIndex?: number;
 }
 
 export function Button(props: ButtonProps) {

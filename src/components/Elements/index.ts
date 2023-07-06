@@ -6,5 +6,6 @@ export * from "./Content";
 export * from "./Header";
 export * from "./Layout";
 export * from "./Row";
+export * from "./Select";
 export * from "./Tooltip";
 export * from "./Typography";

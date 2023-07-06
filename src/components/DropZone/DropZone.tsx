@@ -10,9 +10,9 @@ export function DropZone({
     children,
     onDrop,
 }: PropsWithChildren<DropZoneProps>) {
-    const user = useUser()
-    const canUpload = user.isAdmin;
-    
+    const user = useUser();
+    const canUpload = user?.isAdmin;
+
     const [isDragging, setIsDragging] = useState(false);
 
     useEffect(() => {

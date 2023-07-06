@@ -1,11 +1,6 @@
+"use client";
 import { UploadModal } from "@/components";
-import {
-    PropsWithChildren,
-    createContext,
-    useCallback,
-    useContext,
-    useState,
-} from "react";
+import { PropsWithChildren, createContext, useCallback, useState } from "react";
 import { useBoolean } from "../useBoolean";
 
 interface FileUpload {
@@ -15,7 +10,7 @@ interface FileUpload {
     closeModal(): void;
 }
 
-const FileUpload = createContext<FileUpload>({
+export const FileUpload = createContext<FileUpload>({
     files: [],
     openModal() {
         //
@@ -67,8 +62,4 @@ export function FileUploadProvider({ children }: PropsWithChildren) {
             <UploadModal {...{ isOpen }} />
         </FileUpload.Provider>
     );
-}
-
-export function useUpload() {
-    return useContext(FileUpload);
 }

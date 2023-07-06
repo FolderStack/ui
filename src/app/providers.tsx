@@ -1,13 +1,13 @@
-"use client";
+import { TreeProvider, UserProvider } from "@/hooks";
+import { MainLayout } from "@/sections";
+import { PropsWithChildren } from "react";
 
-import { UserProvider } from "@/hooks";
-import { ThemeToken } from "@/theme";
-import { ConfigProvider } from "antd";
-
-export function Providers({ children }: { children: React.ReactNode }) {
+export function Providers({ children }: PropsWithChildren) {
     return (
-        <ConfigProvider theme={ThemeToken}>
-            <UserProvider>{children}</UserProvider>
-        </ConfigProvider>
+        <UserProvider>
+            <TreeProvider>
+                <MainLayout>{children}</MainLayout>
+            </TreeProvider>
+        </UserProvider>
     );
 }

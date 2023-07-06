@@ -1,10 +1,15 @@
 import { useSort } from "@/hooks";
-import {
-    SortAscendingOutlined,
-    SortDescendingOutlined,
-} from "@ant-design/icons";
-import { Button, Row, Select, Tooltip } from "antd";
+import dynamic from "next/dynamic";
 import { useCallback, useMemo } from "react";
+import { Button, Row } from "../Elements";
+import { Tooltip } from "../Elements/Tooltip";
+
+const SortAscendingOutlined = dynamic(
+    () => import("@ant-design/icons/SortAscendingOutlined")
+);
+const SortDescendingOutlined = dynamic(
+    () => import("@ant-design/icons/SortAscendingOutlined")
+);
 
 const Options: Record<string, any> = {
     desc: {
@@ -38,20 +43,20 @@ export function SortActions() {
 
     return (
         <Row align="middle" style={{ gap: "4px" }}>
-            <Tooltip title="Sort by an attribute">
-                <Select
+            <Tooltip content="Sort by an attribute">
+                {/* <AntSelect
                     value={selected as any}
                     placeholder="Sort by"
                     options={SORT_OPTIONS}
-                    onChange={onSelectChange}
+                    onChange={onSelectChange as any}
                     style={{
                         width: "120px",
                         borderTopRightRadius: 0,
                         borderBottomRightRadius: 0,
                     }}
-                />
+                /> */}
             </Tooltip>
-            <Tooltip title={Options[sort].title}>
+            <Tooltip content={Options[sort].title}>
                 <Button icon={Options[sort].icon} onClick={onToggle} />
             </Tooltip>
         </Row>

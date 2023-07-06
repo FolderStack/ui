@@ -1,8 +1,6 @@
 "use client";
 import { usePageData } from "@/hooks";
-import { Row } from "antd";
-import ButtonGroup from "antd/es/button/button-group";
-import Title from "antd/es/typography/Title";
+import { ButtonGroup, Row, Title } from "../Elements";
 import { DisplayTypeActions } from "./DisplayTypeActions";
 import { FilterActions } from "./FilterActions";
 import { SortActions } from "./SortActions";
@@ -13,7 +11,7 @@ export function ActionBar() {
 
     return (
         <Row align="middle" justify="space-between">
-            <Title level={1}>{folderName}</Title>
+            <Title size="h1">{folderName}</Title>
             <Row align="middle" style={{ marginBottom: "16px", gap: "16px" }}>
                 <SortActions />
                 <ButtonGroup>

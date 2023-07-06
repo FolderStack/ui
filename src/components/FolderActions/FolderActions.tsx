@@ -1,4 +1,5 @@
-import { Row } from "antd";
+"use client";
+import { Row } from "../Elements";
 import { AdminActions } from "./AdminActions";
 import { PaginationActions } from "./PaginationActions";
 

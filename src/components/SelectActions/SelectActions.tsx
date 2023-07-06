@@ -1,19 +1,26 @@
-import { usePageData, useSelection } from "@/hooks";
-import { DownloadOutlined } from "@ant-design/icons";
-import { Button, Checkbox, Row } from "antd";
+"use client";
+import { usePageData, useSelection, useUser } from "@/hooks";
+import dynamic from "next/dynamic";
 import { useEffect, useMemo, useState } from "react";
+import { Button, Checkbox, Row } from "../Elements";
+
+const DownloadOutlined = dynamic(
+    () => import("@ant-design/icons/DownloadOutlined")
+);
 
 export function SelectActions() {
+    const user = useUser();
     const { data = {} } = usePageData();
     const selection = useSelection();
+    const children = useMemo(() => data?.children ?? [], [data]);
 
     const [isAllSelected, setIsAllSelected] = useState(false);
 
     const isAllSelectedInContext = useMemo(() => {
-        return (data?.children ?? [])
+        return children
             .map((item: any) => selection.isSelected(String(item.id)))
             .every((a: boolean) => a);
-    }, [data, selection]);
+    }, [selection, children]);
 
     function selectAll(state: boolean) {
         if (!state) {
@@ -33,19 +40,28 @@ export function SelectActions() {
     return (
         <Row align="middle" justify="space-between" style={{ width: "100%" }}>
             <Checkbox
-                checked={isAllSelected}
+                checked={isAllSelected && children.length}
                 onChange={(evt) => selectAll(evt.target.checked)}
                 style={{ userSelect: "none" }}
+                disabled={!children.length}
             >
                 Select All
             </Checkbox>
 
-            <Button
-                disabled={!selection.selected.length}
-                icon={<DownloadOutlined />}
-            >
-                Download Selected
-            </Button>
+            <Row align={"middle"} style={{ gap: "8px" }}>
+                <Button
+                    disabled={!selection.selected.length}
+                    icon={<DownloadOutlined />}
+                >
+                    Download Selected
+                </Button>
+
+                {user?.isAdmin && (
+                    <Button danger disabled={!selection.selected.length}>
+                        Delete Selected
+                    </Button>
+                )}
+            </Row>
         </Row>
     );
 }

@@ -1,5 +1,5 @@
+"use client";
 import { useUpload } from "@/hooks";
-import { Space } from "antd";
 import { useMemo } from "react";
 import { UploadFileItem } from "./UploadFileItem";
 
@@ -22,8 +22,8 @@ export function UploadFileList({ progress }: UploadFileListProps) {
     }, [upload, progress]);
 
     return (
-        <Space
-            direction="vertical"
+        <div
+            className="space-x-4"
             style={{
                 maxHeight: "300px",
                 overflowY: "scroll",
@@ -33,6 +33,6 @@ export function UploadFileList({ progress }: UploadFileListProps) {
             }}
         >
             {uploadItems}
-        </Space>
+        </div>
     );
 }

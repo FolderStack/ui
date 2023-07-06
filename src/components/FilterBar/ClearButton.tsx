@@ -1,21 +1,22 @@
-import { Button, Form } from "antd";
+import { useWatch } from "antd/es/form/Form";
 import useFormInstance from "antd/es/form/hooks/useFormInstance";
+import { AntButton, AntFormItem } from "../Antd";
 
 export function ClearButton() {
     const form = useFormInstance();
-    const fields = Form.useWatch("to", form);
+    const fields = useWatch("to", form);
 
     console.log(fields);
 
     return (
-        <Form.Item label=" ">
-            <Button
+        <AntFormItem label=" ">
+            <AntButton
                 size="large"
                 danger
                 onClick={() => form.resetFields(["from", "to", "fileTypes"])}
             >
                 Clear
-            </Button>
-        </Form.Item>
+            </AntButton>
+        </AntFormItem>
     );
 }

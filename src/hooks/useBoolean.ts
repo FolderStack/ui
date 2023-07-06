@@ -1,23 +1,29 @@
+"use client";
 import { useCallback, useMemo, useState } from "react";
 
 export function useBoolean(defaultValue = false) {
     const [state, setState] = useState(defaultValue);
 
     function on() {
-        setState(true)
+        setState(true);
     }
 
     function off() {
-        setState(false)
+        setState(false);
     }
 
     const toggle = useCallback(() => {
-        setState(!state)
+        setState(!state);
     }, [state]);
 
-    const actions = useMemo(() => ({
-        on, off, toggle
-    }), [toggle])
+    const actions = useMemo(
+        () => ({
+            on,
+            off,
+            toggle,
+        }),
+        [toggle]
+    );
 
     return [state, actions] as const;
 }

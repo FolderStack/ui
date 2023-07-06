@@ -1,15 +1,18 @@
+"use client";
 import { useSelection } from "@/hooks";
 import { FileData } from "@/types";
-import {
-    DownloadOutlined,
-    InfoCircleOutlined,
-    StarOutlined,
-} from "@ant-design/icons";
-import { Button, Checkbox, Image, Row } from "antd";
-import ButtonGroup from "antd/es/button/button-group";
-import { useToken } from "antd/es/theme/internal";
-import Title from "antd/es/typography/Title";
+import dynamic from "next/dynamic";
+import Image from "next/image";
 import { useEffect, useMemo, useState } from "react";
+import { Button, ButtonGroup, Checkbox, Row, Title } from "../Elements";
+
+const DownloadOutlined = dynamic(
+    () => import("@ant-design/icons/DownloadOutlined")
+);
+const InfoCircleOutlined = dynamic(
+    () => import("@ant-design/icons/InfoCircleOutlined")
+);
+const StarOutlined = dynamic(() => import("@ant-design/icons/StarOutlined"));
 
 interface FileProps {
     data: FileData;
@@ -17,7 +20,6 @@ interface FileProps {
 
 export function File({ data }: FileProps) {
     const selection = useSelection();
-    const [, token] = useToken();
 
     const [isSelected, setIsSelected] = useState(false);
 
@@ -43,8 +45,8 @@ export function File({ data }: FileProps) {
                 minWidth: "280px",
                 maxWidth: "280px",
                 minHeight: "320px",
-                background: token.colorBgContainer,
-                borderRadius: token.borderRadius,
+                // background: token.colorBgContainer,
+                // borderRadius: token.borderRadius,
                 boxShadow: "0px 10px 50px -15px rgba(0,0,0,0.1)",
                 border: isSelected ? "1px solid" : "1px solid transparent",
             }}
@@ -65,7 +67,7 @@ export function File({ data }: FileProps) {
                                 onCheckboxChange(evt.target.checked)
                             }
                         >
-                            <Title level={5} style={{ marginTop: "5px" }}>
+                            <Title size="h5" style={{ marginTop: "5px" }}>
                                 {data.name}
                             </Title>
                         </Checkbox>

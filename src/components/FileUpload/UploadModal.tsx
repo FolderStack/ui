@@ -1,6 +1,8 @@
 "use client";
 import { useBoolean, usePageData, useUpload } from "@/hooks";
+import { Modal } from "antd";
 import { useCallback, useMemo, useReducer } from "react";
+import { UploadFileList } from "./UploadFileList";
 
 interface UploadModalProps {
     isOpen: boolean;
@@ -77,17 +79,15 @@ export function UploadModal({ isOpen }: UploadModalProps) {
         }
     }, [folderName]);
 
-    return null;
-
-    // return (
-    //     <AntModal
-    //         centered
-    //         okText="Upload"
-    //         cancelText="Cancel"
-    //         confirmLoading={isLoading}
-    //         {...{ title, onOk, open: isOpen, onCancel }}
-    //     >
-    //         <UploadFileList progress={progress} />
-    //     </AntModal>
-    // );
+    return (
+        <Modal
+            centered
+            okText="Upload"
+            cancelText="Cancel"
+            confirmLoading={isLoading}
+            {...{ title, onOk, open: isOpen, onCancel }}
+        >
+            <UploadFileList progress={progress} />
+        </Modal>
+    );
 }

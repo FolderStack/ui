@@ -1,8 +1,8 @@
 "use client";
+import { Button, Tooltip } from "antd";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import { MouseEvent } from "react";
-import { AntButton, AntTooltip } from "../Antd";
 
 const FunnelPlotOutlined = dynamic(
     () => import("@ant-design/icons/FunnelPlotOutlined")
@@ -17,12 +17,8 @@ export function AdvancedSearch() {
     }
 
     return (
-        <AntTooltip title="Go to advanced search">
-            <AntButton
-                icon={<FunnelPlotOutlined />}
-                onClick={go}
-                type="ghost"
-            />
-        </AntTooltip>
+        <Tooltip title="Go to advanced search">
+            <Button icon={<FunnelPlotOutlined />} onClick={go} type="ghost" />
+        </Tooltip>
     );
 }

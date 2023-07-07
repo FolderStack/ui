@@ -20,6 +20,8 @@ export interface MenuDropdownToggleEvent extends React.MouseEvent {
 export type OpenState = [string, string[]][];
 
 export interface IMenuContext {
+    active: string | null;
+    activePath: string[];
     open: OpenState;
     setOpen(val: OpenState): void;
 }

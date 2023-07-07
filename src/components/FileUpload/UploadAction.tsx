@@ -1,7 +1,8 @@
 "use client";
 import { useUpload } from "@/hooks";
+import { Button } from "antd";
+import Upload from "antd/es/upload/Upload";
 import dynamic from "next/dynamic";
-import { Button } from "../Elements";
 
 const UploadOutlined = dynamic(
     () => import("@ant-design/icons/UploadOutlined")
@@ -10,18 +11,16 @@ const UploadOutlined = dynamic(
 export function UploadAction() {
     const upload = useUpload();
 
-    return <Button icon={<UploadOutlined />}>Upload Files</Button>;
-
-    // return (
-    //     <AntUpload
-    //         multiple
-    //         showUploadList={false}
-    //         beforeUpload={(_, files) => {
-    //             upload.openModal(files);
-    //             return false;
-    //         }}
-    //     >
-    //         <AntButton icon={<UploadOutlined />}>Upload Files</AntButton>
-    //     </AntUpload>
-    // );
+    return (
+        <Upload
+            multiple
+            showUploadList={false}
+            beforeUpload={(_, files) => {
+                upload.openModal(files);
+                return false;
+            }}
+        >
+            <Button icon={<UploadOutlined />}>Upload Files</Button>
+        </Upload>
+    );
 }

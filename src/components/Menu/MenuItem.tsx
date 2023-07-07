@@ -1,11 +1,8 @@
-import dynamic from "next/dynamic";
+import { MinusOutlined, PlusOutlined } from "@ant-design/icons";
+import { Row } from "antd";
 import { useCallback, useMemo } from "react";
-import { Row } from "../Elements";
 import { useMenu } from "./state";
 import { IMenuItem, MenuDropdownToggleEvent, MenuItemClickEvent } from "./type";
-
-const UpOutlined = dynamic(() => import("@ant-design/icons/UpOutlined"));
-const DownOutlined = dynamic(() => import("@ant-design/icons/DownOutlined"));
 
 export interface MenuItemProps extends IMenuItem {
     onClick(e: MenuItemClickEvent | MenuDropdownToggleEvent): void;
@@ -37,6 +34,10 @@ export function MenuItem({
         [id, parent, onClick]
     );
 
+    const isActive = useMemo(() => {
+        return menuState.active === id;
+    }, [menuState, id]);
+
     const hasChildren = useMemo(() => {
         return !!items?.length;
     }, [items]);
@@ -53,9 +54,13 @@ export function MenuItem({
     const mainClass = useMemo(() => {
         const base = "menu--item";
         const dropdownOpen = isOpen ? " open" : "";
+        const active = isActive ? " active" : "";
+        const childActive = menuState.activePath.includes(id)
+            ? " active-child"
+            : "";
 
-        return `${base}${dropdownOpen}`;
-    }, [isOpen]);
+        return `${base}${dropdownOpen}${active}${childActive}`;
+    }, [isOpen, isActive, menuState, id]);
 
     const labelClass = useMemo(() => {
         const base = "menu--label";
@@ -73,9 +78,9 @@ export function MenuItem({
 
     const dropdownIcon = useMemo(() => {
         if (isOpen) {
-            return <UpOutlined onClick={handleOpen} />;
+            return <MinusOutlined onClick={handleOpen} />;
         }
-        return <DownOutlined onClick={handleOpen} />;
+        return <PlusOutlined onClick={handleOpen} />;
     }, [isOpen, handleOpen]);
 
     return (

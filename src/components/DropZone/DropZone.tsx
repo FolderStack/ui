@@ -1,6 +1,6 @@
 "use client";
 import { useUser } from "@/hooks";
-import { PropsWithChildren, useEffect, useState } from "react";
+import { PropsWithChildren, useEffect, useRef, useState } from "react";
 
 interface DropZoneProps {
     onDrop(file: File[]): void;
@@ -13,9 +13,13 @@ export function DropZone({
     const user = useUser();
     const canUpload = user?.isAdmin;
 
+    const dragEle = useRef<HTMLDivElement>(null);
     const [isDragging, setIsDragging] = useState(false);
 
     useEffect(() => {
+        const element = dragEle.current;
+        if (!element) return;
+
         const dragEvents = ["dragenter", "dragover"];
         const dragEndEvents = ["dragleave", "drop"];
 
@@ -42,19 +46,19 @@ export function DropZone({
         };
 
         dragEvents.forEach((event) =>
-            window.addEventListener(event, dragHandler as any)
+            element.addEventListener(event, dragHandler as any)
         );
         dragEndEvents.forEach((event) =>
-            window.addEventListener(event, dragEndHandler as any)
+            element.addEventListener(event, dragEndHandler as any)
         );
 
         return () => {
-            dragEvents.forEach((event) =>
-                window.removeEventListener(event, dragHandler as any)
-            );
-            dragEndEvents.forEach((event) =>
-                window.removeEventListener(event, dragEndHandler as any)
-            );
+            dragEvents.forEach((event) => {
+                element.removeEventListener(event, dragHandler as any);
+            });
+            dragEndEvents.forEach((event) => {
+                element.removeEventListener(event, dragEndHandler as any);
+            });
         };
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
@@ -81,7 +85,7 @@ export function DropZone({
                     Drop your files here
                 </div>
             ) : null}
-            {children}
+            <div ref={dragEle}>{children}</div>
         </div>
     );
 }

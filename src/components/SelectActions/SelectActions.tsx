@@ -1,8 +1,8 @@
 "use client";
 import { usePageData, useSelection, useUser } from "@/hooks";
+import { Button, Checkbox, Row } from "antd";
 import dynamic from "next/dynamic";
 import { useEffect, useMemo, useState } from "react";
-import { Button, Checkbox, Row } from "../Elements";
 
 const DownloadOutlined = dynamic(
     () => import("@ant-design/icons/DownloadOutlined")

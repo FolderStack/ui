@@ -1,9 +1,9 @@
 "use client";
-import { DropZone, File, Folder, Row } from "@/components";
+import { DropZone, File, Folder } from "@/components";
 import { useUpload } from "@/hooks";
-import { withMainLayout } from "@/sections";
+import { Empty, Row } from "antd";
 
-function HomePage() {
+export default function HomePage() {
     const { data = {} } = {} as any;
     const upload = useUpload();
     const children = data?.children ?? [];
@@ -23,16 +23,14 @@ function HomePage() {
                         style={{ width: "100%", marginTop: "64px" }}
                         justify="center"
                     >
-                        {/* <Empty
+                        <Empty
                             description="Nothing found"
                             style={{ opacity: 1, color: "black !important" }}
                             image={Empty.PRESENTED_IMAGE_SIMPLE}
-                        /> */}
+                        />
                     </Row>
                 )}
             </Row>
         </DropZone>
     );
 }
-
-export default withMainLayout(HomePage);

@@ -12,7 +12,8 @@ export function SideMenu() {
 
     function onClick(e: MenuItemClickEvent) {
         const id = e.id;
-        router.push("/folder/" + id);
+        const query = new URL(window.location.href).searchParams.toString();
+        router.push("/folder/" + id + `?${query}`);
     }
 
     const items = useMemo(() => {

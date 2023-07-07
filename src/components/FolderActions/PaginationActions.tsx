@@ -1,7 +1,7 @@
 "use client";
 import { usePageData, usePagination } from "@/hooks";
-import { Button, ButtonGroup } from "../Elements";
-import { Tooltip } from "../Elements/Tooltip";
+import { Button, Pagination, Tooltip } from "antd";
+import ButtonGroup from "antd/es/button/button-group";
 
 const PAGE_SIZES = [20, 50, 100];
 
@@ -14,18 +14,18 @@ export function PaginationActions() {
 
     return (
         <>
-            {/* <AntPagination
+            <Pagination
                 size="small"
                 pageSize={pageSize}
                 defaultPageSize={PAGE_SIZES[0]}
                 total={children.length ?? 0}
                 showSizeChanger={false}
                 onChange={change}
-            /> */}
+            />
 
             <ButtonGroup>
                 {PAGE_SIZES.map((size, idx) => (
-                    <Tooltip key={idx} content={`Display ${size} results`}>
+                    <Tooltip key={idx} title={`Display ${size} results`}>
                         <Button
                             type={pageSize === size ? "primary" : "default"}
                             onClick={() => change(page, size)}

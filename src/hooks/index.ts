@@ -3,6 +3,7 @@ export * from "./FileUpload";
 export * from "./Filter";
 export * from "./PageData";
 export * from "./Pagination";
+export * from "./SearchAndFilterProviders";
 export * from "./Selection";
 export * from "./Sort";
 export * from "./User";

@@ -1,5 +1,5 @@
 "use client";
-import { Row } from "../Elements";
+import { Row } from "antd";
 import { AdminActions } from "./AdminActions";
 import { PaginationActions } from "./PaginationActions";
 
@@ -23,9 +23,10 @@ const BarStyle = {
     height: "48px",
     width: "100%",
     borderRadius: "4px",
-    marginBottom: "24px",
+    marginBottom: "16px",
 };
 
 const SubRow = {
     gap: "8px",
+    width: "100%",
 };

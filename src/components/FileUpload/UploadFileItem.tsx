@@ -1,5 +1,5 @@
+import { Button, Progress, Row, Tooltip } from "antd";
 import dynamic from "next/dynamic";
-import { AntButton, AntProgress, AntRow, AntTooltip } from "../Antd";
 import "./upload.css";
 
 const PaperClipOutlined = dynamic(
@@ -26,17 +26,17 @@ export function UploadFileItem({
 }: UploadFileItemProps) {
     return (
         <a>
-            <AntRow
+            <Row
                 className="upload-file-item"
                 style={{ width: "100%", display: "flex" }}
                 justify="space-between"
             >
-                <AntRow style={{ gap: "4px" }}>
+                <Row style={{ gap: "4px" }}>
                     <PaperClipOutlined />
                     {file.name}
-                </AntRow>
+                </Row>
                 {typeof progress !== "number" && (
-                    <AntButton
+                    <Button
                         className="upload-file-item-delete"
                         icon={<DeleteFilled />}
                         type="text"
@@ -45,26 +45,26 @@ export function UploadFileItem({
                     />
                 )}
                 {progress === 100 && (
-                    <AntTooltip title="File uploaded">
+                    <Tooltip title="File uploaded">
                         <CheckCircleFilled className="upload-file-item-uploaded" />
-                    </AntTooltip>
+                    </Tooltip>
                 )}
                 {progress === -1 && (
-                    <AntTooltip title="Upload failed">
+                    <Tooltip title="Upload failed">
                         <CloseCircleFilled className="upload-file-item-error" />
-                    </AntTooltip>
+                    </Tooltip>
                 )}
-            </AntRow>
+            </Row>
             {typeof progress === "number" &&
                 progress !== 100 &&
                 progress !== -1 && (
-                    <AntRow>
-                        <AntProgress
+                    <Row>
+                        <Progress
                             percent={progress}
                             size="small"
                             showInfo={false}
                         />
-                    </AntRow>
+                    </Row>
                 )}
         </a>
     );

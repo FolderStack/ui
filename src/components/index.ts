@@ -1,6 +1,5 @@
 export * from "./ActionBar";
 export * from "./DropZone";
-export * from "./Elements";
 export * from "./File";
 export * from "./FileUpload";
 export * from "./FilterBar";

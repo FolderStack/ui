@@ -34,7 +34,7 @@ const handler: NextApiHandler = async (
 
     const response = await fetch(apiUrl, {
         method: req.method,
-        body: ["POST", "PUT", "PATCH"].includes(req.method?.toUpperCase() ?? "")
+        body: ["POST", "PATCH"].includes(req.method?.toUpperCase() ?? "")
             ? rawBody
             : undefined,
         headers: {

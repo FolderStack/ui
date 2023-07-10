@@ -17,7 +17,6 @@ export function DeleteFolderModal() {
     const folderId = params.folderId;
 
     function onClose() {
-        loading.off();
         open.off();
     }
 
@@ -31,11 +30,12 @@ export function DeleteFolderModal() {
         })
             .then((res) => {
                 if (res.ok) {
+                    loading.off();
                     tree.reload();
                     const parent = menu.getParent(folderId);
                     if (parent) {
                         const q = new URL(window.location.href).search;
-                        router.replace(`/folders/${parent}?${q}`);
+                        router.replace(`/folder/${parent}?${q}`);
                     }
                     messageApi.success("Deleted folder");
                     onClose();

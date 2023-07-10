@@ -7,7 +7,7 @@ import { useForm } from "antd/es/form/Form";
 import useMessage from "antd/es/message/useMessage";
 import dynamic from "next/dynamic";
 import { useParams } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 const PlusOutlined = dynamic(() => import("@ant-design/icons/PlusOutlined"));
 const UploadOutlined = dynamic(
@@ -22,6 +22,8 @@ export function CreateFolderModal() {
     const [image, setImage] = useState<File>();
     const [uploadProgress, setProgress] = useState<number>();
     const [messageApi, contextHolder] = useMessage();
+
+    const folderNameRef = useRef<HTMLInputElement>(null);
 
     const params = useParams();
     const folderId = params.folderId;
@@ -72,69 +74,86 @@ export function CreateFolderModal() {
             });
     }
 
+    useEffect(() => {
+        if (isOpen && folderNameRef.current) {
+            folderNameRef.current.focus();
+        }
+    }, [isOpen]);
+
     return (
         <>
             {contextHolder}
             <Button onClick={open.on}>New Folder</Button>
-            <Modal
-                centered
-                open={isOpen}
-                title="Create a new folder"
-                okText="Create Folder"
-                onOk={onOk}
-                onCancel={onClose}
-                confirmLoading={isLoading}
-            >
-                <Form
-                    form={form}
-                    requiredMark={false}
-                    layout="vertical"
-                    style={{ paddingTop: "24px", paddingBottom: "24px" }}
-                    onFinish={handleSubmit}
+            {/* Using this to unrender the modal so that the focus is fired every time it's opened. */}
+            {isOpen && (
+                <Modal
+                    centered
+                    open={true}
+                    title="Create a new folder"
+                    okText="Create Folder"
+                    onOk={onOk}
+                    onCancel={onClose}
+                    confirmLoading={isLoading}
                 >
-                    <Form.Item
-                        label="Folder Name"
-                        name="folderName"
-                        rules={[
-                            {
-                                message: "A folder name is required.",
-                                async validator(_, value) {
-                                    if (
-                                        typeof value !== "string" ||
-                                        !value.trim().length
-                                    ) {
-                                        return Promise.reject();
-                                    }
-                                },
-                            },
-                        ]}
+                    <Form
+                        form={form}
+                        requiredMark={false}
+                        layout="vertical"
+                        style={{ paddingTop: "24px", paddingBottom: "24px" }}
+                        onFinish={handleSubmit}
                     >
-                        <Input type="text" placeholder="My new folder" />
-                    </Form.Item>
-                    <Form.Item label="Featured Image">
-                        <Space direction="vertical" style={{ width: "100%" }}>
-                            <Upload
-                                showUploadList={false}
-                                beforeUpload={(_, files) => {
-                                    setImage(files[0]);
-                                    return false;
-                                }}
+                        <Form.Item
+                            label="Folder Name"
+                            name="folderName"
+                            rules={[
+                                {
+                                    message: "A folder name is required.",
+                                    async validator(_, value) {
+                                        if (
+                                            typeof value !== "string" ||
+                                            !value.trim().length
+                                        ) {
+                                            return Promise.reject();
+                                        }
+                                    },
+                                },
+                            ]}
+                        >
+                            <Input
+                                ref={folderNameRef as any}
+                                autoFocus
+                                type="text"
+                                placeholder="My new folder"
+                            />
+                        </Form.Item>
+                        <Form.Item label="Featured Image">
+                            <Space
+                                direction="vertical"
+                                style={{ width: "100%" }}
                             >
-                                <Button icon={<UploadOutlined />}>
-                                    Upload
-                                </Button>
-                            </Upload>
-                            {image && (
-                                <UploadFileItem
-                                    file={image}
-                                    progress={uploadProgress}
-                                    onRemove={() => setImage(undefined)}
-                                />
-                            )}
-                        </Space>
-                    </Form.Item>
-                </Form>
-            </Modal>
+                                <Upload
+                                    showUploadList={false}
+                                    beforeUpload={(_, files) => {
+                                        setImage(files[0]);
+                                        return false;
+                                    }}
+                                >
+                                    <Button icon={<UploadOutlined />}>
+                                        Upload
+                                    </Button>
+                                </Upload>
+                                {image && (
+                                    <UploadFileItem
+                                        file={image}
+                                        progress={uploadProgress}
+                                        onRemove={() => setImage(undefined)}
+                                    />
+                                )}
+                            </Space>
+                        </Form.Item>
+                    </Form>
+                </Modal>
+            )}
         </>
     );
 }

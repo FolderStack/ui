@@ -4,9 +4,12 @@ import {
     MenuItemClickEvent,
     useMenu,
 } from "@/hooks";
-import { HolderOutlined, MinusOutlined, PlusOutlined } from "@ant-design/icons";
+import { MinusOutlined, PlusOutlined } from "@ant-design/icons";
 import { Row } from "antd";
 import { useCallback, useMemo } from "react";
+import { DragHandle } from "./DragAndDrop/DragHandle";
+import { SortableMenuItem } from "./DragAndDrop/SortableMenuItem";
+import { SortableMenuItemList } from "./DragAndDrop/SortableMenuItemList";
 
 export interface MenuItemProps extends IMenuItem {
     onClick(e: MenuItemClickEvent | MenuDropdownToggleEvent): void;
@@ -102,7 +105,7 @@ export function MenuItem({
     return (
         <div onClick={handleClick} className={mainClass}>
             <Row className={labelClass}>
-                <HolderOutlined className="menu--item-drag-handle" />
+                <DragHandle />
                 <label>{label}</label>
 
                 <div className="dropdown-icon">
@@ -114,14 +117,20 @@ export function MenuItem({
                     className={dropdownClass}
                     onClick={(e) => e.stopPropagation()}
                 >
-                    {items.map((child, idx) => (
-                        <MenuItem
-                            key={child.id ?? idx}
-                            {...child}
-                            parent={id}
-                            onClick={onClick}
-                        />
-                    ))}
+                    <SortableMenuItemList<IMenuItem>
+                        items={items}
+                        onChange={(items) => menuState.setOrder(id, items)}
+                        renderItem={(props) => (
+                            <SortableMenuItem id={props.id}>
+                                <MenuItem
+                                    key={props.id}
+                                    {...props}
+                                    parent={id}
+                                    onClick={onClick}
+                                />
+                            </SortableMenuItem>
+                        )}
+                    />
                 </div>
             )}
         </div>

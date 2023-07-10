@@ -16,9 +16,25 @@ export class Tree<T = any> {
         this.leaves.push(leaf);
     }
 
+    getLeaf(value: Leaf<T>["value"]) {
+        return this.getLeaves().find((l) => l.value === value);
+    }
+
     addNode(tree: Tree<T>) {
         this.parent?.registerChildNode(tree);
         this.nodes.push(tree);
+    }
+
+    getNode(id: Leaf<T>["value"]) {
+        return this.nodes.find((t) => !!t.getLeaf(id));
+    }
+
+    findNode(id: Leaf<T>["value"]): Tree<T> | undefined {
+        return this.nodes.find((node) => {
+            const leaf = node.getLeaf(id);
+            if (leaf) return node;
+            return node.findNode(id);
+        });
     }
 
     getLeaves() {

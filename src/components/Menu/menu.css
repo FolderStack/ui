@@ -10,7 +10,7 @@
     cursor: pointer;
 }
 
-.menu--root-container > .menu--item {
+.menu--root-container > ul > div > .menu--item {
     padding: 24px 24px 24px 24px;
 }
 

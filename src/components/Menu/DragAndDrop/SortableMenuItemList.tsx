@@ -7,14 +7,13 @@ import {
     useSensors,
 } from "@dnd-kit/core";
 import {
-    arrayMove,
     SortableContext,
+    arrayMove,
     sortableKeyboardCoordinates,
 } from "@dnd-kit/sortable";
 import type { ReactNode } from "react";
 import React, { useMemo, useState } from "react";
 
-import "./draganddrop.css";
 import { SortableMenuItemOverlay } from "./SortableMenuItemOverlay";
 
 interface BaseItem {

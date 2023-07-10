@@ -1,7 +1,9 @@
-import { MenuItemClickEvent, useMenu, useTree } from "@/hooks";
-import { Tree } from "@/types";
+import { IMenuItem, MenuItemClickEvent, useMenu, useTree } from "@/hooks";
+import { BasicTree } from "@/types";
 import { useRouter } from "next/navigation";
 import { useMemo } from "react";
+import { SortableMenuItem } from "./DragAndDrop/SortableMenuItem";
+import { SortableMenuItemList } from "./DragAndDrop/SortableMenuItemList";
 import { MenuItem } from "./MenuItem";
 import "./menu.css";
 
@@ -20,7 +22,7 @@ export function SideMenu() {
     }
 
     const items = useMemo(() => {
-        function recurse(t: Tree): any {
+        function recurse(t: BasicTree): any {
             const items = [];
             for (const branch of t.children) {
                 items.push(recurse(branch));
@@ -39,15 +41,25 @@ export function SideMenu() {
         return recurse(tree);
     }, [tree]);
 
+    function onDragChange(items: IMenuItem[]) {
+        menu.setOrder("root", items);
+    }
+
     return (
         <div className="menu--root-container">
-            {items?.map?.((child: any, idx: number) => (
-                <MenuItem
-                    key={child.id ?? idx}
-                    {...{ ...child, onClick }}
-                    parent={"root"}
-                />
-            ))}
+            <SortableMenuItemList<IMenuItem>
+                items={items}
+                onChange={onDragChange}
+                renderItem={(props) => (
+                    <SortableMenuItem id={props.id}>
+                        <MenuItem
+                            key={props.id}
+                            {...{ ...props, onClick }}
+                            parent={"root"}
+                        />
+                    </SortableMenuItem>
+                )}
+            />
         </div>
     );
 }

@@ -26,4 +26,5 @@ export interface IMenuContext {
     setOpen(val: OpenState): void;
     handleClick(e: MenuItemClickEvent | MenuDropdownToggleEvent): void;
     getParent(folderId: string): string | undefined;
+    setOrder(parentId: string, items: IMenuItem[]): void;
 }

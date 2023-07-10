@@ -1,5 +1,5 @@
 "use client";
-import { Tree } from "@/types";
+import { BasicTree } from "@/types";
 import { gotoLogin } from "@/utils";
 import {
     PropsWithChildren,
@@ -12,9 +12,10 @@ import {
 import { useBoolean } from "../useBoolean";
 
 interface TreeContext {
-    tree: Tree;
+    tree: BasicTree;
     isLoading: boolean;
     reload(): void;
+    updateOrder(id: string, items: string[]): void;
 }
 
 const defaultTree = {
@@ -28,10 +29,13 @@ const TreeContext = createContext<TreeContext>({
     reload() {
         //
     },
+    updateOrder(id: string, items: string[]) {
+        //
+    },
 });
 
 export function TreeProvider({ children }: PropsWithChildren) {
-    const [tree, setTree] = useState<Tree>(defaultTree);
+    const [tree, setTree] = useState<BasicTree>(defaultTree);
     const [isLoading, loading] = useBoolean(false);
 
     async function fetchTree() {
@@ -43,6 +47,34 @@ export function TreeProvider({ children }: PropsWithChildren) {
             gotoLogin();
         }
     }
+
+    const updateOrder = (id: string, newOrder: string[]) => {
+        const updateNode = (node: BasicTree): any => {
+            if (node.id === id) {
+                // Found the node to update
+                return {
+                    ...node,
+                    children: node.children.sort((a, b) => {
+                        // Compare function assumes newOrder is an array of IDs in the desired order
+                        const aOrder = newOrder.indexOf(a.id);
+                        const bOrder = newOrder.indexOf(b.id);
+                        return aOrder - bOrder;
+                    }),
+                };
+            } else if (node.children) {
+                // Recursively update children
+                return {
+                    ...node,
+                    children: node.children.map(updateNode),
+                };
+            } else {
+                // Node doesn't have children, return as is
+                return node;
+            }
+        };
+        // Update the state
+        setTree((state) => updateNode(state));
+    };
 
     const reload = useCallback(() => {
         loading.on();
@@ -64,7 +96,7 @@ export function TreeProvider({ children }: PropsWithChildren) {
     }, []);
 
     return (
-        <TreeContext.Provider value={{ tree, isLoading, reload }}>
+        <TreeContext.Provider value={{ tree, isLoading, reload, updateOrder }}>
             {children}
         </TreeContext.Provider>
     );

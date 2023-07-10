@@ -7,8 +7,6 @@ import { CSS } from "@dnd-kit/utilities";
 import type { CSSProperties, PropsWithChildren } from "react";
 import { createContext, useMemo } from "react";
 
-import "./draganddrop.css";
-
 interface Props {
     id: UniqueIdentifier;
 }
@@ -19,7 +17,7 @@ interface Context {
     ref(node: HTMLElement | null): void;
 }
 
-const SortableItemContext = createContext<Context>({
+export const SortableItemContext = createContext<Context>({
     attributes: {},
     listeners: undefined,
     ref() {},
@@ -51,9 +49,9 @@ export function SortableMenuItem({ children, id }: PropsWithChildren<Props>) {
 
     return (
         <SortableItemContext.Provider value={context}>
-            <li className="SortableItem" ref={setNodeRef} style={style}>
+            <div ref={setNodeRef} style={style}>
                 {children}
-            </li>
+            </div>
         </SortableItemContext.Provider>
     );
 }

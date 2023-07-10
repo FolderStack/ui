@@ -1,6 +1,7 @@
 export * from "./DisplayType";
 export * from "./FileUpload";
 export * from "./Filter";
+export * from "./Menu";
 export * from "./PageData";
 export * from "./Pagination";
 export * from "./SearchAndFilterProviders";
@@ -9,3 +10,4 @@ export * from "./Sort";
 export * from "./User";
 export * from "./useBoolean";
 export * from "./useFetchPageData";
+export * from "./useLocalStorage";

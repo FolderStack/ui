@@ -24,4 +24,6 @@ export interface IMenuContext {
     activePath: string[];
     open: OpenState;
     setOpen(val: OpenState): void;
+    handleClick(e: MenuItemClickEvent | MenuDropdownToggleEvent): void;
+    getParent(folderId: string): string | undefined;
 }

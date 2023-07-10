@@ -1,5 +1,6 @@
 "use client";
 import { Tree } from "@/types";
+import { gotoLogin } from "@/utils";
 import {
     PropsWithChildren,
     createContext,
@@ -34,9 +35,13 @@ export function TreeProvider({ children }: PropsWithChildren) {
     const [isLoading, loading] = useBoolean(false);
 
     async function fetchTree() {
-        const response = await fetch(`/api/tree`);
-        const data = await response.json();
-        return data;
+        const res = await fetch(`/api/tree`);
+        if (res.ok) {
+            const data = await res.json();
+            return data;
+        } else if (res.status === 401) {
+            gotoLogin();
+        }
     }
 
     const reload = useCallback(() => {

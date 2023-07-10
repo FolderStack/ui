@@ -1,14 +1,17 @@
 "use client";
-import { useBoolean, useTree } from "@/hooks";
+import { useBoolean, useMenu, useTree } from "@/hooks";
+import { gotoLogin } from "@/utils";
 import { Button, Modal } from "antd";
 import useMessage from "antd/es/message/useMessage";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 
 export function DeleteFolderModal() {
     const tree = useTree();
+    const menu = useMenu();
     const [isLoading, loading] = useBoolean(false);
     const [isOpen, open] = useBoolean(false);
     const [messageApi, contextHolder] = useMessage();
+    const router = useRouter();
 
     const params = useParams();
     const folderId = params.folderId;
@@ -29,8 +32,15 @@ export function DeleteFolderModal() {
             .then((res) => {
                 if (res.ok) {
                     tree.reload();
+                    const parent = menu.getParent(folderId);
+                    if (parent) {
+                        const q = new URL(window.location.href).search;
+                        router.replace(`/folders/${parent}?${q}`);
+                    }
                     messageApi.success("Deleted folder");
                     onClose();
+                } else if (res.status === 401) {
+                    gotoLogin();
                 } else {
                     messageApi.error("An error occured");
                     loading.off();

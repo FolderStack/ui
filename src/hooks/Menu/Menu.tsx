@@ -1,6 +1,7 @@
 import { Tree } from "@/utils";
 import { useParams } from "next/navigation";
 import {
+    PropsWithChildren,
     createContext,
     useCallback,
     useContext,
@@ -8,10 +9,9 @@ import {
     useMemo,
     useState,
 } from "react";
-import { MenuItem } from "./MenuItem";
+import { useTree } from "../PageData";
 import {
     IMenuContext,
-    IMenuItem,
     MenuDropdownToggleEvent,
     MenuItemClickEvent,
     OpenState,
@@ -24,19 +24,31 @@ const MenuContext = createContext<IMenuContext>({
     setOpen() {
         //
     },
+    handleClick(e: MenuItemClickEvent | MenuDropdownToggleEvent) {},
+    getParent(v: string) {
+        return "";
+    },
 });
 
-interface MenuProps {
-    items: IMenuItem[];
-    initial?: OpenState;
-    onClick(e: MenuItemClickEvent): void;
+interface MenuProps extends PropsWithChildren {
+    initialOpenState?: OpenState;
 }
 
-export function MenuProvider({ items = [], onClick, initial = [] }: MenuProps) {
-    const [open, setOpen] = useState<OpenState>(initial);
+export function MenuProvider({ initialOpenState = [], children }: MenuProps) {
+    const menuTree = useTree();
+    const [open, setOpen] = useState<OpenState>(initialOpenState);
     const [active, setActive] = useState<string | null>(null);
     const [activePath, setActivePath] = useState<string[]>([]);
     const params = useParams();
+
+    console.log("MenuProvider", {
+        open,
+        active,
+        activePath,
+        params,
+    });
+
+    const items = useMemo(() => menuTree.tree ?? [], [menuTree]);
 
     function handleClick(e: MenuItemClickEvent | MenuDropdownToggleEvent) {
         if (e.type === "open-toggle") {
@@ -58,18 +70,16 @@ export function MenuProvider({ items = [], onClick, initial = [] }: MenuProps) {
             }
 
             setOpen(openArr);
-        } else {
-            onClick(e);
         }
     }
 
     const buildTree = useCallback(
-        (tree: Tree, arr = items) => {
+        (tree: Tree, arr = items.children) => {
             for (const item of arr) {
                 const itemTree = new Tree(tree);
                 itemTree.addLeaf(item.id);
                 tree.addNode(itemTree);
-                buildTree(itemTree, item.items ?? []);
+                buildTree(itemTree, item.children ?? []);
             }
         },
         [items]
@@ -81,7 +91,31 @@ export function MenuProvider({ items = [], onClick, initial = [] }: MenuProps) {
         return root;
     }, [buildTree]);
 
+    const setOpenWithPath = useCallback((path: string[], override = false) => {
+        let _open: any = [];
+        for (let i = 0; i < path.length; i++) {
+            _open.push([path[i - 1] ?? "root", [path[i]]]);
+        }
+        if (override) {
+            setOpen(_open);
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
+    const getParent = useCallback(
+        (folderId: string) => {
+            debugger;
+            const path = tree.getPath(folderId) as string[];
+            if (path && path.length > 0) {
+                path.pop();
+                return path.pop();
+            }
+        },
+        [tree]
+    );
+
     useEffect(() => {
+        debugger;
         const folderId = params?.folderId ?? null;
         if (folderId) {
             setActive(folderId);
@@ -92,15 +126,9 @@ export function MenuProvider({ items = [], onClick, initial = [] }: MenuProps) {
         const path = tree.getPath(active);
 
         if (path) {
-            let _open: any = [];
-            for (let i = 0; i < path.length; i++) {
-                _open.push([path[i - 1] ?? "root", [path[i]]]);
-            }
-            if (!open.length) {
-                setOpen(_open);
-            }
+            setOpenWithPath(path);
         }
-    }, [items, active, tree]);
+    }, [active, tree, setOpenWithPath]);
 
     useEffect(() => {
         if (active) {
@@ -109,20 +137,18 @@ export function MenuProvider({ items = [], onClick, initial = [] }: MenuProps) {
         }
     }, [active, tree]);
 
-    console.log(open);
-
     return (
-        <MenuContext.Provider value={{ open, setOpen, active, activePath }}>
-            <div className="menu--root-container">
-                {items?.map?.((child, idx) => (
-                    <MenuItem
-                        key={child.id ?? idx}
-                        {...{ ...child, onClick }}
-                        parent={"root"}
-                        onClick={handleClick}
-                    />
-                ))}
-            </div>
+        <MenuContext.Provider
+            value={{
+                open,
+                setOpen,
+                active,
+                activePath,
+                handleClick,
+                getParent,
+            }}
+        >
+            {children}
         </MenuContext.Provider>
     );
 }

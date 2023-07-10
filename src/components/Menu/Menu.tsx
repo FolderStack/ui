@@ -1,19 +1,22 @@
-import { useTree } from "@/hooks";
+import { MenuItemClickEvent, useMenu, useTree } from "@/hooks";
 import { Tree } from "@/types";
 import { useRouter } from "next/navigation";
 import { useMemo } from "react";
+import { MenuItem } from "./MenuItem";
 import "./menu.css";
-import { MenuProvider } from "./state";
-import { MenuItemClickEvent } from "./type";
 
 export function SideMenu() {
+    const menu = useMenu();
     const router = useRouter();
     const { tree } = useTree();
 
     function onClick(e: MenuItemClickEvent) {
-        const id = e.id;
-        const query = new URL(window.location.href).searchParams.toString();
-        router.push("/folder/" + id + `?${query}`);
+        menu.handleClick(e);
+        if (e.type === "click") {
+            const id = e.id;
+            const query = new URL(window.location.href).searchParams.toString();
+            router.push("/folder/" + id + `?${query}`);
+        }
     }
 
     const items = useMemo(() => {
@@ -36,5 +39,15 @@ export function SideMenu() {
         return recurse(tree);
     }, [tree]);
 
-    return <MenuProvider {...{ items, onClick }} />;
+    return (
+        <div className="menu--root-container">
+            {items?.map?.((child: any, idx: number) => (
+                <MenuItem
+                    key={child.id ?? idx}
+                    {...{ ...child, onClick }}
+                    parent={"root"}
+                />
+            ))}
+        </div>
+    );
 }

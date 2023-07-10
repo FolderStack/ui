@@ -1,6 +1,7 @@
 "use client";
 import { UploadFileItem } from "@/components/FileUpload/UploadFileItem";
 import { useBoolean, useTree } from "@/hooks";
+import { gotoLogin } from "@/utils";
 import { Button, Form, Input, Modal, Space, Upload } from "antd";
 import { useForm } from "antd/es/form/Form";
 import useMessage from "antd/es/message/useMessage";
@@ -58,6 +59,8 @@ export function CreateFolderModal() {
                     tree.reload();
                     messageApi.success("Created folder");
                     onClose();
+                } else if (res.status === 401) {
+                    gotoLogin();
                 } else {
                     messageApi.error("An error occured");
                     loading.off();

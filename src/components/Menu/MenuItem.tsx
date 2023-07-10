@@ -1,8 +1,12 @@
-import { MinusOutlined, PlusOutlined } from "@ant-design/icons";
+import {
+    IMenuItem,
+    MenuDropdownToggleEvent,
+    MenuItemClickEvent,
+    useMenu,
+} from "@/hooks";
+import { HolderOutlined, MinusOutlined, PlusOutlined } from "@ant-design/icons";
 import { Row } from "antd";
 import { useCallback, useMemo } from "react";
-import { useMenu } from "./state";
-import { IMenuItem, MenuDropdownToggleEvent, MenuItemClickEvent } from "./type";
 
 export interface MenuItemProps extends IMenuItem {
     onClick(e: MenuItemClickEvent | MenuDropdownToggleEvent): void;
@@ -18,6 +22,7 @@ export function MenuItem({
     const menuState = useMenu();
 
     function handleClick(e: React.MouseEvent) {
+        e.preventDefault();
         e.stopPropagation();
         const menuEvent = e as MenuItemClickEvent;
         Object.assign(menuEvent, { id, parent, type: "click" });
@@ -26,6 +31,7 @@ export function MenuItem({
 
     const handleOpen = useCallback(
         (e: React.MouseEvent) => {
+            e.preventDefault();
             e.stopPropagation();
             const openEvent = e as MenuDropdownToggleEvent;
             Object.assign(openEvent, { id, parent, type: "open-toggle" });
@@ -78,15 +84,27 @@ export function MenuItem({
 
     const dropdownIcon = useMemo(() => {
         if (isOpen) {
-            return <MinusOutlined onClick={handleOpen} />;
+            return (
+                <MinusOutlined
+                    className="menu--dropdown-icon"
+                    onClick={handleOpen}
+                />
+            );
         }
-        return <PlusOutlined onClick={handleOpen} />;
+        return (
+            <PlusOutlined
+                className="menu--dropdown-icon"
+                onClick={handleOpen}
+            />
+        );
     }, [isOpen, handleOpen]);
 
     return (
         <div onClick={handleClick} className={mainClass}>
             <Row className={labelClass}>
-                <span>{label}</span>
+                <HolderOutlined className="menu--item-drag-handle" />
+                <label>{label}</label>
+
                 <div className="dropdown-icon">
                     {hasChildren && dropdownIcon}
                 </div>

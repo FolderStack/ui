@@ -1,12 +1,12 @@
 "use client";
 import { PageData } from "@/types";
+import { gotoLogin } from "@/utils";
 import { useParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { useFilter } from "./Filter";
 import { usePagination } from "./Pagination";
 import { useSort } from "./Sort";
 import { useBoolean } from "./useBoolean";
-const dummyData = require("../../dummy-data.json");
 
 export function useFetchPageData() {
     const [isLoading, loading] = useBoolean(false);
@@ -33,9 +33,13 @@ export function useFetchPageData() {
     }, [params]);
 
     async function fetchData(url: string) {
-        const response = await fetch(`/api/${url}`);
-        const data = await response.json();
-        return data;
+        const res = await fetch(`/api/${url}`);
+        if (res.ok) {
+            const data = await res.json();
+            return data;
+        } else if (res.status === 401) {
+            gotoLogin();
+        }
     }
 
     const request = useCallback(async () => {

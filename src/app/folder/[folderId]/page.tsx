@@ -2,6 +2,7 @@
 import { DropZone, File, Folder } from "@/components";
 import { usePageData, useUpload } from "@/hooks";
 import { Row } from "antd";
+import { useMemo } from "react";
 
 export default function FolderPage() {
     const { data = {} } = usePageData();

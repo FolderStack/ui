@@ -1,5 +1,6 @@
 "use client";
 import { NoSSR, SideBar, TopBar } from "@/components";
+import { MenuProvider } from "@/hooks";
 import { Layout } from "antd";
 import { Content, Header } from "antd/es/layout/layout";
 import { useToken } from "antd/es/theme/internal";
@@ -9,6 +10,7 @@ import { Providers } from "./providers";
 
 export default function RootLayout({ children }: PropsWithChildren) {
     const [, token] = useToken();
+
     return (
         <html lang="en">
             <body style={{ margin: 0 }}>
@@ -21,15 +23,19 @@ export default function RootLayout({ children }: PropsWithChildren) {
                             } as any
                         }
                     >
-                        <SideBar />
-                        <Layout>
-                            <Header style={HeaderStyle}>
-                                <NoSSR>
-                                    <TopBar />
-                                </NoSSR>
-                            </Header>
-                            <Content style={ContentStyle}>{children}</Content>
-                        </Layout>
+                        <MenuProvider>
+                            <SideBar />
+                            <Layout>
+                                <Header style={HeaderStyle}>
+                                    <NoSSR>
+                                        <TopBar />
+                                    </NoSSR>
+                                </Header>
+                                <Content style={ContentStyle}>
+                                    {children}
+                                </Content>
+                            </Layout>
+                        </MenuProvider>
                     </Layout>
                 </Providers>
             </body>

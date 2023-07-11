@@ -9,8 +9,14 @@ import { SideMenu } from "../Menu";
 import "./sidebar.css";
 
 const DragHandle = forwardRef(function DragHandleComponent(props, ref: any) {
+    const dragProps: any = {
+        ...props,
+    };
+
+    delete dragProps.handleAxis;
+
     return (
-        <span {...props} ref={ref}>
+        <span {...dragProps} ref={ref}>
             <Button
                 icon={<RxWidth style={{ marginTop: 4 }} />}
                 className="resize-button"

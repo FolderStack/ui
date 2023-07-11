@@ -9,33 +9,33 @@ import {
     useEffect,
     useState,
 } from "react";
+import { IdTree } from "../Menu";
 import { useBoolean } from "../useBoolean";
 
 interface TreeContext {
-    tree: BasicTree;
+    tree: BasicTree[];
     isLoading: boolean;
     reload(): void;
-    updateOrder(id: string, items: string[]): void;
+    updateOrder(items: IdTree[]): void;
+    updateItem(id: string, update: any): void;
 }
 
-const defaultTree = {
-    id: "ROOT",
-    children: [],
-};
-
 const TreeContext = createContext<TreeContext>({
-    tree: defaultTree,
+    tree: [],
     isLoading: false,
     reload() {
         //
     },
-    updateOrder(id: string, items: string[]) {
+    updateOrder(items: IdTree[]) {
+        //
+    },
+    updateItem(id: string, update: any) {
         //
     },
 });
 
 export function TreeProvider({ children }: PropsWithChildren) {
-    const [tree, setTree] = useState<BasicTree>(defaultTree);
+    const [tree, setTree] = useState<BasicTree[]>([]);
     const [isLoading, loading] = useBoolean(false);
 
     async function fetchTree() {
@@ -48,32 +48,105 @@ export function TreeProvider({ children }: PropsWithChildren) {
         }
     }
 
-    const updateOrder = (id: string, newOrder: string[]) => {
-        const updateNode = (node: BasicTree): any => {
-            if (node.id === id) {
-                // Found the node to update
-                return {
-                    ...node,
-                    children: node.children.sort((a, b) => {
-                        // Compare function assumes newOrder is an array of IDs in the desired order
-                        const aOrder = newOrder.indexOf(a.id);
-                        const bOrder = newOrder.indexOf(b.id);
-                        return aOrder - bOrder;
-                    }),
-                };
-            } else if (node.children) {
-                // Recursively update children
-                return {
-                    ...node,
-                    children: node.children.map(updateNode),
-                };
-            } else {
-                // Node doesn't have children, return as is
-                return node;
+    // Helper function to find a node and its parent in the tree
+    const findNode = (
+        node: BasicTree | null,
+        id: string,
+        parent: BasicTree | null = null
+    ): { node: BasicTree | null; parent: BasicTree | null } => {
+        if (!node) {
+            return { node: null, parent: null };
+        } else if (node.id === id) {
+            return { node, parent };
+        } else {
+            for (let child of node.children || []) {
+                let found = findNode(child, id, node);
+                if (found.node) {
+                    return found;
+                }
             }
+            return { node: null, parent: null };
+        }
+    };
+
+    const buildTree = (node: BasicTree): BasicTree => {
+        if (!node) return node;
+        return {
+            ...node,
+            // build trees for children as well
+            children: node.children.map((child) => buildTree(child)),
         };
+    };
+
+    const flattenOrder = (order: BasicTree[]): string[] => {
+        return order.reduce((acc: string[], curr: BasicTree) => {
+            acc.push(curr.id);
+            if (curr.children) {
+                acc = acc.concat(flattenOrder(curr.children));
+            }
+            return acc;
+        }, []);
+    };
+
+    const updateNodeOrder = (node: BasicTree, order: string[]): BasicTree => {
+        if (!node.children) return node;
+
+        // Sort and update children recursively
+        const sortedChildren = node.children
+            .sort((a, b) => {
+                const aOrder = order.findIndex((id) => id === a.id);
+                const bOrder = order.findIndex((id) => id === b.id);
+                return aOrder - bOrder;
+            })
+            .map((child) => updateNodeOrder(child, order));
+
+        // Return new node with sorted children
+        return {
+            ...node,
+            children: sortedChildren,
+        };
+    };
+
+    const updateOrder = (newOrder: BasicTree[]) => {
+        // Flatten newOrder for sorting
+        const flatOrder = flattenOrder(newOrder);
+
+        // Build new tree
+        const newTree = newOrder.map((node) => buildTree(node));
+
+        // Recursively update nodes
+        const updatedTree = newTree.map((node) =>
+            updateNodeOrder(node, flatOrder)
+        );
+
         // Update the state
-        setTree((state) => updateNode(state));
+        setTree(updatedTree as any);
+    };
+
+    const updateNode = (
+        id: string,
+        update: any,
+        node: BasicTree
+    ): BasicTree => {
+        if (node.id === id) {
+            return { ...node, ...update };
+        }
+
+        if (node.children) {
+            return {
+                ...node,
+                children: node.children.map((child) =>
+                    updateNode(id, update, child)
+                ),
+            };
+        } else {
+            return node;
+        }
+    };
+
+    const updateItem = (id: string, update: any) => {
+        const roots = tree.map((root) => updateNode(id, update, root));
+        setTree(roots);
     };
 
     const reload = useCallback(() => {
@@ -81,7 +154,7 @@ export function TreeProvider({ children }: PropsWithChildren) {
         fetchTree()
             .then((result) => {
                 if (result.id && result.children) {
-                    setTree(result);
+                    updateOrder(result.children);
                 }
             })
             .finally(() => {
@@ -96,7 +169,9 @@ export function TreeProvider({ children }: PropsWithChildren) {
     }, []);
 
     return (
-        <TreeContext.Provider value={{ tree, isLoading, reload, updateOrder }}>
+        <TreeContext.Provider
+            value={{ tree, isLoading, reload, updateOrder, updateItem }}
+        >
             {children}
         </TreeContext.Provider>
     );

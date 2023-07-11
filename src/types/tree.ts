@@ -1,4 +1,5 @@
 export interface BasicTree {
     id: string;
-    children: Array<BasicTree & { name: string }>;
+    name: string;
+    children: BasicTree[];
 }

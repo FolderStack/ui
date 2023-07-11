@@ -1,0 +1,9 @@
+.sidebar-menu .dnd-sortable-tree_simple_tree-item {
+    align-items: center;
+    border: none;
+    box-sizing: border-box;
+    color: #222;
+    display: grid;
+    padding: 0px;
+    position: relative;
+}

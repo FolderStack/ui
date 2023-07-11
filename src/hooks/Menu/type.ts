@@ -19,6 +19,11 @@ export interface MenuDropdownToggleEvent extends React.MouseEvent {
 
 export type OpenState = [string, string[]][];
 
+export interface IdTree {
+    id: string;
+    children: IdTree[];
+}
+
 export interface IMenuContext {
     active: string | null;
     activePath: string[];
@@ -26,5 +31,5 @@ export interface IMenuContext {
     setOpen(val: OpenState): void;
     handleClick(e: MenuItemClickEvent | MenuDropdownToggleEvent): void;
     getParent(folderId: string): string | undefined;
-    setOrder(parentId: string, items: IMenuItem[]): void;
+    setOrder(items: IdTree[]): void;
 }

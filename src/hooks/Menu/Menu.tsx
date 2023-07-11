@@ -14,7 +14,7 @@ import {
 import { useTree } from "../PageData";
 import {
     IMenuContext,
-    IMenuItem,
+    IdTree,
     MenuDropdownToggleEvent,
     MenuItemClickEvent,
     OpenState,
@@ -31,7 +31,7 @@ const MenuContext = createContext<IMenuContext>({
     getParent(v: string) {
         return "";
     },
-    setOrder(parentId: string, items: IMenuItem[]) {
+    setOrder(items: IdTree[]) {
         //
     },
 });
@@ -46,7 +46,7 @@ export function MenuProvider({ initialOpenState = [], children }: MenuProps) {
     const [active, setActive] = useState<string | null>(null);
     const [activePath, setActivePath] = useState<string[]>([]);
     const [messageApi, contextHolder] = useMessage();
-    const [items, setItems] = useState<BasicTree>(menuTree.tree ?? []);
+    const [items, setItems] = useState<BasicTree[]>(menuTree.tree ?? []);
     const params = useParams();
 
     useEffect(() => {
@@ -55,6 +55,7 @@ export function MenuProvider({ initialOpenState = [], children }: MenuProps) {
 
     function handleClick(e: MenuItemClickEvent | MenuDropdownToggleEvent) {
         if (e.type === "open-toggle") {
+            debugger;
             const openArr = [...open];
             const { id, parent } = e;
 
@@ -77,7 +78,7 @@ export function MenuProvider({ initialOpenState = [], children }: MenuProps) {
     }
 
     const buildTree = useCallback(
-        (tree: Tree, arr = items.children) => {
+        (tree: Tree, arr = items) => {
             for (const item of arr) {
                 const itemTree = new Tree(tree);
                 itemTree.addLeaf(item.id);
@@ -97,7 +98,7 @@ export function MenuProvider({ initialOpenState = [], children }: MenuProps) {
     const setOpenWithPath = useCallback((path: string[], override = false) => {
         let _open: any = [];
         for (let i = 0; i < path.length; i++) {
-            _open.push([path[i - 1] ?? "root", [path[i]]]);
+            _open.push([path[i - 1] ?? "ROOT", [path[i]]]);
         }
         if (override) {
             setOpen(_open);
@@ -117,7 +118,6 @@ export function MenuProvider({ initialOpenState = [], children }: MenuProps) {
 
     const getParent = useCallback(
         (folderId: string) => {
-            debugger;
             const path = tree.getPath(folderId) as string[];
             if (path && path.length > 0) {
                 path.pop();
@@ -127,14 +127,18 @@ export function MenuProvider({ initialOpenState = [], children }: MenuProps) {
         [tree]
     );
 
+    function reduceItems(items: any[]): any[] {
+        return items.map((i) => ({
+            id: i.id,
+            children: reduceItems(i.children),
+        }));
+    }
+
     const setOrder = useCallback(
-        (parentId: string, menuItems: IMenuItem[]) => {
+        (items: BasicTree[]) => {
             fetch(`/api/tree`, {
                 method: "PATCH",
-                body: JSON.stringify({
-                    parent: parentId,
-                    items: menuItems.map((i) => i.id),
-                }),
+                body: JSON.stringify({ items: reduceItems(items) }),
             })
                 .then((res) => {
                     if (res.ok) {
@@ -150,16 +154,12 @@ export function MenuProvider({ initialOpenState = [], children }: MenuProps) {
                     messageApi.error("An error occured");
                 });
 
-            menuTree.updateOrder(
-                parentId,
-                menuItems.map((i) => i.id)
-            );
+            menuTree.updateOrder(items);
         },
         [menuTree, messageApi]
     );
 
     useEffect(() => {
-        debugger;
         const folderId = params?.folderId ?? null;
         if (folderId) {
             setActive(folderId);
@@ -183,6 +183,8 @@ export function MenuProvider({ initialOpenState = [], children }: MenuProps) {
     //     debugger;
     //     setOpenWithPath(activePath);
     // }, [activePath, setOpenWithPath]);
+
+    console.log(open);
 
     return (
         <MenuContext.Provider

@@ -2,16 +2,18 @@
     color: #51565f;
     padding: 0px;
     user-select: none;
+
+    padding-top: 18px;
 }
 
 .menu--item {
     border-radius: 8px;
-    padding: 4px 0px 4px 18px;
+    padding: 4px 0px 4px 4px;
     cursor: pointer;
 }
 
-.menu--root-container > ul > div > .menu--item {
-    padding: 24px 24px 24px 24px;
+.menu--root-container > li {
+    padding-right: 24px;
 }
 
 .menu--root-container > .menu--item.open {

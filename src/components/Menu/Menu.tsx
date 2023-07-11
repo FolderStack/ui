@@ -1,64 +1,52 @@
-import { IMenuItem, MenuItemClickEvent, useMenu, useTree } from "@/hooks";
-import { BasicTree } from "@/types";
-import { useRouter } from "next/navigation";
-import { useMemo } from "react";
-import { SortableMenuItem } from "./DragAndDrop/SortableMenuItem";
-import { SortableMenuItemList } from "./DragAndDrop/SortableMenuItemList";
-import { MenuItem } from "./MenuItem";
+import { useMenu, useTree } from "@/hooks";
+import { SortableTree } from "dnd-kit-sortable-tree";
+import { useCallback, useMemo } from "react";
+import { SortableTreeItem } from "./SortableDnD/SortableTreeContext";
 import "./menu.css";
 
 export function SideMenu() {
     const menu = useMenu();
-    const router = useRouter();
     const { tree } = useTree();
 
-    function onClick(e: MenuItemClickEvent) {
-        menu.handleClick(e);
-        if (e.type === "click") {
-            const id = e.id;
-            const query = new URL(window.location.href).searchParams.toString();
-            router.push("/folder/" + id + `?${query}`);
-        }
+    function onDragChange(items: any) {
+        menu.setOrder(items);
     }
+
+    const attachOpenStateToTree = useCallback(
+        (currTree: any, parent: any = null) => {
+            const nodes = [];
+            for (const node of currTree) {
+                node.isOpen = false;
+
+                const parentIdx = menu.open.findIndex(
+                    ([p]) => p === (parent?.id ?? "ROOT")
+                );
+                if (parentIdx !== -1) {
+                    node.isOpen = menu.open[parentIdx][1].includes(node.id);
+                }
+
+                node.isVisible = !(
+                    parent?.isOpen === false || parent?.isVisible === false
+                );
+
+                node.children = attachOpenStateToTree(node.children, node);
+                nodes.push(node);
+            }
+            return nodes;
+        },
+        [menu.open]
+    );
 
     const items = useMemo(() => {
-        function recurse(t: BasicTree): any {
-            const items = [];
-            for (const branch of t.children) {
-                items.push(recurse(branch));
-            }
-            if ("name" in t) {
-                return {
-                    label: t.name,
-                    id: t.id,
-                    items,
-                };
-            } else {
-                return items;
-            }
-        }
-
-        return recurse(tree);
-    }, [tree]);
-
-    function onDragChange(items: IMenuItem[]) {
-        menu.setOrder("root", items);
-    }
+        return attachOpenStateToTree(tree);
+    }, [attachOpenStateToTree, tree]);
 
     return (
         <div className="menu--root-container">
-            <SortableMenuItemList<IMenuItem>
+            <SortableTree
                 items={items}
-                onChange={onDragChange}
-                renderItem={(props) => (
-                    <SortableMenuItem id={props.id}>
-                        <MenuItem
-                            key={props.id}
-                            {...{ ...props, onClick }}
-                            parent={"root"}
-                        />
-                    </SortableMenuItem>
-                )}
+                onItemsChanged={onDragChange}
+                TreeItemComponent={SortableTreeItem as any}
             />
         </div>
     );

@@ -1,6 +1,7 @@
 "use client";
 import { useUser } from "@/hooks";
 import { PropsWithChildren, useEffect, useRef, useState } from "react";
+import "./dropzone.css";
 
 interface DropZoneProps {
     onDrop(file: File[]): void;
@@ -21,15 +22,34 @@ export function DropZone({
         if (!element) return;
 
         const dragEvents = ["dragenter", "dragover"];
-        const dragEndEvents = ["dragleave", "drop"];
+        const dragEndEvents = ["dragleave"];
+        const dropEvents = ["drop"];
+
+        // Keep a counter of dragenter/dragover events
+        let dragCounter = 0;
 
         const dragHandler = (e: DragEvent) => {
+            console.log("enter");
             e.preventDefault();
+            dragCounter++;
             setIsDragging(true);
         };
 
-        const dragEndHandler = (e: DragEvent) => {
+        const dragLeaveHandler = (e: DragEvent) => {
+            console.log("leave");
             e.preventDefault();
+            e.stopPropagation();
+            dragCounter--;
+            if (dragCounter === 0) {
+                setIsDragging(false);
+            }
+        };
+
+        const dragDropHandler = (e: DragEvent) => {
+            console.log("drop");
+            e.preventDefault();
+            e.stopPropagation();
+            dragCounter = 0;
             setIsDragging(false);
 
             if (e && e.dataTransfer && e.dataTransfer.items) {
@@ -49,15 +69,21 @@ export function DropZone({
             element.addEventListener(event, dragHandler as any)
         );
         dragEndEvents.forEach((event) =>
-            element.addEventListener(event, dragEndHandler as any)
+            element.addEventListener(event, dragLeaveHandler as any)
         );
+        dropEvents.forEach((event) => {
+            element.addEventListener(event, dragDropHandler as any);
+        });
 
         return () => {
             dragEvents.forEach((event) => {
                 element.removeEventListener(event, dragHandler as any);
             });
             dragEndEvents.forEach((event) => {
-                element.removeEventListener(event, dragEndHandler as any);
+                element.removeEventListener(event, dragLeaveHandler as any);
+            });
+            dropEvents.forEach((event) => {
+                element.removeEventListener(event, dragDropHandler as any);
             });
         };
         // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -80,12 +106,15 @@ export function DropZone({
                         zIndex: 9999,
                         color: "white",
                         fontSize: "32px",
+                        pointerEvents: "none",
                     }}
                 >
                     Drop your files here
                 </div>
             ) : null}
-            <div ref={dragEle}>{children}</div>
+            <div className="dropzone" ref={dragEle}>
+                {children}
+            </div>
         </div>
     );
 }

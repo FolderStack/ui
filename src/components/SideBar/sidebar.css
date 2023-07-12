@@ -5,3 +5,13 @@
     -o-user-drag: none;
     user-drag: none;
 }
+
+.sider--container .ant-image {
+    justify-content: flex-start;
+    width: 100%;
+    display: flex;
+}
+
+.sider--container .logo  {
+    max-width: 280px !important;
+}

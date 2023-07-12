@@ -32,15 +32,16 @@ const handler: NextApiHandler = async (
 
     const rawBody = await (req as any).text();
 
+    const headers = req.headers as unknown as Headers;
+    headers.set("Authorization", `Bearer ${token.accessToken}`);
+    headers.set("X-Test-Authorizer", config.api.headers["X-Test-Authorizer"]);
+
     const response = await fetch(apiUrl, {
         method: req.method,
         body: ["POST", "PATCH"].includes(req.method?.toUpperCase() ?? "")
             ? rawBody
             : undefined,
-        headers: {
-            Authorization: `Bearer ${token.accessToken}`,
-            ...config.api.headers,
-        },
+        headers,
     });
 
     let result = {};

@@ -42,7 +42,7 @@ export function File({ data }: FileProps) {
             style={{
                 minWidth: "280px",
                 maxWidth: "280px",
-                minHeight: "320px",
+                minHeight: "340px",
                 background: token.colorBgContainer,
                 borderRadius: token.borderRadius,
                 boxShadow: "0px 10px 50px -15px rgba(0,0,0,0.1)",
@@ -65,7 +65,10 @@ export function File({ data }: FileProps) {
                                 onCheckboxChange(evt.target.checked)
                             }
                         >
-                            <Title level={5} style={{ marginTop: "5px" }}>
+                            <Title
+                                level={5}
+                                style={{ marginTop: "5px", fontSize: 14 }}
+                            >
                                 {data.name}
                             </Title>
                         </Checkbox>
@@ -75,7 +78,7 @@ export function File({ data }: FileProps) {
                     <Image
                         src="https://via.placeholder.com/200x200.png"
                         alt="image"
-                        style={{ objectFit: "contain" }}
+                        style={{ objectFit: "contain", borderRadius: "2px" }}
                     />
                 </Row>
             </Row>

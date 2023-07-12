@@ -1,3 +1,4 @@
+import { useUser } from "@/hooks";
 import { SimpleTreeItemWrapper } from "dnd-kit-sortable-tree";
 import { TreeItem } from "dnd-kit-sortable-tree/dist/types";
 import {
@@ -18,7 +19,10 @@ export const SortableTreeItem = forwardRef(function SortableTreeItem(
     props: Props,
     ref: any
 ) {
+    const user = useUser();
     if (!props.item?.isVisible) return null;
+
+    const isAdmin = !!user?.isAdmin;
 
     return (
         <SimpleTreeItemWrapper
@@ -27,6 +31,9 @@ export const SortableTreeItem = forwardRef(function SortableTreeItem(
             ref={ref}
             showDragHandle={false}
             disableCollapseOnItemClick
+            disableSelection={!isAdmin}
+            disableSorting={!isAdmin}
+            manualDrag={!isAdmin}
         >
             <SortableTreeContext.Provider value={props}>
                 <SortableMenuItem {...props} />

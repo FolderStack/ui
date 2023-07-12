@@ -1,6 +1,7 @@
 "use client";
 import { PageData } from "@/types";
-import { PropsWithChildren, createContext } from "react";
+import { PropsWithChildren, createContext, useEffect } from "react";
+import { useOrg } from "../Org";
 import { useFetchPageData } from "../useFetchPageData";
 import { TreeProvider } from "./TreeContext";
 
@@ -15,7 +16,19 @@ export const PageDataContext = createContext<PageDataContext>({
 });
 
 export function PageDataProvider({ children }: PropsWithChildren) {
+    const org = useOrg();
     const { data, isLoading } = useFetchPageData();
+
+    useEffect(() => {
+        const name = data?.data?.current?.name;
+        if (name) {
+            let docName = name;
+            if (org.org?.name) {
+                docName += " | " + org.org.name;
+            }
+            document.title = docName;
+        }
+    }, [data, org]);
 
     return (
         <TreeProvider>

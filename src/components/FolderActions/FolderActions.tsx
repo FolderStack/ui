@@ -20,7 +20,7 @@ export function FolderActions() {
 }
 
 const BarStyle = {
-    height: "48px",
+    maxHeight: "48px",
     width: "100%",
     borderRadius: "4px",
     marginBottom: "16px",

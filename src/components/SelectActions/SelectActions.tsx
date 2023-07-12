@@ -12,7 +12,7 @@ export function SelectActions() {
     const user = useUser();
     const { data = {} } = usePageData();
     const selection = useSelection();
-    const children = useMemo(() => data?.children ?? [], [data]);
+    const children = useMemo(() => data?.data?.items ?? [], [data]);
 
     const [isAllSelected, setIsAllSelected] = useState(false);
 
@@ -26,9 +26,7 @@ export function SelectActions() {
         if (!state) {
             selection.clear();
         } else {
-            const ids = (data?.children ?? []).map((item: any) =>
-                String(item.id)
-            );
+            const ids = children.map((item: any) => String(item.id));
             selection.setState(ids);
         }
     }

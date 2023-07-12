@@ -3,6 +3,7 @@ import { Form, Input } from "antd";
 import { useState } from "react";
 import { AdvancedSearch } from "./AdvancedSearchButton";
 import { SearchButton } from "./SearchButton";
+import "./search.css";
 
 export function SearchBar() {
     const [search, setSearch] = useState<string>();
@@ -12,11 +13,11 @@ export function SearchBar() {
     }
 
     return (
-        <Form.Item>
+        <Form.Item className="search-bar">
             <Input
                 size="large"
                 value={search}
-                placeholder="Search everything..."
+                placeholder="Search..."
                 style={{ maxWidth: "360px" }}
                 onChange={(evt) => setSearch(evt.target.value)}
                 prefix={<SearchButton search={submitSearch} />}

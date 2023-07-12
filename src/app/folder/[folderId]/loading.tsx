@@ -1,3 +1,12 @@
+import Head from "next/head";
+
 export default function FolderLoading() {
-    return "Loading folder";
+    return (
+        <>
+            <Head>
+                <title>Loading</title>
+            </Head>
+            {"Loading folder"}
+        </>
+    );
 }

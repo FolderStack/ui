@@ -1,11 +1,13 @@
 "use client";
 
-import { Button } from "antd";
+import { useOrg } from "@/hooks";
+import { Button, Image, Row } from "antd";
 import Sider from "antd/es/layout/Sider";
-import { forwardRef, useState } from "react";
+import { forwardRef, useMemo, useState } from "react";
 import { RxWidth } from "react-icons/Rx";
 import { Resizable } from "react-resizable";
 import { SideMenu } from "../Menu";
+import { SearchBar } from "../SearchBar";
 import "./sidebar.css";
 
 const DragHandle = forwardRef(function DragHandleComponent(props, ref: any) {
@@ -31,8 +33,13 @@ const DragHandle = forwardRef(function DragHandleComponent(props, ref: any) {
     );
 });
 
+const INITIAL_WIDTH = 320;
+
 export function SideBar() {
-    const [width, setWidth] = useState(280);
+    const org = useOrg();
+    const [width, setWidth] = useState(INITIAL_WIDTH);
+
+    const logo = useMemo(() => org?.config?.logo, [org]);
 
     return (
         <Resizable
@@ -42,12 +49,28 @@ export function SideBar() {
             onResize={(_, { size }) => {
                 setWidth(size.width);
             }}
-            minConstraints={[280, -1]}
+            minConstraints={[INITIAL_WIDTH, -1]}
         >
             <Sider
                 style={{ background: "white", position: "relative" }}
                 width={width}
+                className="sider--container"
             >
+                {logo && typeof logo === "string" ? (
+                    <Image
+                        className="logo"
+                        alt="logo"
+                        src={logo}
+                        width={"100%"}
+                        preview={false}
+                        style={{
+                            padding: "24px 32px 24px 32px",
+                        }}
+                    />
+                ) : null}
+                <Row style={{ padding: "0px 28px 12px 28px" }}>
+                    <SearchBar />
+                </Row>
                 <SideMenu />
             </Sider>
         </Resizable>

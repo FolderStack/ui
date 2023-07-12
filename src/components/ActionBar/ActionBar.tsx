@@ -1,6 +1,8 @@
 "use client";
-import { usePageData, useTree } from "@/hooks";
+import { usePageData, useTree, useUser } from "@/hooks";
+import { gotoLogin } from "@/utils";
 import { Button, Row } from "antd";
+import useMessage from "antd/es/message/useMessage";
 import Title from "antd/es/typography/Title";
 import { useEffect, useState } from "react";
 import { FilterActions } from "../FilterBar/FilterActions";
@@ -8,8 +10,10 @@ import { DisplayTypeActions } from "./DisplayTypeActions";
 import { SortActions } from "./SortActions";
 
 export function ActionBar() {
+    const user = useUser();
     const { updateItem } = useTree();
     const pageData = usePageData();
+    const [messageApi, contextHolder] = useMessage();
 
     const [name, setName] = useState<string | null>(
         pageData?.data?.data?.current?.name ?? null
@@ -27,7 +31,18 @@ export function ActionBar() {
         fetch(`/api/folders/${currentFolder}`, {
             method: "PATCH",
             body: JSON.stringify({ name: value }),
-        }).catch(console.warn);
+        })
+            .then((res) => {
+                if (res.status === 401) {
+                    gotoLogin();
+                }
+                if (!res.ok) {
+                    messageApi.error("Failed to update folder name");
+                }
+            })
+            .catch(() => {
+                messageApi.error("Failed to update folder name");
+            });
     }
 
     useEffect(() => {
@@ -38,7 +53,8 @@ export function ActionBar() {
 
     return (
         <Row align="middle" justify="space-between">
-            <Title level={1} editable={{ onChange }}>
+            {contextHolder}
+            <Title level={1} editable={user?.isAdmin ? { onChange } : false}>
                 {name}
             </Title>
             <Row align="middle" style={{ marginBottom: "16px", gap: "16px" }}>

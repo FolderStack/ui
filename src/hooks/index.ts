@@ -2,6 +2,7 @@ export * from "./DisplayType";
 export * from "./FileUpload";
 export * from "./Filter";
 export * from "./Menu";
+export * from "./Org";
 export * from "./PageData";
 export * from "./Pagination";
 export * from "./SearchAndFilterProviders";

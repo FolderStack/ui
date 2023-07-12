@@ -1,3 +1,3 @@
 export default function AppLoading() {
-    return "Loading app";
+    return "Loading loading loading loading";
 }

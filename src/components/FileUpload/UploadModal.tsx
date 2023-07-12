@@ -1,7 +1,10 @@
 "use client";
 import { useBoolean, usePageData, useUpload } from "@/hooks";
+import { gotoLogin } from "@/utils";
 import { Modal } from "antd";
-import { useCallback, useMemo, useReducer } from "react";
+import axios from "axios";
+import _ from "lodash";
+import { useCallback, useEffect, useMemo, useReducer, useState } from "react";
 import { UploadFileList } from "./UploadFileList";
 
 interface UploadModalProps {
@@ -44,27 +47,62 @@ function reducer(
 export function UploadModal({ isOpen }: UploadModalProps) {
     const upload = useUpload();
     const pageData = usePageData();
+    const [isFetchingUrls, fetching] = useBoolean(false);
     const [isLoading, loading] = useBoolean(false);
 
-    const folderName = pageData.data?.folder?.name;
+    const [urls, setUrls] = useState<Record<string, string>>({});
+
+    const folderName = pageData.data?.data?.current?.name;
+    const folderId = pageData.data?.data?.current?.id;
+
     const [progress, update] = useReducer(reducer, []);
+
+    async function notifyUpload(file: File, url: string) {
+        fetch(`/api/folders/${folderId}/files`, {
+            method: "POST",
+            body: JSON.stringify({
+                name: file.name,
+                file: url,
+                fileSize: file.size,
+                fileType: file.type,
+            }),
+        });
+    }
 
     const onOk = useCallback(async () => {
         loading.on();
 
-        // DUMMY LOADING
-        // TODO: Implement actual upload & progress
         for (let i = 0; i < upload.files.length; i++) {
-            let intervals = [20, 40, 60, 80, 100];
-            for (const int of intervals) {
-                await waitRand();
-                update(["progress", i, int]);
+            const file = upload.files[i];
+            const uploadUrl = urls[file.name];
+            console.log(file, urls);
+
+            const form = new FormData();
+            form.append(file.name, file);
+
+            if (file && uploadUrl) {
+                axios
+                    .put(uploadUrl, form, {
+                        headers: {
+                            "Content-Type": "multipart/form-data",
+                        },
+                        onUploadProgress: _.throttle((evt) => {
+                            const progress = evt.progress ?? 0.5;
+                            update(["progress", i, progress * 100]);
+                        }, 500),
+                    })
+                    .then(() => {
+                        update(["progress", i, 100]);
+                        notifyUpload(file, uploadUrl);
+                    });
+            } else {
+                update(["progress", i, -1]);
             }
         }
 
         loading.off();
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [upload]);
+    }, [upload, urls]);
 
     function onCancel() {
         update(["clear"]);
@@ -79,12 +117,39 @@ export function UploadModal({ isOpen }: UploadModalProps) {
         }
     }, [folderName]);
 
+    useEffect(() => {
+        if (upload.files.length) {
+            fetching.on();
+            fetch("/api/uploads", {
+                method: "POST",
+                body: JSON.stringify({
+                    fileNames: upload.files.map((f) => f.name),
+                }),
+            })
+                .then((res) => {
+                    if (res.ok) {
+                        res.json().then((urls) => {
+                            setUrls(urls);
+                        });
+                    } else if (res.status === 401) {
+                        gotoLogin();
+                    } else {
+                        //
+                    }
+                })
+                .finally(() => {
+                    fetching.off();
+                });
+        }
+    }, [upload.files]);
+
     return (
         <Modal
             centered
-            okText="Upload"
+            okText={isFetchingUrls ? "Preparing" : "Upload"}
             cancelText="Cancel"
             confirmLoading={isLoading}
+            okButtonProps={{ disabled: isFetchingUrls || isLoading }}
             {...{ title, onOk, open: isOpen, onCancel }}
         >
             <UploadFileList progress={progress} />

@@ -2,12 +2,11 @@
 import { DropZone, File, Folder } from "@/components";
 import { usePageData, useUpload } from "@/hooks";
 import { Row } from "antd";
-import { useMemo } from "react";
 
 export default function FolderPage() {
-    const { data = {} } = usePageData();
+    const pageData = usePageData();
     const upload = useUpload();
-    const children = data?.children ?? [];
+    const children = pageData?.data?.data?.items ?? [];
 
     return (
         <DropZone onDrop={upload.openModal}>

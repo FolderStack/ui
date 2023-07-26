@@ -141,6 +141,7 @@ export function UploadModal({ isOpen }: UploadModalProps) {
                     fetching.off();
                 });
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [upload.files]);
 
     return (

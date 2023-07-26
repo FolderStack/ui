@@ -6,7 +6,6 @@ export default function FolderLoading() {
             <Head>
                 <title>Loading</title>
             </Head>
-            {"Loading folder"}
         </>
     );
 }

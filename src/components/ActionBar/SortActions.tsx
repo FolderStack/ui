@@ -1,5 +1,5 @@
 import { useSort } from "@/hooks";
-import { Button, Row, Select, Tooltip } from "antd";
+import { Button, Row, Select } from "antd";
 import dynamic from "next/dynamic";
 import { useCallback, useMemo } from "react";
 
@@ -42,20 +42,17 @@ export function SortActions() {
 
     return (
         <Row align="middle" style={{ gap: "4px" }}>
-            <Tooltip title="Sort by an attribute">
-                <Select
-                    value={selected as any}
-                    placeholder="Sort by"
-                    options={SORT_OPTIONS}
-                    onChange={onSelectChange}
-                    style={{
-                        width: "120px",
-                    }}
-                />
-            </Tooltip>
-            <Tooltip title={Options[sort].title}>
-                <Button icon={Options[sort].icon} onClick={onToggle} />
-            </Tooltip>
+            <Select
+                value={selected as any}
+                placeholder="Sort by"
+                options={SORT_OPTIONS}
+                onChange={onSelectChange}
+                style={{
+                    width: "120px",
+                }}
+            />
+
+            <Button icon={Options[sort].icon} onClick={onToggle} />
         </Row>
     );
 }
@@ -67,7 +64,7 @@ const SORT_OPTIONS = [
     },
     {
         label: "Size",
-        value: "size",
+        value: "fileSize",
     },
     {
         label: "Uploaded",

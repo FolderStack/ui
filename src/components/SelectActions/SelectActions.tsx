@@ -31,6 +31,16 @@ export function SelectActions() {
         }
     }
 
+    function downloadSelected() {
+        const selectedItems = selection.selected;
+        const urls = [];
+        for (const item of children) {
+            if (selectedItems.includes(item.id) && item.asset) {
+                urls.push(item.asset);
+            }
+        }
+    }
+
     useEffect(() => {
         setIsAllSelected(isAllSelectedInContext);
     }, [isAllSelectedInContext]);
@@ -50,6 +60,7 @@ export function SelectActions() {
                 <Button
                     disabled={!selection.selected.length}
                     icon={<DownloadOutlined />}
+                    onClick={downloadSelected}
                 >
                     Download Selected
                 </Button>

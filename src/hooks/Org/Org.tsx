@@ -1,4 +1,4 @@
-import {
+import React, {
     PropsWithChildren,
     createContext,
     useCallback,
@@ -21,14 +21,14 @@ const OrgContext = createContext<IOrgContext>({
     theme: {},
 });
 
-export function OrgProvider({ children }: PropsWithChildren) {
+export function OrgProviderComponent({ children }: PropsWithChildren) {
     const [org, setOrg] = useState<IOrgContext>({
         config: {},
         theme: {},
     });
 
     const getOrg = useCallback(async () => {
-        fetch(`/api/org/@me`).then((res) => {
+        fetch(`/api/org/me`).then((res) => {
             if (res.ok) {
                 res.json().then((body) => {
                     setOrg(body);
@@ -39,10 +39,13 @@ export function OrgProvider({ children }: PropsWithChildren) {
 
     useEffect(() => {
         getOrg();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     return <OrgContext.Provider value={org}>{children}</OrgContext.Provider>;
 }
+
+export const OrgProvider = React.memo(OrgProviderComponent);
 
 export function useOrg() {
     return useContext(OrgContext);

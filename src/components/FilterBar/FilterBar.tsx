@@ -5,6 +5,22 @@ import { useForm } from "antd/es/form/Form";
 import dayjs from "dayjs";
 import { useEffect, useMemo } from "react";
 
+function zeroDate(date: Date) {
+    date.setMilliseconds(0);
+    date.setSeconds(0);
+    date.setMinutes(0);
+    date.setHours(0);
+    return date;
+}
+
+function maxDate(date: Date) {
+    date.setMilliseconds(999);
+    date.setSeconds(59);
+    date.setMinutes(59);
+    date.setHours(23);
+    return date;
+}
+
 export function FilterBar() {
     const [form] = useForm();
     const filter = useFilter();
@@ -15,11 +31,11 @@ export function FilterBar() {
 
     function applyFilter(values: any) {
         if (values.to) {
-            values.to = values.to.toDate();
+            values.to = maxDate(values.to.toDate());
         }
 
         if (values.from) {
-            values.from = values.from.toDate();
+            values.from = zeroDate(values.from.toDate());
         }
 
         filter.apply(values);
@@ -35,16 +51,20 @@ export function FilterBar() {
     }, [from, to, fileTypes]);
 
     useEffect(() => {
-        const _to = filter.filter.to;
-        const _from = filter.filter.from;
         const _fileTypes = filter.filter.fileTypes;
 
-        if (_to) {
-            form.setFieldValue("to", dayjs(_to.toISOString()));
+        if (filter.filter.to) {
+            form.setFieldValue(
+                "to",
+                dayjs(maxDate(new Date(filter.filter.to)).toISOString())
+            );
         }
 
-        if (_from) {
-            form.setFieldValue("from", dayjs(_from.toISOString()));
+        if (filter.filter.from) {
+            form.setFieldValue(
+                "from",
+                dayjs(maxDate(new Date(filter.filter.from)).toISOString())
+            );
         }
 
         if (_fileTypes) {
@@ -156,11 +176,11 @@ const OPTIONS = [
     },
     {
         label: "gif",
-        value: "gif",
+        value: "image/gif",
     },
     {
         label: "jpg",
-        value: "jpg",
+        value: "image/jpg",
     },
     {
         label: "mov",
@@ -176,7 +196,7 @@ const OPTIONS = [
     },
     {
         label: "png",
-        value: "png",
+        value: "image/png",
     },
     {
         label: "psd",

@@ -3,10 +3,11 @@
 import { useOrg } from "@/hooks";
 import { Button, Image, Row } from "antd";
 import Sider from "antd/es/layout/Sider";
-import { forwardRef, useMemo, useState } from "react";
+import React, { forwardRef, useMemo, useState } from "react";
 import { RxWidth } from "react-icons/Rx";
 import { Resizable } from "react-resizable";
 import { SideMenu } from "../Menu";
+import { NoSSR } from "../NoSSR";
 import { SearchBar } from "../SearchBar";
 import "./sidebar.css";
 
@@ -35,7 +36,7 @@ const DragHandle = forwardRef(function DragHandleComponent(props, ref: any) {
 
 const INITIAL_WIDTH = 320;
 
-export function SideBar() {
+function SideBarComponent() {
     const org = useOrg();
     const [width, setWidth] = useState(INITIAL_WIDTH);
 
@@ -67,12 +68,18 @@ export function SideBar() {
                             padding: "24px 32px 24px 32px",
                         }}
                     />
-                ) : null}
+                ) : (
+                    <div style={{ height: "24px" }} />
+                )}
                 <Row style={{ padding: "0px 28px 12px 28px" }}>
                     <SearchBar />
                 </Row>
-                <SideMenu />
+                <NoSSR>
+                    <SideMenu />
+                </NoSSR>
             </Sider>
         </Resizable>
     );
 }
+
+export const SideBar = React.memo(SideBarComponent);

@@ -31,22 +31,26 @@ export function DeleteFolderModal() {
             .then((res) => {
                 if (res.ok) {
                     loading.off();
-                    tree.reload();
+                    onClose();
                     const parent = menu.getParent(folderId);
+                    const q = new URL(window.location.href).search;
                     if (parent) {
-                        const q = new URL(window.location.href).search;
-                        router.replace(`/folder/${parent}?${q}`);
+                        router.push(`/folder/${parent}${q}`);
+                    } else {
+                        router.push(`/${q}`);
                     }
                     messageApi.success("Deleted folder");
-                    onClose();
+                    tree.reload();
                 } else if (res.status === 401) {
                     gotoLogin();
                 } else {
+                    console.log(res);
                     messageApi.error("An error occured");
                     loading.off();
                 }
             })
-            .catch(() => {
+            .catch((err) => {
+                console.log(err);
                 messageApi.error("An error occured");
                 loading.off();
             });

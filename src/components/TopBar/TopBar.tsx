@@ -1,9 +1,10 @@
+import React from "react";
 import { ActionBar } from "../ActionBar";
 import { FilterBar } from "../FilterBar";
 import { FolderActions } from "../FolderActions";
 import { SelectActions } from "../SelectActions";
 
-export function TopBar() {
+function TopBarComponent() {
     return (
         <>
             {/* <SearchBar /> */}
@@ -14,3 +15,5 @@ export function TopBar() {
         </>
     );
 }
+
+export const TopBar = React.memo(TopBarComponent);

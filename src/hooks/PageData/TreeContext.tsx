@@ -1,7 +1,7 @@
 "use client";
 import { BasicTree } from "@/types";
 import { gotoLogin } from "@/utils";
-import {
+import React, {
     PropsWithChildren,
     createContext,
     useCallback,
@@ -34,7 +34,7 @@ const TreeContext = createContext<TreeContext>({
     },
 });
 
-export function TreeProvider({ children }: PropsWithChildren) {
+function TreeProviderComponent({ children }: PropsWithChildren) {
     const [tree, setTree] = useState<BasicTree[]>([]);
     const [isLoading, loading] = useBoolean(false);
 
@@ -150,6 +150,7 @@ export function TreeProvider({ children }: PropsWithChildren) {
     };
 
     const reload = useCallback(() => {
+        console.log("reload");
         loading.on();
         fetchTree()
             .then((result) => {
@@ -176,6 +177,8 @@ export function TreeProvider({ children }: PropsWithChildren) {
         </TreeContext.Provider>
     );
 }
+
+export const TreeProvider = React.memo(TreeProviderComponent);
 
 export function useTree() {
     return useContext(TreeContext);

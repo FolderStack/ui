@@ -12,14 +12,14 @@ export function Providers({ children }: PropsWithChildren) {
     const org = useOrg();
 
     return (
-        <ConfigProvider theme={org?.theme ?? ThemeToken}>
-            <UserProvider>
-                <TreeProvider>
-                    <SearchAndFilterProviders>
+        <UserProvider>
+            <TreeProvider>
+                <SearchAndFilterProviders>
+                    <ConfigProvider theme={org?.theme ?? ThemeToken}>
                         {children}
-                    </SearchAndFilterProviders>
-                </TreeProvider>
-            </UserProvider>
-        </ConfigProvider>
+                    </ConfigProvider>
+                </SearchAndFilterProviders>
+            </TreeProvider>
+        </UserProvider>
     );
 }

@@ -83,7 +83,7 @@ export function FilterProvider({ children }: PropsWithChildren) {
             if (typeof value === "object") {
                 if (!Number.isNaN(new Date(value as any).getTime())) {
                     qs.set(k, new Date(value as any).toISOString());
-                } else if (Array.isArray(value)) {
+                } else if (Array.isArray(value) && value.length > 0) {
                     qs.set(k, value.join(","));
                 }
             }
@@ -108,10 +108,13 @@ export function FilterProvider({ children }: PropsWithChildren) {
         const filterSearch = toSearchParams();
 
         for (const key of FILTER_QUERY_KEYS) {
-            if (!filterSearch.has(key) && url.searchParams.has(key)) {
-                url.searchParams.delete(key);
-            } else if (filterSearch.has(key) && !!filterSearch.get(key)) {
-                url.searchParams.set(key, filterSearch.get(key)!);
+            const item = filterSearch.get(key);
+            if (!item) {
+                if (url.searchParams.has(key)) {
+                    url.searchParams.delete(key);
+                }
+            } else {
+                url.searchParams.set(key, item);
             }
         }
 

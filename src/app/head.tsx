@@ -7,7 +7,7 @@ export function Head() {
 
     return (
         <head>
-            <title>Loading</title>
+            <title>Home</title>
             <link rel="icon" href={icon} sizes="any" />
         </head>
     );

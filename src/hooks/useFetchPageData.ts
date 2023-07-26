@@ -1,49 +1,43 @@
 "use client";
 import { PageData } from "@/types";
 import { gotoLogin } from "@/utils";
-import { useParams } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useFilter } from "./Filter";
 import { usePagination } from "./Pagination";
 import { useSort } from "./Sort";
 import { useBoolean } from "./useBoolean";
+import { useStableParams } from "./useStableParams";
 
 export function useFetchPageData() {
     const [isLoading, loading] = useBoolean(false);
-    const params = useParams();
+    const params = useStableParams();
     const filter = useFilter();
     const sort = useSort();
     const pagination = usePagination();
-
     const [data, setData] = useState<PageData | null>(null);
-    const [folderId, setFolderId] = useState<string | null>(null);
-    const [fileId, setFileId] = useState<string | null>(null);
+    const abortController = useRef<AbortController | null>(null);
 
-    useEffect(() => {
-        const _folderId = params.folderId;
-        const _fileId = params.fileId;
-
-        if (_folderId && !!_folderId?.trim?.()?.length) {
-            setFolderId(_folderId);
+    const fetchData = useCallback(async (url: string) => {
+        try {
+            const res = await fetch(`/api/${url}`, {
+                signal: abortController.current?.signal,
+            });
+            if (res.ok) {
+                const data = await res.json();
+                setData(data);
+            } else if (res.status === 401) {
+                gotoLogin();
+            }
+        } catch (err) {
+            //
         }
 
-        if (_fileId && !!_fileId?.trim?.()?.length) {
-            setFileId(_fileId);
-        }
-    }, [params]);
+        loading.off();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
-    async function fetchData(url: string) {
-        const res = await fetch(`/api/${url}`);
-        if (res.ok) {
-            const data = await res.json();
-            return data;
-        } else if (res.status === 401) {
-            gotoLogin();
-        }
-    }
-
-    const request = useCallback(async () => {
-        if (!folderId) return;
+    const reload = useCallback(() => {
+        debugger;
         loading.on();
         const url = new URL(window.location.href);
         filter.toSearchParams(url.searchParams);
@@ -51,26 +45,43 @@ export function useFetchPageData() {
         pagination.toSearchParams(url.searchParams);
         const qs = url.searchParams.toString();
 
+        const folderId = params?.folderId;
+        const fileId = params.fileId;
+
         let requestUrl = `folders/${folderId}`;
         if (fileId) requestUrl += `/files/${fileId}`;
         requestUrl += `?${qs}`;
 
-        fetchData(requestUrl)
-            .then((data) => {
-                setData(data);
-            })
-            .finally(() => {
-                loading.off();
-            });
+        // Cancel the previous request
+        abortController.current?.abort();
+        // Create a new AbortController for the new request
+        abortController.current = new AbortController();
 
-        // Using filter.filter to avoid triggering a call every time
-        // filter.isVisible is changed etc..
+        if (!params.folderId?.length) {
+            setData({
+                data: {
+                    current: {},
+                    items: [],
+                },
+            });
+            return;
+        }
+
+        fetchData(requestUrl);
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [filter.filter, sort, pagination, folderId, fileId]);
+    }, [filter, pagination, sort, params]);
 
     useEffect(() => {
-        request();
-    }, [request]);
+        reload();
+        return () => {
+            // Abort ongoing fetch when the component is unmounted
+            abortController.current?.abort();
+        };
+    }, [reload]);
+
+    useEffect(() => {
+        console.log("Page data", data);
+    }, [data]);
 
     return { data, isLoading };
 }

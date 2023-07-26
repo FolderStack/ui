@@ -26,7 +26,7 @@ const SortContext = createContext<SortContext>({
     },
 });
 
-const SORT_KEYS = ["name", "size", "createdAt", "updatedAt"];
+const SORT_KEYS = ["name", "fileSize", "createdAt", "updatedAt"];
 
 export function SortProvider({ children }: PropsWithChildren) {
     const [sortBy, setSortBy] = useState<string>();

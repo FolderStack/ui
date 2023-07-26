@@ -3,7 +3,8 @@
     padding: 0px;
     user-select: none;
 
-    /* padding-top: 18px; */
+    padding-left: 24px;
+    padding-right: 4px;
 }
 
 .menu--item {

@@ -46,16 +46,17 @@ export function ActionBar() {
     }
 
     useEffect(() => {
-        if (pageData?.data?.data?.current?.name) {
-            setName(pageData?.data?.data?.current?.name);
-        }
+        setName(pageData?.data?.data?.current?.name ?? null);
     }, [pageData]);
 
     return (
         <Row align="middle" justify="space-between">
             {contextHolder}
-            <Title level={1} editable={user?.isAdmin ? { onChange } : false}>
-                {name}
+            <Title
+                level={1}
+                editable={user?.isAdmin && name ? { onChange } : false}
+            >
+                {name ?? "Home"}
             </Title>
             <Row align="middle" style={{ marginBottom: "16px", gap: "16px" }}>
                 <SortActions />

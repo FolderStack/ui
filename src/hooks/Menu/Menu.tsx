@@ -55,7 +55,6 @@ export function MenuProvider({ initialOpenState = [], children }: MenuProps) {
 
     function handleClick(e: MenuItemClickEvent | MenuDropdownToggleEvent) {
         if (e.type === "open-toggle") {
-            debugger;
             const openArr = [...open];
             const { id, parent } = e;
 
@@ -156,6 +155,7 @@ export function MenuProvider({ initialOpenState = [], children }: MenuProps) {
 
             menuTree.updateOrder(items);
         },
+        // eslint-disable-next-line react-hooks/exhaustive-deps
         [menuTree, messageApi]
     );
 
@@ -167,7 +167,6 @@ export function MenuProvider({ initialOpenState = [], children }: MenuProps) {
     }, [params, activePath, setOpenWithId]);
 
     useEffect(() => {
-        debugger;
         if (active) {
             const path = tree.getPath(active);
             if (path) {
@@ -177,14 +176,8 @@ export function MenuProvider({ initialOpenState = [], children }: MenuProps) {
                 setActivePath(path);
             }
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [active, tree]);
-
-    // useEffect(() => {
-    //     debugger;
-    //     setOpenWithPath(activePath);
-    // }, [activePath, setOpenWithPath]);
-
-    console.log(open);
 
     return (
         <MenuContext.Provider

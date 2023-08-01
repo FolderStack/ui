@@ -1,24 +1,20 @@
 import { useSort } from "@/hooks";
 import { Button, Row, Select } from "antd";
-import dynamic from "next/dynamic";
 import { useCallback, useMemo } from "react";
-
-const SortAscendingOutlined = dynamic(
-    () => import("@ant-design/icons/SortAscendingOutlined")
-);
-const SortDescendingOutlined = dynamic(
-    () => import("@ant-design/icons/SortAscendingOutlined")
-);
+import {
+    AiOutlineSortAscending,
+    AiOutlineSortDescending,
+} from "react-icons/ai";
 
 const Options: Record<string, any> = {
     desc: {
         title: "Sort descending",
-        icon: <SortAscendingOutlined />,
+        icon: <AiOutlineSortAscending className="ai-icon" />,
         toggle: "asc",
     },
     asc: {
         title: "Sort ascending",
-        icon: <SortDescendingOutlined />,
+        icon: <AiOutlineSortDescending className="ai-icon" />,
         toggle: "desc",
     },
 };

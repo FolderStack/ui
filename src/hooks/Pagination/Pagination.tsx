@@ -26,6 +26,9 @@ export function PaginationProvider({ children }: PropsWithChildren) {
     const [isLoading, loading] = useBoolean(true);
 
     function change(p: number, ps: number) {
+        setPage(Math.max(1, p));
+        setPageSize(ps);
+
         const url = new URL(window.location.href);
         const search = new URLSearchParams(url.search);
 
@@ -42,7 +45,7 @@ export function PaginationProvider({ children }: PropsWithChildren) {
         const _pageSize = Number(url.searchParams.get("pageSize"));
 
         if (!Number.isNaN(_page) && _page > 0) {
-            setPage(_page);
+            setPage(Math.max(1, _page));
         }
 
         if (!Number.isNaN(_pageSize) && _pageSize > 0) {

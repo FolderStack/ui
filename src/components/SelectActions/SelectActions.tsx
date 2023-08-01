@@ -1,18 +1,18 @@
 "use client";
 import { usePageData, useSelection, useUser } from "@/hooks";
 import { Button, Checkbox, Row } from "antd";
-import dynamic from "next/dynamic";
 import { useEffect, useMemo, useState } from "react";
-
-const DownloadOutlined = dynamic(
-    () => import("@ant-design/icons/DownloadOutlined")
-);
+import { AiOutlineDownload } from "react-icons/ai";
+import { DeleteSelectedModal } from "./DeleteSelectedModal";
 
 export function SelectActions() {
     const user = useUser();
-    const { data = {} } = usePageData();
+    const pageData = usePageData();
     const selection = useSelection();
-    const children = useMemo(() => data?.data?.items ?? [], [data]);
+    const children = useMemo(
+        () => pageData.data?.data?.items ?? [],
+        [pageData]
+    );
 
     const [isAllSelected, setIsAllSelected] = useState(false);
 
@@ -45,13 +45,28 @@ export function SelectActions() {
         setIsAllSelected(isAllSelectedInContext);
     }, [isAllSelectedInContext]);
 
+    const selectableItems = useMemo(
+        () =>
+            children.filter(
+                (child: any) => child.type?.toLowerCase?.() === "file"
+            ),
+        [children]
+    );
+
+    useEffect(() => {
+        if (pageData.isLoading) {
+            selection.clear();
+            setIsAllSelected(false);
+        }
+    }, [pageData]);
+
     return (
         <Row align="middle" justify="space-between" style={{ width: "100%" }}>
             <Checkbox
-                checked={isAllSelected && children.length}
+                checked={isAllSelected && selectableItems.length > 0}
                 onChange={(evt) => selectAll(evt.target.checked)}
                 style={{ userSelect: "none" }}
-                disabled={!children.length}
+                disabled={!selectableItems.length || pageData.isLoading}
             >
                 Select All
             </Checkbox>
@@ -59,17 +74,13 @@ export function SelectActions() {
             <Row align={"middle"} style={{ gap: "8px" }}>
                 <Button
                     disabled={!selection.selected.length}
-                    icon={<DownloadOutlined />}
+                    icon={<AiOutlineDownload className="ai-icon" />}
                     onClick={downloadSelected}
                 >
                     Download Selected
                 </Button>
 
-                {user?.isAdmin && (
-                    <Button danger disabled={!selection.selected.length}>
-                        Delete Selected
-                    </Button>
-                )}
+                {user?.isAdmin && <DeleteSelectedModal />}
             </Row>
         </Row>
     );

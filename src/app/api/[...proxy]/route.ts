@@ -4,15 +4,11 @@ import {
     GetAccessTokenResult,
     getAccessToken,
 } from "@auth0/nextjs-auth0";
-import { NextApiHandler, NextApiRequest, NextApiResponse } from "next";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
 const IS_TEST = true;
 
-const handler: NextApiHandler = async (
-    req: NextApiRequest,
-    res: NextApiResponse
-) => {
+const handler = async (req: NextRequest) => {
     const url = new URL(req.url!);
     const pathname = url.pathname.split("/api/")[1];
     const query = url.search;
@@ -43,11 +39,14 @@ const handler: NextApiHandler = async (
     headers.set("X-Test-Authorizer", config.api.headers["X-Test-Authorizer"]);
     headers.delete("content-length");
 
+    console.log(rawBody, !!rawBody);
+
+    const method = req.method.toUpperCase();
+
     const response = await fetch(apiUrl, {
         method: req.method,
         body:
-            req.method?.toUpperCase() === "POST" ||
-            req.method?.toUpperCase() === "PATCH"
+            !!rawBody && method !== "GET" && method !== "HEAD"
                 ? rawBody
                 : undefined,
         headers,

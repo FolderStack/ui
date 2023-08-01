@@ -2,15 +2,16 @@
 import { usePageData, usePagination } from "@/hooks";
 import { Button, Pagination, Tooltip } from "antd";
 import ButtonGroup from "antd/es/button/button-group";
+import { useMemo } from "react";
 
-const PAGE_SIZES = [20, 50, 100];
+const PAGE_SIZES = [10, 20, 50];
 
 export function PaginationActions() {
-    const data = usePageData();
+    const { data } = usePageData();
     const { pageSize, page, change } = usePagination();
 
-    const children = data.data?.children ?? [];
-    if (children.length < pageSize) return null;
+    const children = useMemo(() => data?.data?.items ?? [], [data]);
+    const totalItems = useMemo(() => data?.pagination?.totalItems, [data]);
 
     return (
         <>
@@ -18,8 +19,9 @@ export function PaginationActions() {
                 size="small"
                 pageSize={pageSize}
                 defaultPageSize={PAGE_SIZES[0]}
-                total={children.length ?? 0}
+                total={totalItems ?? children.length ?? 0}
                 showSizeChanger={false}
+                current={page}
                 onChange={change}
             />
 

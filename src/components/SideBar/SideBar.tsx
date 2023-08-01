@@ -4,7 +4,7 @@ import { useOrg } from "@/hooks";
 import { Button, Image, Row } from "antd";
 import Sider from "antd/es/layout/Sider";
 import React, { forwardRef, useMemo, useState } from "react";
-import { RxWidth } from "react-icons/Rx";
+import { RxWidth } from "react-icons/rx";
 import { Resizable } from "react-resizable";
 import { SideMenu } from "../Menu";
 import { NoSSR } from "../NoSSR";

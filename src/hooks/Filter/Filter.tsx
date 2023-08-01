@@ -2,10 +2,12 @@
 import {
     createContext,
     PropsWithChildren,
+    useCallback,
     useContext,
     useEffect,
     useState,
 } from "react";
+import { usePageData } from "../PageData";
 import { useBoolean } from "../useBoolean";
 
 interface Filters {
@@ -42,6 +44,7 @@ const FilterContext = createContext({
 const FILTER_QUERY_KEYS = ["from", "to", "fileTypes"];
 
 export function FilterProvider({ children }: PropsWithChildren) {
+    const pageData = usePageData();
     const [isLoading, loading] = useBoolean(true);
     const [filter, setFilter] = useState<Filters>({});
     const [isVisible, visible] = useBoolean(false);
@@ -54,7 +57,7 @@ export function FilterProvider({ children }: PropsWithChildren) {
         setFilter({});
     }
 
-    function fromSearchParams() {
+    const fromSearchParams = useCallback(() => {
         const url = new URL(window.location.href);
         const _filters: Record<string, string[] | Date> = {};
 
@@ -71,26 +74,29 @@ export function FilterProvider({ children }: PropsWithChildren) {
         }
 
         return _filters as Filters;
-    }
+    }, []);
 
-    function toSearchParams(qs = new URLSearchParams()) {
-        for (const key in filter) {
-            const k = key as keyof Filters;
-            if (!filter[k]) continue;
+    const toSearchParams = useCallback(
+        (qs = new URLSearchParams()) => {
+            for (const key in filter) {
+                const k = key as keyof Filters;
+                if (!filter[k]) continue;
 
-            const value = filter[k];
+                const value = filter[k];
 
-            if (typeof value === "object") {
-                if (!Number.isNaN(new Date(value as any).getTime())) {
-                    qs.set(k, new Date(value as any).toISOString());
-                } else if (Array.isArray(value) && value.length > 0) {
-                    qs.set(k, value.join(","));
+                if (typeof value === "object") {
+                    if (!Number.isNaN(new Date(value as any).getTime())) {
+                        qs.set(k, new Date(value as any).toISOString());
+                    } else if (Array.isArray(value) && value.length > 0) {
+                        qs.set(k, value.join(","));
+                    }
                 }
             }
-        }
 
-        return qs;
-    }
+            return qs;
+        },
+        [filter]
+    );
 
     useEffect(() => {
         const urlFilters = fromSearchParams();
@@ -100,7 +106,7 @@ export function FilterProvider({ children }: PropsWithChildren) {
         }
         loading.off();
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
+    }, [fromSearchParams]);
 
     useEffect(() => {
         if (isLoading) return;
@@ -119,8 +125,7 @@ export function FilterProvider({ children }: PropsWithChildren) {
         }
 
         window.history.replaceState(null, "", url.toString());
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [filter, isLoading]);
+    }, [filter, isLoading, toSearchParams]);
 
     return (
         <FilterContext.Provider

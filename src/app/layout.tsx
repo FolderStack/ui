@@ -28,7 +28,7 @@ export default function RootLayout({ children }: PropsWithChildren) {
                         >
                             <MenuProvider>
                                 <SideBar />
-                                <Layout>
+                                <Layout style={{ height: "100vh" }}>
                                     <Header style={HeaderStyle}>
                                         <NoSSR>
                                             <TopBar />
@@ -66,5 +66,7 @@ const ContentStyle = {
     marginTop: "24px",
     paddingInline: "50px",
     color: "black",
-    height: "100%",
+    height: "calc(100vh - 210px)",
+    paddingBottom: "80px",
+    overflow: "scroll",
 };

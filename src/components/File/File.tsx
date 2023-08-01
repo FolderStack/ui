@@ -1,15 +1,15 @@
 import { useSelection } from "@/hooks";
 import { FileData } from "@/types";
-import {
-    DownloadOutlined,
-    InfoCircleOutlined,
-    StarOutlined,
-} from "@ant-design/icons";
 import { Button, Checkbox, Image, Row } from "antd";
 import ButtonGroup from "antd/es/button/button-group";
 import { useToken } from "antd/es/theme/internal";
 import Title from "antd/es/typography/Title";
 import { useEffect, useMemo, useState } from "react";
+import {
+    AiOutlineDownload,
+    AiOutlineInfoCircle,
+    AiOutlineStar,
+} from "react-icons/ai";
 
 interface FileProps {
     data: FileData;
@@ -36,6 +36,15 @@ export function File({ data }: FileProps) {
     useEffect(() => {
         setIsSelected(isSelectedInContext);
     }, [isSelectedInContext]);
+
+    const thumbnail = useMemo(() => {
+        if (data.thumbnail) {
+            return data.thumbnail
+                .replace(/\/\//gi, "/")
+                .replace("https:/", "https://");
+        }
+        return "https://via.placeholder.com/200x200.png";
+    }, [data.thumbnail]);
 
     return (
         <Row
@@ -76,21 +85,34 @@ export function File({ data }: FileProps) {
                 </Row>
                 <Row style={{ width: "100%", justifyContent: "center" }}>
                     <Image
-                        src="https://via.placeholder.com/200x200.png"
+                        src={thumbnail}
                         alt="image"
                         style={{ objectFit: "contain", borderRadius: "2px" }}
                     />
                 </Row>
             </Row>
             <Row justify="end" style={{ width: "100%", paddingInline: "8px" }}>
-                <ButtonGroup>
-                    <Button icon={<DownloadOutlined />} />
+                <ButtonGroup style={{ alignItems: "center" }}>
                     <Button
-                        icon={<StarOutlined style={{ marginTop: "3px" }} />}
+                        href={data.asset ?? "#"}
+                        target="_blank"
+                        rel="noopener nofollow"
+                        icon={<AiOutlineDownload className="ai-icon" />}
                     />
                     <Button
                         icon={
-                            <InfoCircleOutlined style={{ marginTop: "3px" }} />
+                            <AiOutlineInfoCircle
+                                style={{ marginTop: "3px" }}
+                                className="ai-icon"
+                            />
+                        }
+                    />
+                    <Button
+                        icon={
+                            <AiOutlineStar
+                                style={{ marginTop: "3px" }}
+                                className="ai-icon"
+                            />
                         }
                     />
                 </ButtonGroup>

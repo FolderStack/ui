@@ -162,7 +162,7 @@ export function MenuProvider({ initialOpenState = [], children }: MenuProps) {
     useEffect(() => {
         const folderId = params?.folderId ?? null;
         if (folderId) {
-            setActive(folderId);
+            setActive(folderId.toString());
         }
     }, [params, activePath, setOpenWithId]);
 

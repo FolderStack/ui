@@ -3,11 +3,12 @@ import {
     MenuDropdownToggleEvent,
     MenuItemClickEvent,
     useMenu,
+    usePagination,
 } from "@/hooks";
-import { MinusOutlined, PlusOutlined } from "@ant-design/icons";
 import { Row } from "antd";
 import { useParams, useRouter } from "next/navigation";
 import { useCallback, useMemo } from "react";
+import { AiOutlineMinus, AiOutlinePlus } from "react-icons/ai";
 import { DragHandle } from "./DragHandle";
 
 export interface MenuItemProps extends IMenuItem {
@@ -18,10 +19,12 @@ export function SortableMenuItem(ctx: any) {
     const menu = useMenu();
     const router = useRouter();
     const params = useParams();
+    const pagination = usePagination();
 
     function handleClick(e: React.MouseEvent) {
         e.preventDefault();
         e.stopPropagation();
+
         const menuEvent = e as MenuItemClickEvent;
         Object.assign(menuEvent, {
             id: ctx.item.id,
@@ -29,8 +32,10 @@ export function SortableMenuItem(ctx: any) {
             type: "click",
         });
 
-        const q = new URL(window.location.href).search;
-        router.push(`/folder/${ctx.item.id}${q}`);
+        const url = new URL(window.location.href);
+        url.searchParams.set("page", "1");
+        router.push(`/folder/${ctx.item.id}${url.search}`);
+        pagination.change(1, pagination.pageSize);
 
         menu.handleClick(menuEvent);
     }
@@ -75,15 +80,15 @@ export function SortableMenuItem(ctx: any) {
     const dropdownIcon = useMemo(() => {
         if (ctx.item?.isOpen) {
             return (
-                <MinusOutlined
-                    className="menu--dropdown-icon"
+                <AiOutlineMinus
+                    className="menu--dropdown-icon ai-icon"
                     onClick={handleOpen}
                 />
             );
         }
         return (
-            <PlusOutlined
-                className="menu--dropdown-icon"
+            <AiOutlinePlus
+                className="menu--dropdown-icon ai-icon"
                 onClick={handleOpen}
             />
         );

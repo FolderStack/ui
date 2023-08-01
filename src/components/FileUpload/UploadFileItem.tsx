@@ -1,17 +1,11 @@
 import { Button, Progress, Row, Tooltip } from "antd";
-import dynamic from "next/dynamic";
+import {
+    AiFillCheckCircle,
+    AiFillCloseCircle,
+    AiFillDelete,
+    AiOutlinePaperClip,
+} from "react-icons/ai";
 import "./upload.css";
-
-const PaperClipOutlined = dynamic(
-    () => import("@ant-design/icons/PaperClipOutlined")
-);
-const DeleteFilled = dynamic(() => import("@ant-design/icons/DeleteFilled"));
-const CheckCircleFilled = dynamic(
-    () => import("@ant-design/icons/CheckCircleFilled")
-);
-const CloseCircleFilled = dynamic(
-    () => import("@ant-design/icons/CloseCircleFilled")
-);
 
 interface UploadFileItemProps {
     file: File;
@@ -32,13 +26,13 @@ export function UploadFileItem({
                 justify="space-between"
             >
                 <Row style={{ gap: "4px" }}>
-                    <PaperClipOutlined />
+                    <AiOutlinePaperClip className="ai-icon" />
                     {file.name}
                 </Row>
                 {typeof progress !== "number" && (
                     <Button
                         className="upload-file-item-delete"
-                        icon={<DeleteFilled />}
+                        icon={<AiFillDelete className="ai-icon" />}
                         type="text"
                         size="small"
                         onClick={onRemove}
@@ -46,12 +40,12 @@ export function UploadFileItem({
                 )}
                 {progress === 100 && (
                     <Tooltip title="File uploaded">
-                        <CheckCircleFilled className="upload-file-item-uploaded" />
+                        <AiFillCheckCircle className="upload-file-item-uploaded ai-icon" />
                     </Tooltip>
                 )}
                 {progress === -1 && (
                     <Tooltip title="Upload failed">
-                        <CloseCircleFilled className="upload-file-item-error" />
+                        <AiFillCloseCircle className="upload-file-item-error ai-icon" />
                     </Tooltip>
                 )}
             </Row>

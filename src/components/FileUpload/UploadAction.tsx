@@ -2,11 +2,7 @@
 import { useUpload } from "@/hooks";
 import { Button } from "antd";
 import Upload from "antd/es/upload/Upload";
-import dynamic from "next/dynamic";
-
-const UploadOutlined = dynamic(
-    () => import("@ant-design/icons/UploadOutlined")
-);
+import { AiOutlineUpload } from "react-icons/ai";
 
 export function UploadAction() {
     const upload = useUpload();
@@ -20,7 +16,9 @@ export function UploadAction() {
                 return false;
             }}
         >
-            <Button icon={<UploadOutlined />}>Upload Files</Button>
+            <Button icon={<AiOutlineUpload className="ai-icon" />}>
+                Upload Files
+            </Button>
         </Upload>
     );
 }

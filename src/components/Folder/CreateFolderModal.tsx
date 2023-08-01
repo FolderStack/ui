@@ -1,21 +1,17 @@
 "use client";
 import { UploadFileItem } from "@/components/FileUpload/UploadFileItem";
-import { useBoolean, useTree } from "@/hooks";
+import { useBoolean, usePageData, useTree } from "@/hooks";
 import { gotoLogin } from "@/utils";
 import { Button, Form, Input, Modal, Space, Upload } from "antd";
 import { useForm } from "antd/es/form/Form";
 import useMessage from "antd/es/message/useMessage";
-import dynamic from "next/dynamic";
 import { useParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-
-const PlusOutlined = dynamic(() => import("@ant-design/icons/PlusOutlined"));
-const UploadOutlined = dynamic(
-    () => import("@ant-design/icons/UploadOutlined")
-);
+import { AiOutlineUpload } from "react-icons/ai";
 
 export function CreateFolderModal() {
     const tree = useTree();
+    const pageData = usePageData();
     const [form] = useForm();
     const [isLoading, loading] = useBoolean(false);
     const [isOpen, open] = useBoolean(false);
@@ -59,6 +55,7 @@ export function CreateFolderModal() {
             .then((res) => {
                 if (res.ok) {
                     tree.reload();
+                    pageData.reload();
                     messageApi.success("Created folder");
                     onClose();
                 } else if (res.status === 401) {
@@ -138,7 +135,11 @@ export function CreateFolderModal() {
                                         return false;
                                     }}
                                 >
-                                    <Button icon={<UploadOutlined />}>
+                                    <Button
+                                        icon={
+                                            <AiOutlineUpload className="ai-icon" />
+                                        }
+                                    >
                                         Upload
                                     </Button>
                                 </Upload>

@@ -1,46 +1,42 @@
 "use client";
-import { useBoolean, useMenu, useTree } from "@/hooks";
+import { useBoolean, usePageData, useSelection } from "@/hooks";
 import { gotoLogin } from "@/utils";
 import { Button, Modal } from "antd";
 import useMessage from "antd/es/message/useMessage";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 
-export function DeleteFolderModal() {
-    const tree = useTree();
-    const menu = useMenu();
+export function DeleteSelectedModal() {
+    const pageData = usePageData();
+    const { selected } = useSelection();
+
     const [isLoading, loading] = useBoolean(false);
     const [isOpen, open] = useBoolean(false);
     const [messageApi, contextHolder] = useMessage();
-    const router = useRouter();
-
-    const params = useParams();
-    const folderId = params.folderId;
+    const { folderId = "ROOT" } = useParams();
 
     function onClose() {
         open.off();
     }
 
     async function handleSubmit() {
-        if (!folderId) return;
-
         loading.on();
 
-        fetch("/api/folders/" + folderId, {
+        fetch(`/api/folders/${folderId}/files`, {
             method: "DELETE",
+            body: JSON.stringify({
+                ids: selected,
+            }),
         })
             .then((res) => {
                 if (res.ok) {
                     loading.off();
+
+                    setTimeout(() => {
+                        pageData.reload();
+                    }, 350);
+
                     onClose();
-                    const parent = menu.getParent(folderId.toString());
-                    const q = new URL(window.location.href).search;
-                    if (parent) {
-                        router.push(`/folder/${parent}${q}`);
-                    } else {
-                        router.push(`/${q}`);
-                    }
-                    messageApi.success("Deleted folder");
-                    tree.reload();
+                    messageApi.success("Deleted selected files");
                 } else if (res.status === 401) {
                     gotoLogin();
                 } else {
@@ -58,14 +54,14 @@ export function DeleteFolderModal() {
     return (
         <>
             {contextHolder}
-            <Button danger onClick={open.on}>
-                Delete Folder
+            <Button danger onClick={open.on} disabled={!selected.length}>
+                Delete Selected
             </Button>
             <Modal
                 centered
                 open={isOpen}
                 title="Are you sure?"
-                okText="Delete Folder"
+                okText="Delete Selection"
                 okType="danger"
                 onOk={handleSubmit}
                 okButtonProps={{ type: "primary" }}
@@ -73,8 +69,9 @@ export function DeleteFolderModal() {
                 confirmLoading={isLoading}
             >
                 <span>
-                    Deleting the current folder will also delete all subfolders
-                    and files, are you sure you want to proceed?
+                    Deleting the selected files will be not be undoable and
+                    these files will no longer be accessible. Are you sure you
+                    want to continue?
                 </span>
             </Modal>
         </>

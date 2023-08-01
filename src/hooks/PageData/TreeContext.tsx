@@ -18,6 +18,7 @@ interface TreeContext {
     reload(): void;
     updateOrder(items: IdTree[]): void;
     updateItem(id: string, update: any): void;
+    getNameFromId(id?: string): string | null;
 }
 
 const TreeContext = createContext<TreeContext>({
@@ -31,6 +32,9 @@ const TreeContext = createContext<TreeContext>({
     },
     updateItem(id: string, update: any) {
         //
+    },
+    getNameFromId(id: string) {
+        return null;
     },
 });
 
@@ -149,8 +153,16 @@ function TreeProviderComponent({ children }: PropsWithChildren) {
         setTree(roots);
     };
 
+    const getNameFromId = (id: string) => {
+        if (!id) return "Home";
+        const nodes = tree
+            .map((root) => findNode(root, id))
+            .filter((v) => !!v.node);
+        if (nodes[0]) return nodes[0].node?.name ?? null;
+        return null;
+    };
+
     const reload = useCallback(() => {
-        console.log("reload");
         loading.on();
         fetchTree()
             .then((result) => {
@@ -171,7 +183,14 @@ function TreeProviderComponent({ children }: PropsWithChildren) {
 
     return (
         <TreeContext.Provider
-            value={{ tree, isLoading, reload, updateOrder, updateItem }}
+            value={{
+                tree,
+                isLoading,
+                reload,
+                getNameFromId,
+                updateOrder,
+                updateItem,
+            }}
         >
             {children}
         </TreeContext.Provider>

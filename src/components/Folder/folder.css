@@ -1,0 +1,22 @@
+.folder-item {
+    min-width: 280px;
+    max-width: 280px;
+    min-height: 340px;
+    box-shadow: 0px 10px 50px -15px rgba(0,0,0,0.1);
+    border: 1px solid transparent;
+    cursor: pointer;
+}
+
+.folder-item:hover {
+    border: 1px solid;
+}
+
+.folder-item .folder-contents {
+    width: 100%;
+    padding: 16px;
+}
+
+.folder-item .folder-contents > .folder-title {
+    margin-top: 5px;
+    font-size: 14;
+}

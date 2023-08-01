@@ -15,9 +15,7 @@ export function ActionBar() {
     const pageData = usePageData();
     const [messageApi, contextHolder] = useMessage();
 
-    const [name, setName] = useState<string | null>(
-        pageData?.data?.data?.current?.name ?? null
-    );
+    const [name, setName] = useState<string | null>(pageData.name);
 
     function onChange(value: string) {
         if (value.toLowerCase() === name?.toLowerCase?.()) return;
@@ -46,8 +44,8 @@ export function ActionBar() {
     }
 
     useEffect(() => {
-        setName(pageData?.data?.data?.current?.name ?? null);
-    }, [pageData]);
+        setName(pageData.name);
+    }, [pageData.name]);
 
     return (
         <Row align="middle" justify="space-between">

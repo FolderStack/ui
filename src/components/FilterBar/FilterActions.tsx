@@ -1,7 +1,7 @@
 "use client";
 import { useFilter } from "@/hooks";
-import { FilterOutlined } from "@ant-design/icons";
 import { Button, Tooltip } from "antd";
+import { AiOutlineFilter } from "react-icons/ai";
 
 export function FilterActions() {
     const { isVisible, visible } = useFilter();
@@ -11,7 +11,7 @@ export function FilterActions() {
         <Tooltip {...{ title }}>
             <Button
                 type={isVisible ? "primary" : "default"}
-                icon={<FilterOutlined />}
+                icon={<AiOutlineFilter className="ai-icon" />}
                 onClick={visible.toggle}
             />
         </Tooltip>

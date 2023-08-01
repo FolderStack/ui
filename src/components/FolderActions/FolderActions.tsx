@@ -28,5 +28,4 @@ const BarStyle = {
 
 const SubRow = {
     gap: "8px",
-    width: "100%",
 };

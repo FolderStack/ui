@@ -1,25 +1,44 @@
 "use client";
 import { PageData } from "@/types";
-import React, { PropsWithChildren, createContext, useEffect } from "react";
+import React, {
+    PropsWithChildren,
+    createContext,
+    useEffect,
+    useState,
+} from "react";
 import { useOrg } from "../Org";
 import { useFetchPageData } from "../useFetchPageData";
+import { useStableParams } from "../useStableParams";
+import { useTree } from "./TreeContext";
 
 interface PageDataContext {
-    data: PageData;
+    name: string | null;
+    data: PageData | null;
     isLoading: boolean;
+    reload(cursor?: string): void;
 }
 
 export const PageDataContext = createContext<PageDataContext>({
-    data: {},
+    name: null,
+    data: {} as any,
     isLoading: false,
+    reload() {
+        //
+    },
 });
 
 function PageDataProviderComponent({ children }: PropsWithChildren) {
     const org = useOrg();
-    const { data, isLoading } = useFetchPageData();
+    const tree = useTree();
+    const { folderId } = useStableParams();
+    const { data, isLoading, reload } = useFetchPageData();
+    const [name, setName] = useState<string | null>(null);
 
     useEffect(() => {
-        const name = data?.data?.current?.name;
+        setName(tree.getNameFromId(folderId?.toString()));
+    }, [tree, folderId]);
+
+    useEffect(() => {
         if (name) {
             let docName = name;
             if (org.org?.name) {
@@ -29,10 +48,10 @@ function PageDataProviderComponent({ children }: PropsWithChildren) {
                 document.title = docName;
             }
         }
-    }, [data, org]);
+    }, [org, name]);
 
     return (
-        <PageDataContext.Provider value={{ data, isLoading }}>
+        <PageDataContext.Provider value={{ name, data, isLoading, reload }}>
             {children}
         </PageDataContext.Provider>
     );

@@ -1,1 +1,7 @@
-export type PageData = any;
+export type PageData = {
+    data: {
+        current: any;
+        items: any[];
+    };
+    pagination: any;
+};

@@ -1,11 +1,14 @@
 "use client";
+import {
+    UserProvider as Auth0UserProvider,
+    useUser as useAuth0User,
+} from "@auth0/nextjs-auth0/client";
 import { useRouter } from "next/navigation";
 import React, {
     PropsWithChildren,
     createContext,
     useContext,
     useEffect,
-    useMemo,
     useState,
 } from "react";
 
@@ -16,7 +19,7 @@ interface IUser extends Record<string, any> {
 const UserContext = createContext<IUser | null>(null);
 
 function UserProviderComponent({ children }: PropsWithChildren) {
-    const auth0User = useMemo(() => ({ isLoading: false, user: {} }), []); //useAuth0User();
+    const auth0User = useAuth0User();
     const [user, setUser] = useState<IUser | null>(null);
     const router = useRouter();
 
@@ -34,9 +37,9 @@ function UserProviderComponent({ children }: PropsWithChildren) {
 
 function UserProviderComponentWithAuth0({ children }: PropsWithChildren) {
     return (
-        // <Auth0UserProvider>
-        <UserProviderComponent>{children}</UserProviderComponent>
-        // </Auth0UserProvider>
+        <Auth0UserProvider>
+            <UserProviderComponent>{children}</UserProviderComponent>
+        </Auth0UserProvider>
     );
 }
 

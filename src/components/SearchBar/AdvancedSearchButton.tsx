@@ -1,12 +1,8 @@
 "use client";
 import { Button, Tooltip } from "antd";
-import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import { MouseEvent } from "react";
-
-const FunnelPlotOutlined = dynamic(
-    () => import("@ant-design/icons/FunnelPlotOutlined")
-);
+import { AiOutlineFunnelPlot } from "react-icons/ai";
 
 export function AdvancedSearch() {
     const router = useRouter();
@@ -18,7 +14,12 @@ export function AdvancedSearch() {
 
     return (
         <Tooltip title="Go to advanced search">
-            <Button icon={<FunnelPlotOutlined />} onClick={go} type="ghost" />
+            <Button
+                icon={<AiOutlineFunnelPlot />}
+                onClick={go}
+                type="text"
+                className="ai-icon"
+            />
         </Tooltip>
     );
 }

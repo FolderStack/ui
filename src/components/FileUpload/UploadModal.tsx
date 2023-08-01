@@ -3,25 +3,19 @@ import { useBoolean, usePageData, useUpload } from "@/hooks";
 import { gotoLogin } from "@/utils";
 import { Modal } from "antd";
 import axios from "axios";
-import _ from "lodash";
-import { useCallback, useEffect, useMemo, useReducer, useState } from "react";
+import { throttle } from "lodash";
+import {
+    useCallback,
+    useEffect,
+    useMemo,
+    useReducer,
+    useRef,
+    useState,
+} from "react";
 import { UploadFileList } from "./UploadFileList";
 
 interface UploadModalProps {
     isOpen: boolean;
-}
-
-async function wait(ms: number) {
-    return new Promise((resolve) => {
-        setTimeout(() => {
-            resolve(null);
-        }, ms);
-    });
-}
-
-async function waitRand(max = 300) {
-    const rand = Math.random() * max;
-    await wait(rand);
 }
 
 function reducer(
@@ -69,43 +63,87 @@ export function UploadModal({ isOpen }: UploadModalProps) {
         });
     }
 
+    const [overallStatus, setOverallStatus] = useState<number>(0);
+    const hasUploaded = useMemo(
+        () => overallStatus >= upload.files.length,
+        [overallStatus, upload]
+    );
+
+    const abortController = useRef<AbortController | null>(null);
+
     const onOk = useCallback(async () => {
-        loading.on();
-
-        for (let i = 0; i < upload.files.length; i++) {
-            const file = upload.files[i];
-            const uploadUrl = urls[file.name];
-            console.log(file, urls);
-
-            const form = new FormData();
-            form.append(file.name, file);
-
-            if (file && uploadUrl) {
-                axios
-                    .put(uploadUrl, form, {
-                        headers: {
-                            "Content-Type": "multipart/form-data",
-                        },
-                        onUploadProgress: _.throttle((evt) => {
-                            const progress = evt.progress ?? 0.5;
-                            update(["progress", i, progress * 100]);
-                        }, 500),
-                    })
-                    .then(() => {
-                        update(["progress", i, 100]);
-                        notifyUpload(file, uploadUrl);
-                    });
-            } else {
-                update(["progress", i, -1]);
-            }
+        if (hasUploaded) {
+            return onCancel();
         }
 
-        loading.off();
+        loading.on();
+        const ctrl = new AbortController();
+        abortController.current = ctrl;
+
+        try {
+            for (let i = 0; i < upload.files.length; i++) {
+                const file = upload.files[i];
+                const uploadUrl = urls[file.name];
+
+                const form = new FormData();
+                form.append(file.name, file);
+
+                if (file && uploadUrl) {
+                    axios
+                        .put(uploadUrl, form, {
+                            // headers: {
+                            //     // "Content-Type": "multipart/form-data",
+                            // },
+                            onUploadProgress: throttle((evt) => {
+                                const progress = evt.progress ?? 0.5;
+                                update(["progress", i, progress * 100]);
+                            }, 500),
+                            signal: ctrl.signal,
+                        })
+                        .then(() => {
+                            update(["progress", i, 100]);
+                            notifyUpload(file, uploadUrl);
+                        })
+                        .finally(() => {
+                            // Increment overall status counter once this request is done.
+                            setOverallStatus((v) => v + 1);
+                        });
+                } else {
+                    update(["progress", i, -1]);
+                }
+            }
+        } catch (err) {
+            //
+        }
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [upload, urls]);
+    }, [upload, urls, hasUploaded]);
+
+    useEffect(() => {
+        if (overallStatus === upload.files.length) {
+            loading.off();
+            abortController.current = null;
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [upload.files, overallStatus]);
 
     function onCancel() {
-        update(["clear"]);
+        try {
+            update(["clear"]);
+            loading.off();
+
+            // If atleast one thing has been uploaded, we'll refresh
+            if (overallStatus > 0) {
+                pageData.reload();
+            }
+
+            if (abortController.current) {
+                abortController.current.abort();
+            }
+
+            setOverallStatus(0);
+        } catch (err) {
+            console.log(err);
+        }
         upload.closeModal();
     }
 
@@ -144,13 +182,32 @@ export function UploadModal({ isOpen }: UploadModalProps) {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [upload.files]);
 
+    const text = useMemo(() => {
+        if (isFetchingUrls) return "Preparing";
+        if (isLoading) {
+            if (hasUploaded) {
+                return "Closing";
+            }
+            return "Uploading";
+        }
+        if (hasUploaded) return "Close";
+        return "Upload";
+    }, [hasUploaded, isFetchingUrls, isLoading]);
+
     return (
         <Modal
             centered
-            okText={isFetchingUrls ? "Preparing" : "Upload"}
+            okText={text}
             cancelText="Cancel"
+            cancelButtonProps={{
+                style: {
+                    visibility: hasUploaded ? "hidden" : "visible",
+                },
+            }}
             confirmLoading={isLoading}
-            okButtonProps={{ disabled: isFetchingUrls || isLoading }}
+            okButtonProps={{
+                disabled: isFetchingUrls || isLoading,
+            }}
             {...{ title, onOk, open: isOpen, onCancel }}
         >
             <UploadFileList progress={progress} />

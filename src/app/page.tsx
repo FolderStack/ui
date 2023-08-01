@@ -10,7 +10,9 @@ export default function HomePage() {
 
     return (
         <DropZone onDrop={upload.openModal}>
-            <Row style={{ gap: "24px", flexWrap: "wrap" }}>
+            <Row
+                style={{ gap: "24px", flexWrap: "wrap", paddingBottom: "32px" }}
+            >
                 {children.map((c: any, idx: number) => {
                     if (c.type === "folder") {
                         return <Folder key={idx} data={c} />;

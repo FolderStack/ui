@@ -14,35 +14,63 @@ export function useFetchPageData() {
     const filter = useFilter();
     const sort = useSort();
     const pagination = usePagination();
-    const [data, setData] = useState<PageData | null>(null);
+
     const abortController = useRef<AbortController | null>(null);
 
-    const fetchData = useCallback(async (url: string) => {
-        try {
-            const res = await fetch(`/api/${url}`, {
-                signal: abortController.current?.signal,
-            });
-            if (res.ok) {
-                const data = await res.json();
-                setData(data);
-            } else if (res.status === 401) {
-                gotoLogin();
-            }
-        } catch (err) {
-            //
-        }
+    const [data, setData] = useState<PageData | null>(null);
 
-        loading.off();
+    const emptyData = () => {
+        setData({
+            pagination: data?.pagination ?? {},
+            data: {
+                current: data?.data.current ?? {},
+                items: [],
+            },
+        });
+    };
+
+    // Fallback to a lower page if the pageSize is increased beyond the total data size
+    // so that we don't remain on a page that no longer exists.
+    useEffect(() => {
+        const totalItems = data?.pagination.totalItems ?? 0;
+        const { page, pageSize } = pagination;
+        if ((page - 1) * pageSize > totalItems && page > 1) {
+            pagination.change(page - 1, pageSize);
+        }
+    }, [pagination, data]);
+
+    const fetchData = useCallback(
+        async (url: string) => {
+            try {
+                const res = await fetch(`/api/${url}`, {
+                    signal: abortController.current?.signal,
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    setData(data);
+                    loading.off();
+                    return;
+                } else if (res.status === 401) {
+                    gotoLogin();
+                }
+            } catch (err) {
+                //
+            }
+            emptyData();
+
+            loading.off();
+        },
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
+        []
+    );
 
     const reload = useCallback(() => {
-        debugger;
         loading.on();
         const url = new URL(window.location.href);
         filter.toSearchParams(url.searchParams);
         sort.toSearchParams(url.searchParams);
         pagination.toSearchParams(url.searchParams);
+
         const qs = url.searchParams.toString();
 
         const folderId = params?.folderId;
@@ -58,12 +86,7 @@ export function useFetchPageData() {
         abortController.current = new AbortController();
 
         if (!params.folderId?.length) {
-            setData({
-                data: {
-                    current: {},
-                    items: [],
-                },
-            });
+            emptyData();
             return;
         }
 
@@ -79,9 +102,5 @@ export function useFetchPageData() {
         };
     }, [reload]);
 
-    useEffect(() => {
-        console.log("Page data", data);
-    }, [data]);
-
-    return { data, isLoading };
+    return { data, isLoading, reload };
 }

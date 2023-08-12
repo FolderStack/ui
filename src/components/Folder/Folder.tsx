@@ -7,9 +7,10 @@ import "./folder.css";
 
 interface FolderProps {
     data: FolderData;
+    table?: boolean;
 }
 
-export function Folder({ data }: FolderProps) {
+export function Folder({ data, table: isTable = false }: FolderProps) {
     const router = useRouter();
     const [, token] = useToken();
 
@@ -20,7 +21,7 @@ export function Folder({ data }: FolderProps) {
 
     return (
         <Row
-            onClick={handleClick}
+            onClick={isTable ? undefined : handleClick}
             className="folder-item"
             style={{
                 background: token.colorBgContainer,
@@ -29,7 +30,11 @@ export function Folder({ data }: FolderProps) {
         >
             <Row className="folder-contents" justify="start">
                 <Row align="top">
-                    <Title level={5} className="folder-title">
+                    <Title
+                        level={5}
+                        className="folder-title"
+                        onClick={isTable ? handleClick : undefined}
+                    >
                         {data.name}
                     </Title>
                 </Row>
@@ -43,6 +48,7 @@ export function Folder({ data }: FolderProps) {
                         borderRadius: "2px",
                         height: "100%",
                         width: "100%",
+                        display: isTable ? "none" : undefined,
                     }}
                 />
             </Row>

@@ -1,9 +1,5 @@
 "use client";
-import {
-    UserProvider as Auth0UserProvider,
-    useUser as useAuth0User,
-} from "@auth0/nextjs-auth0/client";
-import { useRouter } from "next/navigation";
+import Cookies from "js-cookie";
 import React, {
     PropsWithChildren,
     createContext,
@@ -19,31 +15,40 @@ interface IUser extends Record<string, any> {
 const UserContext = createContext<IUser | null>(null);
 
 function UserProviderComponent({ children }: PropsWithChildren) {
-    const auth0User = useAuth0User();
     const [user, setUser] = useState<IUser | null>(null);
-    const router = useRouter();
+
+    const getSessionFromCookies = () => {
+        const userState = Cookies.get("_fsus");
+        if (typeof userState === "string") {
+            const state = window.btoa(userState);
+            try {
+                const userData = JSON.parse(state);
+                setUser(userData);
+                return;
+            } catch (err) {
+                //
+            }
+        }
+        // router.push(`/api/auth/login`);
+    };
 
     useEffect(() => {
-        if (!auth0User.isLoading && !auth0User.user) {
-            router.push(`/api/auth/login`);
-        } else if (auth0User.user) {
-            setUser({ ...auth0User.user, isAdmin: true });
-        }
+        getSessionFromCookies();
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [auth0User, router]);
+    }, []);
 
     return <UserContext.Provider value={user}>{children}</UserContext.Provider>;
 }
 
-function UserProviderComponentWithAuth0({ children }: PropsWithChildren) {
-    return (
-        <Auth0UserProvider>
-            <UserProviderComponent>{children}</UserProviderComponent>
-        </Auth0UserProvider>
-    );
-}
+// function UserProviderComponentWithAuth0({ children }: PropsWithChildren) {
+//     return (
+//         <Auth0UserProvider>
+//             <UserProviderComponent>{children}</UserProviderComponent>
+//         </Auth0UserProvider>
+//     );
+// }
 
-export const UserProvider = React.memo(UserProviderComponentWithAuth0);
+export const UserProvider = React.memo(UserProviderComponent);
 
 export function useUser() {
     return useContext(UserContext);

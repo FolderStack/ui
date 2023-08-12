@@ -13,9 +13,10 @@ import {
 
 interface FileProps {
     data: FileData;
+    table?: boolean;
 }
 
-export function File({ data }: FileProps) {
+export function File({ data, table: isTable = false }: FileProps) {
     const selection = useSelection();
     const [, token] = useToken();
 
@@ -46,18 +47,23 @@ export function File({ data }: FileProps) {
         return "https://via.placeholder.com/200x200.png";
     }, [data.thumbnail]);
 
+    const containerStyle = useMemo(() => {
+        if (isTable) {
+            return {};
+        }
+        return {
+            minWidth: "280px",
+            maxWidth: "280px",
+            minHeight: "340px",
+            background: token.colorBgContainer,
+            borderRadius: token.borderRadius,
+            boxShadow: "0px 10px 50px -15px rgba(0,0,0,0.1)",
+            border: isSelected ? "1px solid" : "1px solid transparent",
+        };
+    }, [isTable, token, isSelected]);
+
     return (
-        <Row
-            style={{
-                minWidth: "280px",
-                maxWidth: "280px",
-                minHeight: "340px",
-                background: token.colorBgContainer,
-                borderRadius: token.borderRadius,
-                boxShadow: "0px 10px 50px -15px rgba(0,0,0,0.1)",
-                border: isSelected ? "1px solid" : "1px solid transparent",
-            }}
-        >
+        <Row style={containerStyle}>
             <Row style={{ padding: "16px" }} align="top" justify="start">
                 <Row
                     align="middle"

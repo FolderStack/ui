@@ -1,4 +1,4 @@
-.folder-item {
+.list-grid .folder-item {
     min-width: 280px;
     max-width: 280px;
     min-height: 340px;
@@ -7,16 +7,38 @@
     cursor: pointer;
 }
 
-.folder-item:hover {
+.list-grid .folder-item:hover {
     border: 1px solid;
 }
 
-.folder-item .folder-contents {
+.list-grid .folder-item .folder-contents {
     width: 100%;
     padding: 16px;
 }
 
-.folder-item .folder-contents > .folder-title {
+.list-grid .folder-item .folder-contents > .folder-title {
     margin-top: 5px;
     font-size: 14;
+}
+
+.list-table .folder-item {
+    max-width: 100%;
+    width: 100%;
+    border: none;
+    cursor: default;
+
+    border-radius: 0px;
+    border-bottom: 1px solid black;
+}
+
+.list-table .folder-item .folder-contents {
+    padding: 12px;
+}
+
+.list-table .folder-item .folder-contents .folder-title {
+    cursor: pointer;
+}
+
+.list-table .folder-item .folder-contents > .folder-title:hover {
+    
 }

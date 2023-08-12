@@ -35,7 +35,6 @@ export function SortableMenuItem(ctx: any) {
         const url = new URL(window.location.href);
         url.searchParams.set("page", "1");
         router.push(`/folder/${ctx.item.id}${url.search}`);
-        pagination.change(1, pagination.pageSize);
 
         menu.handleClick(menuEvent);
     }

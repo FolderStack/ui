@@ -1,8 +1,8 @@
 import { config } from "@/config";
 import {
     AccessTokenError,
+    AccessTokenErrorCode,
     GetAccessTokenResult,
-    getAccessToken,
 } from "@auth0/nextjs-auth0";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -17,7 +17,14 @@ const handler = async (req: NextRequest) => {
 
     let token: GetAccessTokenResult | null = null;
     try {
-        token = await getAccessToken(req, null as any);
+        const tokenCookie = req.cookies.get("_fsat")?.value;
+        if (!tokenCookie) {
+            throw new AccessTokenError(
+                AccessTokenErrorCode.MISSING_ACCESS_TOKEN,
+                "token missing"
+            );
+        }
+        token = { accessToken: tokenCookie };
     } catch (err) {
         if (err instanceof AccessTokenError && !IS_TEST) {
             return new NextResponse(null, { status: 401 });
@@ -32,16 +39,35 @@ const handler = async (req: NextRequest) => {
 
     const headers = req.headers as unknown as Headers;
 
-    if (!IS_TEST && token) {
+    if (IS_TEST) {
+        headers.set(
+            "X-Test-Authorizer",
+            config.api.headers["X-Test-Authorizer"]
+        );
+    } else if (token) {
         headers.set("Authorization", `Bearer ${token.accessToken}`);
     }
 
-    headers.set("X-Test-Authorizer", config.api.headers["X-Test-Authorizer"]);
     headers.delete("content-length");
 
-    console.log(rawBody, !!rawBody);
+    const method = req.method.trim().toUpperCase();
 
-    const method = req.method.toUpperCase();
+    if (["PATCH", "PUT", "DELETE", "POST"].includes(method)) {
+        const cookieCsrf = req.cookies.get("_fscsrf");
+        const reqCsrf = req.headers.get("X-CSRF");
+
+        if (!cookieCsrf || !reqCsrf) {
+            return new NextResponse(
+                JSON.stringify({
+                    error: "invalid_token",
+                    error_description: "CSRF token validation failed.",
+                }),
+                {
+                    status: 403,
+                }
+            );
+        }
+    }
 
     const response = await fetch(apiUrl, {
         method: req.method,
@@ -51,7 +77,7 @@ const handler = async (req: NextRequest) => {
                 : undefined,
         headers,
     });
-
+    console.log(response);
     let result = {};
     try {
         result = await response.json();

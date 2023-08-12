@@ -166,7 +166,7 @@ function TreeProviderComponent({ children }: PropsWithChildren) {
         loading.on();
         fetchTree()
             .then((result) => {
-                if (result.id && result.children) {
+                if (result?.id && result?.children) {
                     updateOrder(result.children);
                 }
             })

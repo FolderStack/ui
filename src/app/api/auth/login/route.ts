@@ -1,7 +1,7 @@
 import { pseudoRandomBytes } from "crypto";
-import { NextApiRequest } from "next";
 import { cookies } from "next/dist/client/components/headers";
 import { ResponseCookie } from "next/dist/compiled/@edge-runtime/cookies";
+import { NextRequest } from "next/server";
 
 function isValidUrl(url?: unknown) {
     try {
@@ -13,7 +13,7 @@ function isValidUrl(url?: unknown) {
 }
 
 export async function GET(
-    req: NextApiRequest,
+    req: NextRequest,
     ctx: { params: Record<string, string> }
 ) {
     let baseUrl: string = (req.headers as any).get("host") ?? req.url;
@@ -65,7 +65,7 @@ export async function GET(
     const cookieOptions: Partial<ResponseCookie> = {
         secure: true,
         sameSite: true,
-        domain: req.headers.host,
+        domain: req.headers.get("host") ?? undefined,
         httpOnly: true,
         expires: expiry,
     };

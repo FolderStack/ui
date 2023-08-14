@@ -45,6 +45,11 @@ function TreeProviderComponent({ children }: PropsWithChildren) {
     async function fetchTree() {
         const res = await fetch(`/api/tree`);
         if (res.ok) {
+            if (res.status === 401) {
+                gotoLogin();
+                return;
+            }
+
             const data = await res.json();
             return data;
         } else if (res.status === 401) {

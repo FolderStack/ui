@@ -4,9 +4,9 @@ import {
     AccessTokenErrorCode,
     GetAccessTokenResult,
 } from "@auth0/nextjs-auth0";
+import * as JWT from "jsonwebtoken";
 import { NextRequest, NextResponse } from "next/server";
-
-const IS_TEST = true;
+import { getCsrfCookie } from "../getCsrfCookie";
 
 const handler = async (req: NextRequest) => {
     const url = new URL(req.url!);
@@ -15,9 +15,9 @@ const handler = async (req: NextRequest) => {
 
     const apiUrl = `${config.api.baseUrl}/${pathname}${query}`;
 
-    let token: GetAccessTokenResult | null = null;
+    let token: Required<GetAccessTokenResult> | null = null;
     try {
-        const tokenCookie = req.cookies.get("_fsat")?.value;
+        const tokenCookie = req.cookies.get("fsat")?.value;
         if (!tokenCookie) {
             throw new AccessTokenError(
                 AccessTokenErrorCode.MISSING_ACCESS_TOKEN,
@@ -26,37 +26,44 @@ const handler = async (req: NextRequest) => {
         }
         token = { accessToken: tokenCookie };
     } catch (err) {
-        if (err instanceof AccessTokenError && !IS_TEST) {
+        if (err instanceof AccessTokenError) {
             return new NextResponse(null, { status: 401 });
         }
     }
 
-    if (token === null && !IS_TEST) {
+    const headers = req.headers as unknown as Headers;
+    if (token === null) {
         return new NextResponse(null, { status: 401 });
+    } else {
+        headers.set("Authorization", `Bearer ${token.accessToken}`);
     }
 
     const rawBody = await (req as any).text();
 
-    const headers = req.headers as unknown as Headers;
-
-    if (IS_TEST) {
-        headers.set(
-            "X-Test-Authorizer",
-            config.api.headers["X-Test-Authorizer"]
-        );
-    } else if (token) {
-        headers.set("Authorization", `Bearer ${token.accessToken}`);
-    }
-
     headers.delete("content-length");
 
     const method = req.method.trim().toUpperCase();
+    const tokenData = JWT.decode(token.accessToken) as JWT.JwtPayload;
+    const realm = tokenData.rlm;
+
+    if (realm !== "folderstack") {
+        return new NextResponse(null, { status: 403 });
+    }
 
     if (["PATCH", "PUT", "DELETE", "POST"].includes(method)) {
-        const cookieCsrf = req.cookies.get("_fscsrf");
-        const reqCsrf = req.headers.get("X-CSRF");
+        const cookieCsrf = req.cookies.get("fscsrf")?.value;
+        const reqCsrf =
+            req.headers.get("X-CSRF") ??
+            req.headers.get("X-Csrf") ??
+            req.headers.get("x-csrf");
 
-        if (!cookieCsrf || !reqCsrf) {
+        const permissions = tokenData.permissions ?? "Nil";
+
+        if (permissions !== "*") {
+            return new NextResponse(null, { status: 403 });
+        }
+
+        if (!cookieCsrf || !reqCsrf || cookieCsrf !== reqCsrf) {
             return new NextResponse(
                 JSON.stringify({
                     error: "invalid_token",
@@ -77,7 +84,7 @@ const handler = async (req: NextRequest) => {
                 : undefined,
         headers,
     });
-    console.log(response);
+
     let result = {};
     try {
         result = await response.json();
@@ -91,7 +98,12 @@ const handler = async (req: NextRequest) => {
         status = 200;
     }
 
-    return NextResponse.json(result, { status });
+    return NextResponse.json(result, {
+        status,
+        headers: {
+            "Set-Cookie": getCsrfCookie(req).toString(),
+        },
+    });
 };
 
 export const GET = handler;

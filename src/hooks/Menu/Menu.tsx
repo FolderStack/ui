@@ -12,6 +12,7 @@ import {
     useState,
 } from "react";
 import { useTree } from "../PageData";
+import { useCsrfToken } from "../useCsrfToken";
 import {
     IMenuContext,
     IdTree,
@@ -48,6 +49,7 @@ export function MenuProvider({ initialOpenState = [], children }: MenuProps) {
     const [messageApi, contextHolder] = useMessage();
     const [items, setItems] = useState<BasicTree[]>(menuTree.tree ?? []);
     const params = useParams();
+    const csrf = useCsrfToken();
 
     useEffect(() => {
         setItems(menuTree.tree ?? []);
@@ -138,6 +140,9 @@ export function MenuProvider({ initialOpenState = [], children }: MenuProps) {
             fetch(`/api/tree`, {
                 method: "PATCH",
                 body: JSON.stringify({ items: reduceItems(items) }),
+                headers: {
+                    "X-CSRF": csrf,
+                },
             })
                 .then((res) => {
                     if (res.ok) {

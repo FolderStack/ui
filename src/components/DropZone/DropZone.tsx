@@ -29,14 +29,12 @@ export function DropZone({
         let dragCounter = 0;
 
         const dragHandler = (e: DragEvent) => {
-            console.log("enter");
             e.preventDefault();
             dragCounter++;
             setIsDragging(true);
         };
 
         const dragLeaveHandler = (e: DragEvent) => {
-            console.log("leave");
             e.preventDefault();
             e.stopPropagation();
             dragCounter--;
@@ -46,7 +44,6 @@ export function DropZone({
         };
 
         const dragDropHandler = (e: DragEvent) => {
-            console.log("drop");
             e.preventDefault();
             e.stopPropagation();
             dragCounter = 0;

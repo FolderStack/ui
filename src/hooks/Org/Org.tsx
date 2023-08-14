@@ -1,3 +1,4 @@
+import { gotoLogin } from "@/utils";
 import React, {
     PropsWithChildren,
     createContext,
@@ -30,6 +31,11 @@ export function OrgProviderComponent({ children }: PropsWithChildren) {
     const getOrg = useCallback(async () => {
         fetch(`/api/org/me`).then((res) => {
             if (res.ok) {
+                if (res.status === 401) {
+                    gotoLogin();
+                    return;
+                }
+
                 res.json().then((body) => {
                     setOrg(body);
                 });

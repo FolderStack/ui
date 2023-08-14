@@ -1,10 +1,11 @@
-import { pseudoRandomBytes } from "crypto";
+import * as JWT from "jsonwebtoken";
 import _ from "lodash";
-import { NextApiRequest } from "next";
 import { cookies } from "next/dist/client/components/headers";
 import { ResponseCookie } from "next/dist/compiled/@edge-runtime/cookies";
+import { NextRequest } from "next/server";
+import { getCsrfCookie } from "../../getCsrfCookie";
 
-export async function GET(req: NextApiRequest) {
+export async function GET(req: NextRequest) {
     const url = new URL(req.url!);
     const host: string = (req.headers as any).get("host") ?? url.host;
 
@@ -39,15 +40,34 @@ export async function GET(req: NextApiRequest) {
     const cookieOptions: Partial<ResponseCookie> = {
         secure: true,
         sameSite: "strict",
-        domain: req.headers.host,
+        domain: req.headers.get("host") ?? "",
         httpOnly: true,
         expires: expiry,
     };
 
+    const userState: Record<string, any> = {};
+
     if (accessToken) {
-        Cookies.set("_fsat", accessToken, cookieOptions);
+        Cookies.set("fsat", accessToken, cookieOptions);
+
+        try {
+            const tokenBody = JWT.decode(accessToken);
+            if (
+                typeof tokenBody === "object" &&
+                tokenBody &&
+                "permissions" in tokenBody
+            ) {
+                if (tokenBody.permissions === "*") {
+                    // FS Roles: 1 = administrator
+                    userState.r = ["1"];
+                }
+            }
+        } catch (err) {
+            //
+        }
+
         if (refreshToken) {
-            Cookies.set("_fsrt", refreshToken.toString(), {
+            Cookies.set("fsrt", refreshToken.toString(), {
                 ...cookieOptions,
                 expires: new Date(new Date().getTime() + 1000 * 60 * 24), // 24 hours
             });
@@ -61,11 +81,14 @@ export async function GET(req: NextApiRequest) {
         });
     }
 
-    const userState = JSON.stringify({ isAdmin: true });
-    Cookies.set("_fsus", Buffer.from(userState).toString("base64"));
+    Cookies.set(
+        "fsus",
+        Buffer.from(JSON.stringify(userState))
+            .toString("base64")
+            .replace(/=+$/, "")
+    );
 
-    const csrf = pseudoRandomBytes(32);
-    Cookies.set("_fscsrf", Buffer.from(csrf).toString("base64"));
+    getCsrfCookie(req, Cookies);
 
     return new Response(null, {
         status: 302,

@@ -1,6 +1,11 @@
 "use client";
-import { NoSSR, SideBar, TopBar } from "@/components";
-import { MenuProvider, OrgProvider } from "@/hooks";
+import { NoSSR, PageLoader, SideBar, TopBar } from "@/components";
+import {
+    MenuProvider,
+    OrgProvider,
+    PageLoadingConsumer,
+    PageLoadingProvider,
+} from "@/hooks";
 import { Layout } from "antd";
 import { Content, Header } from "antd/es/layout/layout";
 import { useToken } from "antd/es/theme/internal";
@@ -13,40 +18,56 @@ export default function RootLayout({ children }: PropsWithChildren) {
     const [, token] = useToken();
 
     return (
-        <OrgProvider>
-            <html lang="en">
-                <Head />
-                <body style={{ margin: 0 }}>
-                    <Providers>
-                        <Layout
-                            style={
-                                {
-                                    background: token.colorBgBase,
-                                    ...LayoutStyle,
-                                } as any
-                            }
-                        >
-                            <MenuProvider>
-                                <SideBar />
-                                <Layout style={{ height: "100vh" }}>
-                                    <Header style={HeaderStyle}>
-                                        <NoSSR>
-                                            <TopBar />
-                                        </NoSSR>
-                                    </Header>
-                                    <Content
-                                        style={ContentStyle}
-                                        className="content"
-                                    >
-                                        {children}
-                                    </Content>
-                                </Layout>
-                            </MenuProvider>
-                        </Layout>
-                    </Providers>
-                </body>
-            </html>
-        </OrgProvider>
+        <PageLoadingProvider>
+            <OrgProvider>
+                <html lang="en">
+                    <Head />
+                    <body style={{ margin: 0 }}>
+                        <Providers>
+                            <Layout
+                                style={
+                                    {
+                                        background: token.colorBgBase,
+                                        ...LayoutStyle,
+                                    } as any
+                                }
+                            >
+                                <MenuProvider>
+                                    <PageLoadingConsumer>
+                                        {({ isLoading }) => {
+                                            if (isLoading)
+                                                return <PageLoader />;
+                                            return (
+                                                <NoSSR>
+                                                    <SideBar />
+                                                    <Layout
+                                                        style={{
+                                                            height: "100vh",
+                                                        }}
+                                                    >
+                                                        <Header
+                                                            style={HeaderStyle}
+                                                        >
+                                                            <TopBar />
+                                                        </Header>
+                                                        <Content
+                                                            style={ContentStyle}
+                                                            className="content"
+                                                        >
+                                                            {children}
+                                                        </Content>
+                                                    </Layout>
+                                                </NoSSR>
+                                            );
+                                        }}
+                                    </PageLoadingConsumer>
+                                </MenuProvider>
+                            </Layout>
+                        </Providers>
+                    </body>
+                </html>
+            </OrgProvider>
+        </PageLoadingProvider>
     );
 }
 

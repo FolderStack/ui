@@ -1,5 +1,5 @@
 "use client";
-import { useBoolean, usePageData, useSelection } from "@/hooks";
+import { useBoolean, useCsrfToken, usePageData, useSelection } from "@/hooks";
 import { gotoLogin } from "@/utils";
 import { Button, Modal } from "antd";
 import useMessage from "antd/es/message/useMessage";
@@ -13,6 +13,7 @@ export function DeleteSelectedModal() {
     const [isOpen, open] = useBoolean(false);
     const [messageApi, contextHolder] = useMessage();
     const { folderId = "ROOT" } = useParams();
+    const csrf = useCsrfToken();
 
     function onClose() {
         open.off();
@@ -26,6 +27,9 @@ export function DeleteSelectedModal() {
             body: JSON.stringify({
                 ids: selected,
             }),
+            headers: {
+                "X-CSRF": csrf,
+            },
         })
             .then((res) => {
                 if (res.ok) {

@@ -6,6 +6,7 @@ import { useFilter } from "./Filter";
 import { usePagination } from "./Pagination";
 import { useSort } from "./Sort";
 import { useBoolean } from "./useBoolean";
+import { useCsrfToken } from "./useCsrfToken";
 import { useStableParams } from "./useStableParams";
 
 export function useFetchPageData() {
@@ -14,6 +15,7 @@ export function useFetchPageData() {
     const filter = useFilter();
     const sort = useSort();
     const pagination = usePagination();
+    const csrf = useCsrfToken();
 
     const abortController = useRef<AbortController | null>(null);
 
@@ -44,6 +46,9 @@ export function useFetchPageData() {
             try {
                 const res = await fetch(`/api/${url}`, {
                     signal: abortController.current?.signal,
+                    headers: {
+                        "X-CSRF": csrf,
+                    },
                 });
                 if (res.ok) {
                     const data = await res.json();

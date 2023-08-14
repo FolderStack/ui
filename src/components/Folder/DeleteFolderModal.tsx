@@ -1,5 +1,5 @@
 "use client";
-import { useBoolean, useMenu, useTree } from "@/hooks";
+import { useBoolean, useCsrfToken, useMenu, useTree } from "@/hooks";
 import { gotoLogin } from "@/utils";
 import { Button, Modal } from "antd";
 import useMessage from "antd/es/message/useMessage";
@@ -12,6 +12,7 @@ export function DeleteFolderModal() {
     const [isOpen, open] = useBoolean(false);
     const [messageApi, contextHolder] = useMessage();
     const router = useRouter();
+    const csrf = useCsrfToken();
 
     const params = useParams();
     const folderId = params.folderId;
@@ -27,6 +28,9 @@ export function DeleteFolderModal() {
 
         fetch("/api/folders/" + folderId, {
             method: "DELETE",
+            headers: {
+                "X-CSRF": csrf,
+            },
         })
             .then((res) => {
                 if (res.ok) {

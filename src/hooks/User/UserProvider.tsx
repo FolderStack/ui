@@ -7,6 +7,7 @@ import React, {
     useEffect,
     useState,
 } from "react";
+import { usePageLoading } from "../PageLoading";
 
 interface IUser extends Record<string, any> {
     isAdmin: boolean;
@@ -16,37 +17,36 @@ const UserContext = createContext<IUser | null>(null);
 
 function UserProviderComponent({ children }: PropsWithChildren) {
     const [user, setUser] = useState<IUser | null>(null);
+    const { loading } = usePageLoading();
 
     const getSessionFromCookies = () => {
-        const userState = Cookies.get("_fsus");
+        const userState = Cookies.get("fsus");
         if (typeof userState === "string") {
-            const state = window.btoa(userState);
+            const state = Buffer.from(userState, "base64").toString("ascii");
             try {
                 const userData = JSON.parse(state);
-                setUser(userData);
+                const isAdmin = !!userData?.r?.includes?.("1");
+                setUser({ ...userData, isAdmin });
+                loading.off();
                 return;
             } catch (err) {
-                //
+                console.warn(err);
             }
         }
-        // router.push(`/api/auth/login`);
     };
 
     useEffect(() => {
         getSessionFromCookies();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
+        const intervalId = setInterval(getSessionFromCookies, 3500); // Check every 3.5 seconds
+
+        // Cleanup: clear the interval when the component is unmounted
+        return () => {
+            clearInterval(intervalId);
+        };
     }, []);
 
     return <UserContext.Provider value={user}>{children}</UserContext.Provider>;
 }
-
-// function UserProviderComponentWithAuth0({ children }: PropsWithChildren) {
-//     return (
-//         <Auth0UserProvider>
-//             <UserProviderComponent>{children}</UserProviderComponent>
-//         </Auth0UserProvider>
-//     );
-// }
 
 export const UserProvider = React.memo(UserProviderComponent);
 

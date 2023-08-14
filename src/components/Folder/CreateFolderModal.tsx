@@ -1,6 +1,6 @@
 "use client";
 import { UploadFileItem } from "@/components/FileUpload/UploadFileItem";
-import { useBoolean, usePageData, useTree } from "@/hooks";
+import { useBoolean, useCsrfToken, usePageData, useTree } from "@/hooks";
 import { gotoLogin } from "@/utils";
 import { Button, Form, Input, Modal, Space, Upload } from "antd";
 import { useForm } from "antd/es/form/Form";
@@ -18,6 +18,7 @@ export function CreateFolderModal() {
     const [image, setImage] = useState<File>();
     const [uploadProgress, setProgress] = useState<number>();
     const [messageApi, contextHolder] = useMessage();
+    const csrf = useCsrfToken();
 
     const folderNameRef = useRef<HTMLInputElement>(null);
 
@@ -50,6 +51,7 @@ export function CreateFolderModal() {
             }),
             headers: {
                 "Content-Type": "application/json",
+                "X-CSRF": csrf,
             },
         })
             .then((res) => {
@@ -86,8 +88,8 @@ export function CreateFolderModal() {
                 <Modal
                     centered
                     open={true}
-                    title="Create a new folder"
-                    okText="Create Folder"
+                    title="Create Folder"
+                    okText="Create"
                     onOk={onOk}
                     onCancel={onClose}
                     confirmLoading={isLoading}

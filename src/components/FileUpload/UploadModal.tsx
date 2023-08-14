@@ -1,5 +1,5 @@
 "use client";
-import { useBoolean, usePageData, useUpload } from "@/hooks";
+import { useBoolean, useCsrfToken, usePageData, useUpload } from "@/hooks";
 import { gotoLogin } from "@/utils";
 import { Modal } from "antd";
 import axios from "axios";
@@ -43,6 +43,7 @@ export function UploadModal({ isOpen }: UploadModalProps) {
     const pageData = usePageData();
     const [isFetchingUrls, fetching] = useBoolean(false);
     const [isLoading, loading] = useBoolean(false);
+    const csrf = useCsrfToken();
 
     const [urls, setUrls] = useState<Record<string, string>>({});
 
@@ -60,6 +61,9 @@ export function UploadModal({ isOpen }: UploadModalProps) {
                 fileSize: file.size,
                 fileType: file.type,
             }),
+            headers: {
+                "X-CSRF": csrf,
+            },
         });
     }
 
@@ -163,6 +167,9 @@ export function UploadModal({ isOpen }: UploadModalProps) {
                 body: JSON.stringify({
                     fileNames: upload.files.map((f) => f.name),
                 }),
+                headers: {
+                    "X-CSRF": csrf,
+                },
             })
                 .then((res) => {
                     if (res.ok) {

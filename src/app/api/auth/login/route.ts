@@ -70,9 +70,9 @@ export async function GET(
         expires: expiry,
     };
 
-    Cookies.set("_fstrn", reqNonce, cookieOptions);
-    Cookies.set("_fsts", state.toString(), cookieOptions);
-    Cookies.set("_fsrt", "code", cookieOptions);
+    Cookies.set("fstrn", reqNonce, cookieOptions);
+    Cookies.set("fsts", state.toString(), cookieOptions);
+    Cookies.set("fsrt", "code", cookieOptions);
 
     res.headers.set("Location", authorize.toString());
     res.headers.set("Set-Cookie", Cookies.toString());

@@ -1,5 +1,5 @@
 "use client";
-import { usePageData, useTree, useUser } from "@/hooks";
+import { useCsrfToken, usePageData, useTree, useUser } from "@/hooks";
 import { gotoLogin } from "@/utils";
 import { Button, Row } from "antd";
 import useMessage from "antd/es/message/useMessage";
@@ -14,13 +14,14 @@ export function ActionBar() {
     const { updateItem } = useTree();
     const pageData = usePageData();
     const [messageApi, contextHolder] = useMessage();
+    const csrf = useCsrfToken();
 
     const [name, setName] = useState<string | null>(pageData.name);
 
     function onChange(value: string) {
         if (value.toLowerCase() === name?.toLowerCase?.()) return;
 
-        const currentFolder = pageData.data.data.current?.id;
+        const currentFolder = pageData?.data?.data.current?.id;
         if (!currentFolder) return;
 
         setName(value);
@@ -28,6 +29,9 @@ export function ActionBar() {
 
         fetch(`/api/folders/${currentFolder}`, {
             method: "PATCH",
+            headers: {
+                "X-CSRF": csrf,
+            },
             body: JSON.stringify({ name: value }),
         })
             .then((res) => {

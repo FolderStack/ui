@@ -6,6 +6,7 @@ export * from "./FilterBar";
 export * from "./Folder";
 export * from "./FolderActions";
 export * from "./NoSSR";
+export * from "./PageLoader";
 export * from "./SearchBar";
 export * from "./SelectActions";
 export * from "./SideBar";

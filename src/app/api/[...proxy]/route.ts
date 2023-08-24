@@ -24,6 +24,7 @@ const handler = async (req: NextRequest) => {
 
     let token: Required<GetAccessTokenResult> | null = null;
     try {
+        console.log(req.cookies);
         const tokenCookie = req.cookies.get("fsat")?.value;
         if (!tokenCookie) {
             throw new AccessTokenError(
@@ -34,7 +35,6 @@ const handler = async (req: NextRequest) => {
         token = { accessToken: tokenCookie };
         console.log(token);
     } catch (err) {
-        console.log(err);
         if (err instanceof AccessTokenError) {
             return new NextResponse(null, { status: 401 });
         }

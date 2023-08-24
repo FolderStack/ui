@@ -1,10 +1,9 @@
 "use client";
 import { config } from "@/config";
-import { useBoolean, useCsrfToken, usePageData, useUpload } from "@/hooks";
+import { useAccessToken, useBoolean, usePageData, useUpload } from "@/hooks";
 import { gotoLogin } from "@/utils";
 import { Modal } from "antd";
 import axios from "axios";
-import Cookies from "js-cookie";
 import { throttle } from "lodash";
 import {
     useCallback,
@@ -45,7 +44,7 @@ export function UploadModal({ isOpen }: UploadModalProps) {
     const pageData = usePageData();
     const [isFetchingUrls, fetching] = useBoolean(false);
     const [isLoading, loading] = useBoolean(false);
-    const csrf = useCsrfToken();
+    const getToken = useAccessToken();
 
     const [urls, setUrls] = useState<Record<string, string>>({});
 
@@ -64,7 +63,7 @@ export function UploadModal({ isOpen }: UploadModalProps) {
                 fileType: file.type,
             }),
             headers: {
-                Authorization: "Bearer " + Cookies.get("fsat") ?? "",
+                Authorization: getToken(),
             },
         });
     }
@@ -170,7 +169,7 @@ export function UploadModal({ isOpen }: UploadModalProps) {
                     fileNames: upload.files.map((f) => f.name),
                 }),
                 headers: {
-                    Authorization: "Bearer " + Cookies.get("fsat") ?? "",
+                    Authorization: getToken(),
                 },
             })
                 .then((res) => {

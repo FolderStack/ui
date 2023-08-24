@@ -1,6 +1,5 @@
 import { config } from "@/config";
 import { gotoLogin } from "@/utils";
-import Cookies from "js-cookie";
 import React, {
     PropsWithChildren,
     createContext,
@@ -9,6 +8,7 @@ import React, {
     useEffect,
     useState,
 } from "react";
+import { useAccessToken } from "../useAccessToken";
 
 interface IOrgContext {
     org?: {
@@ -25,6 +25,7 @@ const OrgContext = createContext<IOrgContext>({
 });
 
 export function OrgProviderComponent({ children }: PropsWithChildren) {
+    const getToken = useAccessToken();
     const [org, setOrg] = useState<IOrgContext>({
         config: {},
         theme: {},
@@ -33,7 +34,7 @@ export function OrgProviderComponent({ children }: PropsWithChildren) {
     const getOrg = useCallback(async () => {
         fetch(`${config.api.baseUrl}/org/me`, {
             headers: {
-                Authorization: "Bearer " + Cookies.get("fsat") ?? "",
+                Authorization: getToken(),
             },
         }).then((res) => {
             if (res.ok) {

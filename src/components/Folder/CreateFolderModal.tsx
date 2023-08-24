@@ -1,12 +1,11 @@
 "use client";
 import { UploadFileItem } from "@/components/FileUpload/UploadFileItem";
 import { config } from "@/config";
-import { useBoolean, useCsrfToken, usePageData, useTree } from "@/hooks";
+import { useAccessToken, useBoolean, usePageData, useTree } from "@/hooks";
 import { gotoLogin } from "@/utils";
 import { Button, Form, Input, Modal, Space, Upload } from "antd";
 import { useForm } from "antd/es/form/Form";
 import useMessage from "antd/es/message/useMessage";
-import Cookies from "js-cookie";
 import { useParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { AiOutlineUpload } from "react-icons/ai";
@@ -20,7 +19,7 @@ export function CreateFolderModal() {
     const [image, setImage] = useState<File>();
     const [uploadProgress, setProgress] = useState<number>();
     const [messageApi, contextHolder] = useMessage();
-    const csrf = useCsrfToken();
+    const getToken = useAccessToken();
 
     const folderNameRef = useRef<HTMLInputElement>(null);
 
@@ -53,7 +52,7 @@ export function CreateFolderModal() {
             }),
             headers: {
                 "Content-Type": "application/json",
-                Authorization: "Bearer " + Cookies.get("fsat") ?? "",
+                Authorization: getToken(),
             },
         })
             .then((res) => {

@@ -10,6 +10,7 @@ export * from "./SearchAndFilterProviders";
 export * from "./Selection";
 export * from "./Sort";
 export * from "./User";
+export * from "./useAccessToken";
 export * from "./useBoolean";
 export * from "./useCsrfToken";
 export * from "./useFetchPageData";

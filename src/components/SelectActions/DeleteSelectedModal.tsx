@@ -1,10 +1,9 @@
 "use client";
 import { config } from "@/config";
-import { useBoolean, useCsrfToken, usePageData, useSelection } from "@/hooks";
+import { useAccessToken, useBoolean, usePageData, useSelection } from "@/hooks";
 import { gotoLogin } from "@/utils";
 import { Button, Modal } from "antd";
 import useMessage from "antd/es/message/useMessage";
-import Cookies from "js-cookie";
 import { useParams } from "next/navigation";
 
 export function DeleteSelectedModal() {
@@ -15,7 +14,7 @@ export function DeleteSelectedModal() {
     const [isOpen, open] = useBoolean(false);
     const [messageApi, contextHolder] = useMessage();
     const { folderId = "ROOT" } = useParams();
-    const csrf = useCsrfToken();
+    const getToken = useAccessToken();
 
     function onClose() {
         open.off();
@@ -30,7 +29,7 @@ export function DeleteSelectedModal() {
                 ids: selected,
             }),
             headers: {
-                Authorization: "Bearer " + Cookies.get("fsat") ?? "",
+                Authorization: getToken(),
             },
         })
             .then((res) => {

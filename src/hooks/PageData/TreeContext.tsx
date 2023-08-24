@@ -2,7 +2,6 @@
 import { config } from "@/config";
 import { BasicTree } from "@/types";
 import { gotoLogin } from "@/utils";
-import Cookies from "js-cookie";
 import React, {
     PropsWithChildren,
     createContext,
@@ -12,6 +11,7 @@ import React, {
     useState,
 } from "react";
 import { IdTree } from "../Menu";
+import { useAccessToken } from "../useAccessToken";
 import { useBoolean } from "../useBoolean";
 
 interface TreeContext {
@@ -43,11 +43,12 @@ const TreeContext = createContext<TreeContext>({
 function TreeProviderComponent({ children }: PropsWithChildren) {
     const [tree, setTree] = useState<BasicTree[]>([]);
     const [isLoading, loading] = useBoolean(false);
+    const getToken = useAccessToken();
 
     async function fetchTree() {
         const res = await fetch(`${config.api.baseUrl}/tree`, {
             headers: {
-                Authorization: "Bearer " + Cookies.get("fsat") ?? "",
+                Authorization: getToken(),
             },
         });
         if (res.ok) {

@@ -2,13 +2,12 @@
 import { config } from "@/config";
 import { PageData } from "@/types";
 import { gotoLogin } from "@/utils";
-import Cookies from "js-cookie";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useFilter } from "./Filter";
 import { usePagination } from "./Pagination";
 import { useSort } from "./Sort";
+import { useAccessToken } from "./useAccessToken";
 import { useBoolean } from "./useBoolean";
-import { useCsrfToken } from "./useCsrfToken";
 import { useStableParams } from "./useStableParams";
 
 export function useFetchPageData() {
@@ -17,7 +16,7 @@ export function useFetchPageData() {
     const filter = useFilter();
     const sort = useSort();
     const pagination = usePagination();
-    const csrf = useCsrfToken();
+    const getToken = useAccessToken();
 
     const abortController = useRef<AbortController | null>(null);
 
@@ -49,7 +48,7 @@ export function useFetchPageData() {
                 const res = await fetch(`${config.api.baseUrl}/${url}`, {
                     signal: abortController.current?.signal,
                     headers: {
-                        Authorization: "Bearer " + Cookies.get("fsat") ?? "",
+                        Authorization: getToken(),
                     },
                 });
                 if (res.ok) {

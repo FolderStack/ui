@@ -1,10 +1,9 @@
 "use client";
 import { config } from "@/config";
-import { useBoolean, useCsrfToken, useMenu, useTree } from "@/hooks";
+import { useAccessToken, useBoolean, useMenu, useTree } from "@/hooks";
 import { gotoLogin } from "@/utils";
 import { Button, Modal } from "antd";
 import useMessage from "antd/es/message/useMessage";
-import Cookies from "js-cookie";
 import { useParams, useRouter } from "next/navigation";
 
 export function DeleteFolderModal() {
@@ -14,7 +13,7 @@ export function DeleteFolderModal() {
     const [isOpen, open] = useBoolean(false);
     const [messageApi, contextHolder] = useMessage();
     const router = useRouter();
-    const csrf = useCsrfToken();
+    const getToken = useAccessToken();
 
     const params = useParams();
     const folderId = params.folderId;
@@ -31,7 +30,7 @@ export function DeleteFolderModal() {
         fetch(`${config.api.baseUrl}/folders/${folderId}`, {
             method: "DELETE",
             headers: {
-                Authorization: "Bearer " + Cookies.get("fsat") ?? "",
+                Authorization: getToken(),
             },
         })
             .then((res) => {

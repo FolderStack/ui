@@ -2,7 +2,6 @@ import { config } from "@/config";
 import { BasicTree } from "@/types";
 import { Tree, gotoLogin } from "@/utils";
 import useMessage from "antd/es/message/useMessage";
-import Cookies from "js-cookie";
 import { useParams } from "next/navigation";
 import {
     PropsWithChildren,
@@ -14,7 +13,7 @@ import {
     useState,
 } from "react";
 import { useTree } from "../PageData";
-import { useCsrfToken } from "../useCsrfToken";
+import { useAccessToken } from "../useAccessToken";
 import {
     IMenuContext,
     IdTree,
@@ -51,7 +50,7 @@ export function MenuProvider({ initialOpenState = [], children }: MenuProps) {
     const [messageApi, contextHolder] = useMessage();
     const [items, setItems] = useState<BasicTree[]>(menuTree.tree ?? []);
     const params = useParams();
-    const csrf = useCsrfToken();
+    const getToken = useAccessToken();
 
     useEffect(() => {
         setItems(menuTree.tree ?? []);
@@ -143,7 +142,7 @@ export function MenuProvider({ initialOpenState = [], children }: MenuProps) {
                 method: "PATCH",
                 body: JSON.stringify({ items: reduceItems(items) }),
                 headers: {
-                    Authorization: "Bearer " + Cookies.get("fsat") ?? "",
+                    Authorization: getToken(),
                 },
             })
                 .then((res) => {

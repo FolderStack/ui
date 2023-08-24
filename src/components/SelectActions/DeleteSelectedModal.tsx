@@ -1,8 +1,10 @@
 "use client";
+import { config } from "@/config";
 import { useBoolean, useCsrfToken, usePageData, useSelection } from "@/hooks";
 import { gotoLogin } from "@/utils";
 import { Button, Modal } from "antd";
 import useMessage from "antd/es/message/useMessage";
+import Cookies from "js-cookie";
 import { useParams } from "next/navigation";
 
 export function DeleteSelectedModal() {
@@ -22,13 +24,14 @@ export function DeleteSelectedModal() {
     async function handleSubmit() {
         loading.on();
 
-        fetch(`/api/folders/${folderId}/files`, {
+        fetch(`${config.api.baseUrl}/folders/${folderId}/files`, {
             method: "DELETE",
             body: JSON.stringify({
                 ids: selected,
             }),
             headers: {
                 "X-CSRF": csrf,
+                Authorization: Cookies.get("fsat") ?? "",
             },
         })
             .then((res) => {

@@ -1,4 +1,6 @@
+import { config } from "@/config";
 import { gotoLogin } from "@/utils";
+import Cookies from "js-cookie";
 import React, {
     PropsWithChildren,
     createContext,
@@ -29,7 +31,11 @@ export function OrgProviderComponent({ children }: PropsWithChildren) {
     });
 
     const getOrg = useCallback(async () => {
-        fetch(`/api/org/me`).then((res) => {
+        fetch(`${config.api.baseUrl}/org/me`, {
+            headers: {
+                Authorization: Cookies.get("fsat") ?? "",
+            },
+        }).then((res) => {
             if (res.ok) {
                 if (res.status === 401) {
                     gotoLogin();

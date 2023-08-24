@@ -1,6 +1,8 @@
 "use client";
+import { config } from "@/config";
 import { PageData } from "@/types";
 import { gotoLogin } from "@/utils";
+import Cookies from "js-cookie";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useFilter } from "./Filter";
 import { usePagination } from "./Pagination";
@@ -44,10 +46,11 @@ export function useFetchPageData() {
     const fetchData = useCallback(
         async (url: string) => {
             try {
-                const res = await fetch(`/api/${url}`, {
+                const res = await fetch(`${config.api.baseUrl}/${url}`, {
                     signal: abortController.current?.signal,
                     headers: {
                         "X-CSRF": csrf,
+                        Authorization: Cookies.get("fsat") ?? "",
                     },
                 });
                 if (res.ok) {

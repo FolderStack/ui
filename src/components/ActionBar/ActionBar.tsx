@@ -1,9 +1,11 @@
 "use client";
+import { config } from "@/config";
 import { useCsrfToken, usePageData, useTree, useUser } from "@/hooks";
 import { gotoLogin } from "@/utils";
 import { Button, Row } from "antd";
 import useMessage from "antd/es/message/useMessage";
 import Title from "antd/es/typography/Title";
+import Cookies from "js-cookie";
 import { useEffect, useState } from "react";
 import { FilterActions } from "../FilterBar/FilterActions";
 import { DisplayTypeActions } from "./DisplayTypeActions";
@@ -27,10 +29,11 @@ export function ActionBar() {
         setName(value);
         updateItem(currentFolder, { name: value });
 
-        fetch(`/api/folders/${currentFolder}`, {
+        fetch(`${config.api.baseUrl}/folders/${currentFolder}`, {
             method: "PATCH",
             headers: {
                 "X-CSRF": csrf,
+                Authorization: Cookies.get("fsat") ?? "",
             },
             body: JSON.stringify({ name: value }),
         })

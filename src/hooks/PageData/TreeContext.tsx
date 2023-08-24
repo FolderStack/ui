@@ -1,6 +1,8 @@
 "use client";
+import { config } from "@/config";
 import { BasicTree } from "@/types";
 import { gotoLogin } from "@/utils";
+import Cookies from "js-cookie";
 import React, {
     PropsWithChildren,
     createContext,
@@ -43,7 +45,11 @@ function TreeProviderComponent({ children }: PropsWithChildren) {
     const [isLoading, loading] = useBoolean(false);
 
     async function fetchTree() {
-        const res = await fetch(`/api/tree`);
+        const res = await fetch(`${config.api.baseUrl}/tree`, {
+            headers: {
+                Authorization: Cookies.get("fsat") ?? "",
+            },
+        });
         if (res.ok) {
             if (res.status === 401) {
                 gotoLogin();

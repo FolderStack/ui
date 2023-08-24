@@ -1,6 +1,8 @@
+import { config } from "@/config";
 import { BasicTree } from "@/types";
 import { Tree, gotoLogin } from "@/utils";
 import useMessage from "antd/es/message/useMessage";
+import Cookies from "js-cookie";
 import { useParams } from "next/navigation";
 import {
     PropsWithChildren,
@@ -137,11 +139,12 @@ export function MenuProvider({ initialOpenState = [], children }: MenuProps) {
 
     const setOrder = useCallback(
         (items: BasicTree[]) => {
-            fetch(`/api/tree`, {
+            fetch(`${config.api.baseUrl}/tree`, {
                 method: "PATCH",
                 body: JSON.stringify({ items: reduceItems(items) }),
                 headers: {
                     "X-CSRF": csrf,
+                    Authorization: Cookies.get("fsat") ?? "",
                 },
             })
                 .then((res) => {

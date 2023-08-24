@@ -1,8 +1,10 @@
 "use client";
+import { config } from "@/config";
 import { useBoolean, useCsrfToken, usePageData, useUpload } from "@/hooks";
 import { gotoLogin } from "@/utils";
 import { Modal } from "antd";
 import axios from "axios";
+import Cookies from "js-cookie";
 import { throttle } from "lodash";
 import {
     useCallback,
@@ -53,7 +55,7 @@ export function UploadModal({ isOpen }: UploadModalProps) {
     const [progress, update] = useReducer(reducer, []);
 
     async function notifyUpload(file: File, url: string) {
-        fetch(`/api/folders/${folderId}/files`, {
+        fetch(`${config.api.baseUrl}/folders/${folderId}/files`, {
             method: "POST",
             body: JSON.stringify({
                 name: file.name,
@@ -63,6 +65,7 @@ export function UploadModal({ isOpen }: UploadModalProps) {
             }),
             headers: {
                 "X-CSRF": csrf,
+                Authorization: Cookies.get("fsat") ?? "",
             },
         });
     }
@@ -162,13 +165,14 @@ export function UploadModal({ isOpen }: UploadModalProps) {
     useEffect(() => {
         if (upload.files.length) {
             fetching.on();
-            fetch("/api/uploads", {
+            fetch(`${config.api.baseUrl}/uploads`, {
                 method: "POST",
                 body: JSON.stringify({
                     fileNames: upload.files.map((f) => f.name),
                 }),
                 headers: {
                     "X-CSRF": csrf,
+                    Authorization: Cookies.get("fsat") ?? "",
                 },
             })
                 .then((res) => {

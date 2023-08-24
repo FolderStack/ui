@@ -4,7 +4,7 @@ import { MenuProvider, OrgProvider, PageLoadingProvider } from "@/hooks";
 import { Layout } from "antd";
 import { Content, Header } from "antd/es/layout/layout";
 import { useToken } from "antd/es/theme/internal";
-import { useRouter } from "next/router";
+import { usePathname } from "next/navigation";
 import { PropsWithChildren } from "react";
 import "./globals.css";
 import { Head } from "./head";
@@ -12,9 +12,9 @@ import { Providers } from "./providers";
 
 export default function RootLayout({ children }: PropsWithChildren) {
     const [, token] = useToken();
-    const router = useRouter();
+    const path = usePathname();
 
-    if (router.pathname.startsWith("/auth/error")) {
+    if (path.startsWith("/auth/error")) {
         return (
             <html lang="en">
                 <Head title="Error" />

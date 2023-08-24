@@ -36,18 +36,20 @@ export function OrgProviderComponent({ children }: PropsWithChildren) {
             headers: {
                 Authorization: getToken(),
             },
-        }).then((res) => {
-            if (res.ok) {
-                if (res.status === 401) {
-                    gotoLogin();
-                    return;
-                }
+        })
+            .then((res) => {
+                if (res.ok) {
+                    if (res.status === 401) {
+                        gotoLogin();
+                        return;
+                    }
 
-                res.json().then((body) => {
-                    setOrg(body);
-                });
-            }
-        });
+                    res.json().then((body) => {
+                        setOrg(body);
+                    });
+                }
+            })
+            .catch(console.log);
     }, []);
 
     useEffect(() => {

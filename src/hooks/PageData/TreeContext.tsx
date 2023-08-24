@@ -182,6 +182,7 @@ function TreeProviderComponent({ children }: PropsWithChildren) {
                     updateOrder(result.children);
                 }
             })
+            .catch(console.log)
             .finally(() => {
                 loading.off();
             });

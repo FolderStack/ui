@@ -64,7 +64,7 @@ export function UploadModal({ isOpen }: UploadModalProps) {
                 fileType: file.type,
             }),
             headers: {
-                Authorization: Cookies.get("fsat") ?? "",
+                Authorization: "Bearer " + Cookies.get("fsat") ?? "",
             },
         });
     }
@@ -170,7 +170,7 @@ export function UploadModal({ isOpen }: UploadModalProps) {
                     fileNames: upload.files.map((f) => f.name),
                 }),
                 headers: {
-                    Authorization: Cookies.get("fsat") ?? "",
+                    Authorization: "Bearer " + Cookies.get("fsat") ?? "",
                 },
             })
                 .then((res) => {

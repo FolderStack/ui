@@ -49,7 +49,7 @@ export function useFetchPageData() {
                 const res = await fetch(`${config.api.baseUrl}/${url}`, {
                     signal: abortController.current?.signal,
                     headers: {
-                        Authorization: Cookies.get("fsat") ?? "",
+                        Authorization: "Bearer " + Cookies.get("fsat") ?? "",
                     },
                 });
                 if (res.ok) {

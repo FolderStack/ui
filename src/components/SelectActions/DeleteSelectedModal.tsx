@@ -30,7 +30,7 @@ export function DeleteSelectedModal() {
                 ids: selected,
             }),
             headers: {
-                Authorization: Cookies.get("fsat") ?? "",
+                Authorization: "Bearer " + Cookies.get("fsat") ?? "",
             },
         })
             .then((res) => {

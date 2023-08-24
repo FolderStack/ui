@@ -47,7 +47,7 @@ function TreeProviderComponent({ children }: PropsWithChildren) {
     async function fetchTree() {
         const res = await fetch(`${config.api.baseUrl}/tree`, {
             headers: {
-                Authorization: Cookies.get("fsat") ?? "",
+                Authorization: "Bearer " + Cookies.get("fsat") ?? "",
             },
         });
         if (res.ok) {

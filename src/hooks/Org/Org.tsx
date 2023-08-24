@@ -33,7 +33,7 @@ export function OrgProviderComponent({ children }: PropsWithChildren) {
     const getOrg = useCallback(async () => {
         fetch(`${config.api.baseUrl}/org/me`, {
             headers: {
-                Authorization: Cookies.get("fsat") ?? "",
+                Authorization: "Bearer " + Cookies.get("fsat") ?? "",
             },
         }).then((res) => {
             if (res.ok) {

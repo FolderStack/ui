@@ -53,7 +53,7 @@ export function CreateFolderModal() {
             }),
             headers: {
                 "Content-Type": "application/json",
-                Authorization: Cookies.get("fsat") ?? "",
+                Authorization: "Bearer " + Cookies.get("fsat") ?? "",
             },
         })
             .then((res) => {

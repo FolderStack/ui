@@ -32,7 +32,7 @@ export function ActionBar() {
         fetch(`${config.api.baseUrl}/folders/${currentFolder}`, {
             method: "PATCH",
             headers: {
-                Authorization: Cookies.get("fsat") ?? "",
+                Authorization: "Bearer " + Cookies.get("fsat") ?? "",
             },
             body: JSON.stringify({ name: value }),
         })

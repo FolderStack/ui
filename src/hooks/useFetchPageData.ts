@@ -58,38 +58,32 @@ export function useFetchPageData() {
         }
     }, [page, pageSize, change, data]);
 
-    const fetchData = useCallback(
-        async (url: string) => {
-            try {
-                const res = await fetch(`${config.api.baseUrl}/${url}`, {
-                    signal: abortController.current?.signal,
-                    headers: getHeaders(),
-                });
+    const fetchData = async (url: string) => {
+        try {
+            const res = await fetch(`${config.api.baseUrl}/${url}`, {
+                signal: abortController.current?.signal,
+                headers: getHeaders(),
+            });
 
-                if (!res.ok && res.status === 401) {
-                    gotoLogin();
-                }
-
-                const data = await res.json();
-                console.debug("useFetchPageData", "fetchData", "setData");
-                setData(data);
-                abortController.current = null;
-            } catch (err: any) {
-                // Distinguish fetch abort error from other errors
-                if (err.name === "AbortError") {
-                    console.log("Fetch aborted");
-                } else {
-                    emptyData();
-                }
-            } finally {
-                loading.off();
+            if (!res.ok && res.status === 401) {
+                gotoLogin();
             }
-        },
-        // The exhaustive-deps warning here is suppressed
-        // but be cautious when doing this in other scenarios
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-        []
-    );
+
+            const data = await res.json();
+            console.debug("useFetchPageData", "fetchData", "setData");
+            setData(data);
+            abortController.current = null;
+        } catch (err: any) {
+            // Distinguish fetch abort error from other errors
+            if (err.name === "AbortError") {
+                console.log("Fetch aborted");
+            } else {
+                emptyData();
+            }
+        } finally {
+            loading.off();
+        }
+    };
 
     const reload = useCallback(() => {
         console.debug("useFetchPageData", "reload");
@@ -130,7 +124,6 @@ export function useFetchPageData() {
         createSortQuery,
         createPaginationQuery,
         params,
-        fetchData,
         emptyData,
     ]);
 

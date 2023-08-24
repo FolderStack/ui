@@ -7,7 +7,7 @@ import {
 import { Agent } from "https";
 import * as JWT from "jsonwebtoken";
 import { NextRequest, NextResponse } from "next/server";
-import fetch from "node-fetch";
+import fetch, { FetchError } from "node-fetch";
 import { getCsrfCookie } from "../getCsrfCookie";
 
 const agent = new Agent({
@@ -47,14 +47,13 @@ const handler = async (req: NextRequest) => {
         headers.set("Authorization", `Bearer ${token.accessToken}`);
     }
 
-    console.log(headers);
-
     const rawBody = await (req as any).text();
 
     headers.delete("content-length");
 
     const method = req.method.trim().toUpperCase();
     const tokenData = JWT.decode(token.accessToken) as JWT.JwtPayload;
+    console.log(tokenData);
     const realm = tokenData.rlm;
 
     // if (realm !== "folderstack") {
@@ -101,9 +100,9 @@ const handler = async (req: NextRequest) => {
     try {
         result = await response.json();
     } catch (err) {
-        console.log(err);
+        console.log((err as FetchError).message);
     }
-    console.log(result);
+
     result = result ?? {};
 
     const status = response.status;

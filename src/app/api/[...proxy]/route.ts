@@ -20,6 +20,7 @@ const handler = async (req: NextRequest) => {
     const query = url.search;
 
     const apiUrl = `${config.api.baseUrl}/${pathname}${query}`;
+    console.log("apiUrl", apiUrl);
 
     let token: Required<GetAccessTokenResult> | null = null;
     try {
@@ -31,7 +32,9 @@ const handler = async (req: NextRequest) => {
             );
         }
         token = { accessToken: tokenCookie };
+        console.log(token);
     } catch (err) {
+        console.log(err);
         if (err instanceof AccessTokenError) {
             return new NextResponse(null, { status: 401 });
         }
@@ -43,6 +46,8 @@ const handler = async (req: NextRequest) => {
     } else {
         headers.set("Authorization", `Bearer ${token.accessToken}`);
     }
+
+    console.log(headers);
 
     const rawBody = await (req as any).text();
 
@@ -98,12 +103,10 @@ const handler = async (req: NextRequest) => {
     } catch (err) {
         console.log(err);
     }
+    console.log(result);
     result = result ?? {};
 
-    let status = response.status;
-    if (response.status.toString().startsWith("20")) {
-        status = 200;
-    }
+    const status = response.status;
 
     return NextResponse.json(result, {
         status,

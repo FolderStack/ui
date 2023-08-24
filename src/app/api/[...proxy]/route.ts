@@ -102,6 +102,7 @@ const handler = async (req: NextRequest) => {
         console.log((err as FetchError).message);
     }
 
+    console.log(result, Object.keys(result));
     result = result ?? {};
 
     const status = response.status;

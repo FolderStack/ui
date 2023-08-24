@@ -2,6 +2,7 @@
 import { config } from "@/config";
 import { BasicTree } from "@/types";
 import { gotoLogin } from "@/utils";
+import { FetchError } from "node-fetch";
 import React, {
     PropsWithChildren,
     createContext,
@@ -182,7 +183,11 @@ function TreeProviderComponent({ children }: PropsWithChildren) {
                     updateOrder(result.children);
                 }
             })
-            .catch(console.log)
+            .catch((err) => {
+                const error = err as FetchError;
+                console.log(error.code);
+                console.log(error.message);
+            })
             .finally(() => {
                 loading.off();
             });

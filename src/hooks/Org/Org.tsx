@@ -49,7 +49,11 @@ export function OrgProviderComponent({ children }: PropsWithChildren) {
                     });
                 }
             })
-            .catch(console.log);
+            .catch((err) => {
+                const error = err as FetchError;
+                console.log(error.code);
+                console.log(error.message);
+            });
     }, []);
 
     useEffect(() => {

@@ -85,6 +85,16 @@ const handler = async (req: NextRequest) => {
         }
     }
 
+    for (const header in headers.keys()) {
+        if (header.startsWith("x-vercel")) {
+            headers.delete(header);
+        }
+
+        if (header.startsWith("sec-")) {
+            headers.delete(header);
+        }
+    }
+
     console.log(headers);
     const response = await fetch(apiUrl, {
         method: req.method,

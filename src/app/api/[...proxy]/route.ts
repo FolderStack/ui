@@ -7,7 +7,7 @@ import {
 import { Agent } from "https";
 import * as JWT from "jsonwebtoken";
 import { NextRequest, NextResponse } from "next/server";
-import fetch, { FetchError } from "node-fetch";
+import fetch, { FetchError, Headers } from "node-fetch";
 import { getCsrfCookie } from "../getCsrfCookie";
 
 const handler = async (req: NextRequest) => {
@@ -39,7 +39,7 @@ const handler = async (req: NextRequest) => {
         }
     }
 
-    const headers = req.headers as unknown as Headers;
+    const headers = new Headers();
     if (token === null) {
         return new NextResponse(null, { status: 401 });
     } else {
@@ -82,16 +82,6 @@ const handler = async (req: NextRequest) => {
                     status: 403,
                 }
             );
-        }
-    }
-
-    for (const header in headers.keys()) {
-        if (header.startsWith("x-vercel")) {
-            headers.delete(header);
-        }
-
-        if (header.startsWith("sec-")) {
-            headers.delete(header);
         }
     }
 

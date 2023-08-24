@@ -1,5 +1,6 @@
 import { config } from "@/config";
 import { gotoLogin } from "@/utils";
+import { FetchError } from "node-fetch";
 import React, {
     PropsWithChildren,
     createContext,

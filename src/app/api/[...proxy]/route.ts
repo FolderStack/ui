@@ -52,9 +52,9 @@ const handler = async (req: NextRequest) => {
     const tokenData = JWT.decode(token.accessToken) as JWT.JwtPayload;
     const realm = tokenData.rlm;
 
-    if (realm !== "folderstack") {
-        return new NextResponse(null, { status: 403 });
-    }
+    // if (realm !== "folderstack") {
+    //     return new NextResponse(null, { status: 403 });
+    // }
 
     if (["PATCH", "PUT", "DELETE", "POST"].includes(method)) {
         const cookieCsrf = req.cookies.get("fscsrf")?.value;

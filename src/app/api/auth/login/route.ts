@@ -12,10 +12,8 @@ function isValidUrl(url?: unknown) {
     }
 }
 
-export async function GET(
-    req: NextRequest,
-    ctx: { params: Record<string, string> }
-) {
+export async function GET(req: NextRequest) {
+    const reqUrl = new URL(req.url);
     let baseUrl: string = (req.headers as any).get("host") ?? req.url;
     if (!baseUrl.startsWith("http")) {
         baseUrl = `https://${baseUrl}`;
@@ -36,7 +34,7 @@ export async function GET(
 
     const reqNonce = pseudoRandomBytes(12).toString("base64");
     const stateNonce = pseudoRandomBytes(12).toString("base64");
-    const returnTo = ctx.params?.["returnTo"] ?? null;
+    const returnTo = reqUrl.searchParams.get("returnTo") ?? null;
 
     const expiry = new Date(new Date().getTime() + 1000 * 60 * 5); // 5 minutes
 

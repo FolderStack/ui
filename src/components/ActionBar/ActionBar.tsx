@@ -1,6 +1,6 @@
 "use client";
 import { config } from "@/config";
-import { useAccessToken, usePageData, useTree, useUser } from "@/hooks";
+import { usePageData, useRequestHeaders, useTree, useUser } from "@/hooks";
 import { gotoLogin } from "@/utils";
 import { Button, Row } from "antd";
 import useMessage from "antd/es/message/useMessage";
@@ -15,7 +15,7 @@ export function ActionBar() {
     const { updateItem } = useTree();
     const pageData = usePageData();
     const [messageApi, contextHolder] = useMessage();
-    const getToken = useAccessToken();
+    const getHeaders = useRequestHeaders();
 
     const [name, setName] = useState<string | null>(pageData.name);
 
@@ -30,9 +30,7 @@ export function ActionBar() {
 
         fetch(`${config.api.baseUrl}/folders/${currentFolder}`, {
             method: "PATCH",
-            headers: {
-                Authorization: getToken(),
-            },
+            headers: getHeaders(),
             body: JSON.stringify({ name: value }),
         })
             .then((res) => {

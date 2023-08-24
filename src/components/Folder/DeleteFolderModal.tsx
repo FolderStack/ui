@@ -1,6 +1,6 @@
 "use client";
 import { config } from "@/config";
-import { useAccessToken, useBoolean, useMenu, useTree } from "@/hooks";
+import { useBoolean, useMenu, useRequestHeaders, useTree } from "@/hooks";
 import { gotoLogin } from "@/utils";
 import { Button, Modal } from "antd";
 import useMessage from "antd/es/message/useMessage";
@@ -13,7 +13,7 @@ export function DeleteFolderModal() {
     const [isOpen, open] = useBoolean(false);
     const [messageApi, contextHolder] = useMessage();
     const router = useRouter();
-    const getToken = useAccessToken();
+    const getHeaders = useRequestHeaders();
 
     const params = useParams();
     const folderId = params.folderId;
@@ -29,9 +29,7 @@ export function DeleteFolderModal() {
 
         fetch(`${config.api.baseUrl}/folders/${folderId}`, {
             method: "DELETE",
-            headers: {
-                Authorization: getToken(),
-            },
+            headers: getHeaders(),
         })
             .then((res) => {
                 if (res.ok) {

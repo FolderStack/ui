@@ -1,7 +1,7 @@
 "use client";
 import { UploadFileItem } from "@/components/FileUpload/UploadFileItem";
 import { config } from "@/config";
-import { useAccessToken, useBoolean, usePageData, useTree } from "@/hooks";
+import { useBoolean, usePageData, useRequestHeaders, useTree } from "@/hooks";
 import { gotoLogin } from "@/utils";
 import { Button, Form, Input, Modal, Space, Upload } from "antd";
 import { useForm } from "antd/es/form/Form";
@@ -19,7 +19,7 @@ export function CreateFolderModal() {
     const [image, setImage] = useState<File>();
     const [uploadProgress, setProgress] = useState<number>();
     const [messageApi, contextHolder] = useMessage();
-    const getToken = useAccessToken();
+    const getHeaders = useRequestHeaders();
 
     const folderNameRef = useRef<HTMLInputElement>(null);
 
@@ -50,10 +50,7 @@ export function CreateFolderModal() {
                 name: folderName,
                 parent: parentFolderId,
             }),
-            headers: {
-                "Content-Type": "application/json",
-                Authorization: getToken(),
-            },
+            headers: getHeaders(),
         })
             .then((res) => {
                 if (res.ok) {

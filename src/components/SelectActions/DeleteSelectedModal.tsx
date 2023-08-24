@@ -1,6 +1,11 @@
 "use client";
 import { config } from "@/config";
-import { useAccessToken, useBoolean, usePageData, useSelection } from "@/hooks";
+import {
+    useBoolean,
+    usePageData,
+    useRequestHeaders,
+    useSelection,
+} from "@/hooks";
 import { gotoLogin } from "@/utils";
 import { Button, Modal } from "antd";
 import useMessage from "antd/es/message/useMessage";
@@ -14,7 +19,7 @@ export function DeleteSelectedModal() {
     const [isOpen, open] = useBoolean(false);
     const [messageApi, contextHolder] = useMessage();
     const { folderId = "ROOT" } = useParams();
-    const getToken = useAccessToken();
+    const getHeaders = useRequestHeaders();
 
     function onClose() {
         open.off();
@@ -28,9 +33,7 @@ export function DeleteSelectedModal() {
             body: JSON.stringify({
                 ids: selected,
             }),
-            headers: {
-                Authorization: getToken(),
-            },
+            headers: getHeaders(),
         })
             .then((res) => {
                 if (res.ok) {

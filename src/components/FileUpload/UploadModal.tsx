@@ -1,6 +1,6 @@
 "use client";
 import { config } from "@/config";
-import { useAccessToken, useBoolean, usePageData, useUpload } from "@/hooks";
+import { useBoolean, usePageData, useRequestHeaders, useUpload } from "@/hooks";
 import { gotoLogin } from "@/utils";
 import { Modal } from "antd";
 import axios from "axios";
@@ -44,7 +44,7 @@ export function UploadModal({ isOpen }: UploadModalProps) {
     const pageData = usePageData();
     const [isFetchingUrls, fetching] = useBoolean(false);
     const [isLoading, loading] = useBoolean(false);
-    const getToken = useAccessToken();
+    const getHeaders = useRequestHeaders();
 
     const [urls, setUrls] = useState<Record<string, string>>({});
 
@@ -62,9 +62,7 @@ export function UploadModal({ isOpen }: UploadModalProps) {
                 fileSize: file.size,
                 fileType: file.type,
             }),
-            headers: {
-                Authorization: getToken(),
-            },
+            headers: getHeaders(),
         });
     }
 
@@ -168,9 +166,7 @@ export function UploadModal({ isOpen }: UploadModalProps) {
                 body: JSON.stringify({
                     fileNames: upload.files.map((f) => f.name),
                 }),
-                headers: {
-                    Authorization: getToken(),
-                },
+                headers: getHeaders(),
             })
                 .then((res) => {
                     if (res.ok) {

@@ -1,7 +1,7 @@
 import { config } from "@/config";
 import { gotoLogin } from "@/utils";
 import { FetchError } from "node-fetch";
-import React, {
+import {
     PropsWithChildren,
     createContext,
     useCallback,
@@ -9,7 +9,7 @@ import React, {
     useEffect,
     useState,
 } from "react";
-import { useAccessToken } from "../useAccessToken";
+import { useRequestHeaders } from "../useRequestHeaders";
 
 interface IOrgContext {
     org?: {
@@ -25,8 +25,8 @@ const OrgContext = createContext<IOrgContext>({
     theme: {},
 });
 
-export function OrgProviderComponent({ children }: PropsWithChildren) {
-    const getToken = useAccessToken();
+export function OrgProvider({ children }: PropsWithChildren) {
+    const getHeaders = useRequestHeaders();
     const [org, setOrg] = useState<IOrgContext>({
         config: {},
         theme: {},
@@ -34,9 +34,7 @@ export function OrgProviderComponent({ children }: PropsWithChildren) {
 
     const getOrg = useCallback(async () => {
         fetch(`${config.api.baseUrl}/org/me`, {
-            headers: {
-                Authorization: getToken(),
-            },
+            headers: getHeaders(),
         })
             .then((res) => {
                 if (res.ok) {
@@ -64,8 +62,6 @@ export function OrgProviderComponent({ children }: PropsWithChildren) {
 
     return <OrgContext.Provider value={org}>{children}</OrgContext.Provider>;
 }
-
-export const OrgProvider = React.memo(OrgProviderComponent);
 
 export function useOrg() {
     return useContext(OrgContext);

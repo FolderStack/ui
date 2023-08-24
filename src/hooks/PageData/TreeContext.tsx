@@ -3,7 +3,7 @@ import { config } from "@/config";
 import { BasicTree } from "@/types";
 import { gotoLogin } from "@/utils";
 import { FetchError } from "node-fetch";
-import React, {
+import {
     PropsWithChildren,
     createContext,
     useCallback,
@@ -12,8 +12,8 @@ import React, {
     useState,
 } from "react";
 import { IdTree } from "../Menu";
-import { useAccessToken } from "../useAccessToken";
 import { useBoolean } from "../useBoolean";
+import { useRequestHeaders } from "../useRequestHeaders";
 
 interface TreeContext {
     tree: BasicTree[];
@@ -41,16 +41,14 @@ const TreeContext = createContext<TreeContext>({
     },
 });
 
-function TreeProviderComponent({ children }: PropsWithChildren) {
+export function TreeProvider({ children }: PropsWithChildren) {
     const [tree, setTree] = useState<BasicTree[]>([]);
     const [isLoading, loading] = useBoolean(false);
-    const getToken = useAccessToken();
+    const getHeaders = useRequestHeaders();
 
     async function fetchTree() {
         const res = await fetch(`${config.api.baseUrl}/tree`, {
-            headers: {
-                Authorization: getToken(),
-            },
+            headers: getHeaders(),
         });
         if (res.ok) {
             if (res.status === 401) {
@@ -214,8 +212,6 @@ function TreeProviderComponent({ children }: PropsWithChildren) {
         </TreeContext.Provider>
     );
 }
-
-export const TreeProvider = React.memo(TreeProviderComponent);
 
 export function useTree() {
     return useContext(TreeContext);

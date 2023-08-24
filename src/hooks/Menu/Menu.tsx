@@ -13,7 +13,7 @@ import {
     useState,
 } from "react";
 import { useTree } from "../PageData";
-import { useAccessToken } from "../useAccessToken";
+import { useRequestHeaders } from "../useRequestHeaders";
 import {
     IMenuContext,
     IdTree,
@@ -50,7 +50,7 @@ export function MenuProvider({ initialOpenState = [], children }: MenuProps) {
     const [messageApi, contextHolder] = useMessage();
     const [items, setItems] = useState<BasicTree[]>(menuTree.tree ?? []);
     const params = useParams();
-    const getToken = useAccessToken();
+    const getHeaders = useRequestHeaders();
 
     useEffect(() => {
         setItems(menuTree.tree ?? []);
@@ -141,9 +141,7 @@ export function MenuProvider({ initialOpenState = [], children }: MenuProps) {
             fetch(`${config.api.baseUrl}/tree`, {
                 method: "PATCH",
                 body: JSON.stringify({ items: reduceItems(items) }),
-                headers: {
-                    Authorization: getToken(),
-                },
+                headers: getHeaders(),
             })
                 .then((res) => {
                     if (res.ok) {

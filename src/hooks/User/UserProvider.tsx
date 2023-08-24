@@ -1,6 +1,7 @@
 "use client";
+import { config } from "@/config";
 import Cookies from "js-cookie";
-import React, {
+import {
     PropsWithChildren,
     createContext,
     useContext,
@@ -15,11 +16,17 @@ interface IUser extends Record<string, any> {
 
 const UserContext = createContext<IUser | null>(null);
 
-function UserProviderComponent({ children }: PropsWithChildren) {
+export function UserProvider({ children }: PropsWithChildren) {
     const [user, setUser] = useState<IUser | null>(null);
     const { loading } = usePageLoading();
 
     const getSessionFromCookies = () => {
+        if (config.env === "dev") {
+            setUser({ isAdmin: true });
+            loading.off();
+            return;
+        }
+
         const userState = Cookies.get("fsus");
         if (typeof userState === "string") {
             const state = Buffer.from(userState, "base64").toString("ascii");
@@ -48,8 +55,6 @@ function UserProviderComponent({ children }: PropsWithChildren) {
 
     return <UserContext.Provider value={user}>{children}</UserContext.Provider>;
 }
-
-export const UserProvider = React.memo(UserProviderComponent);
 
 export function useUser() {
     return useContext(UserContext);

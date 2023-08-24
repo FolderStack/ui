@@ -15,3 +15,4 @@ export * from "./useBoolean";
 export * from "./useCsrfToken";
 export * from "./useFetchPageData";
 export * from "./useLocalStorage";
+export * from "./useRequestHeaders";

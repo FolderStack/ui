@@ -1,10 +1,11 @@
 "use client";
 import { PageData } from "@/types";
-import React, {
+import {
     PropsWithChildren,
     createContext,
+    memo,
     useEffect,
-    useState,
+    useMemo,
 } from "react";
 import { useOrg } from "../Org";
 import { useFetchPageData } from "../useFetchPageData";
@@ -28,33 +29,45 @@ export const PageDataContext = createContext<PageDataContext>({
 });
 
 function PageDataProviderComponent({ children }: PropsWithChildren) {
-    const org = useOrg();
-    const tree = useTree();
+    const { org } = useOrg();
+    const { getNameFromId } = useTree();
     const { folderId } = useStableParams();
     const { data, isLoading, reload } = useFetchPageData();
-    const [name, setName] = useState<string | null>(null);
+
+    const orgName = useMemo(() => org?.name, [org]);
 
     useEffect(() => {
-        setName(tree.getNameFromId(folderId?.toString()));
-    }, [tree, folderId]);
+        console.debug("PageDataProvider", "useEffect #1 (mount)");
+        return () =>
+            console.debug("PageDataProvider", "useEffect #1 (unmount)");
+    }, []);
 
     useEffect(() => {
+        const name = getNameFromId(folderId?.toString());
         if (name) {
+            console.debug("PageDataProvider", "useEffect #2 (update title)");
             let docName = name;
-            if (org.org?.name) {
-                docName += " | " + org.org.name;
+            if (orgName) {
+                docName += " | " + orgName;
             }
             if (typeof document !== "undefined") {
                 document.title = docName;
             }
         }
-    }, [org, name]);
+    }, [orgName, getNameFromId, folderId]);
 
     return (
-        <PageDataContext.Provider value={{ name, data, isLoading, reload }}>
+        <PageDataContext.Provider
+            value={{
+                name: getNameFromId(folderId?.toString()),
+                data,
+                isLoading,
+                reload,
+            }}
+        >
             {children}
         </PageDataContext.Provider>
     );
 }
 
-export const PageDataProvider = React.memo(PageDataProviderComponent);
+export const PageDataProvider = memo(PageDataProviderComponent);

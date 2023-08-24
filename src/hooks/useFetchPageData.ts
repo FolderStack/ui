@@ -2,27 +2,43 @@
 import { config } from "@/config";
 import { PageData } from "@/types";
 import { gotoLogin } from "@/utils";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useFilter } from "./Filter";
 import { usePagination } from "./Pagination";
 import { useSort } from "./Sort";
-import { useAccessToken } from "./useAccessToken";
 import { useBoolean } from "./useBoolean";
+import { useRequestHeaders } from "./useRequestHeaders";
 import { useStableParams } from "./useStableParams";
 
 export function useFetchPageData() {
     const [isLoading, loading] = useBoolean(false);
+    const getHeaders = useRequestHeaders();
     const params = useStableParams();
-    const filter = useFilter();
-    const sort = useSort();
-    const pagination = usePagination();
-    const getToken = useAccessToken();
+    const { toSearchParams: createFilterQuery } = useFilter();
+    const { toSearchParams: createSortQuery } = useSort();
+    const {
+        page,
+        pageSize,
+        change,
+        toSearchParams: createPaginationQuery,
+    } = usePagination();
 
     const abortController = useRef<AbortController | null>(null);
 
     const [data, setData] = useState<PageData | null>(null);
 
-    const emptyData = () => {
+    useEffect(() => {
+        console.debug("useFetchPageData", "useEffect #1 (mount)");
+
+        return () => {
+            console.debug("useFetchPageData", "unmount & abort");
+            // Abort ongoing fetch when the component is unmounted
+            abortController.current?.abort();
+        };
+    }, []);
+
+    const emptyData = useCallback(() => {
+        console.debug("useFetchPageData", "emptyData");
         setData({
             pagination: data?.pagination ?? {},
             data: {
@@ -30,64 +46,75 @@ export function useFetchPageData() {
                 items: [],
             },
         });
-    };
+    }, []);
 
     // Fallback to a lower page if the pageSize is increased beyond the total data size
     // so that we don't remain on a page that no longer exists.
     useEffect(() => {
         const totalItems = data?.pagination.totalItems ?? 0;
-        const { page, pageSize } = pagination;
         if ((page - 1) * pageSize > totalItems && page > 1) {
-            pagination.change(page - 1, pageSize);
+            console.debug("useFetchPageData", "useEffect #2 (set pagination)");
+            change(page - 1, pageSize);
         }
-    }, [pagination, data]);
+    }, [page, pageSize, change, data]);
 
     const fetchData = useCallback(
         async (url: string) => {
             try {
                 const res = await fetch(`${config.api.baseUrl}/${url}`, {
                     signal: abortController.current?.signal,
-                    headers: {
-                        Authorization: getToken(),
-                    },
+                    headers: getHeaders(),
                 });
-                if (res.ok) {
-                    const data = await res.json();
-                    setData(data);
-                    loading.off();
-                    return;
-                } else if (res.status === 401) {
+
+                if (!res.ok && res.status === 401) {
                     gotoLogin();
                 }
-            } catch (err) {
-                //
-            }
-            emptyData();
 
-            loading.off();
+                const data = await res.json();
+                console.debug("useFetchPageData", "fetchData", "setData");
+                setData(data);
+                abortController.current = null;
+            } catch (err: any) {
+                // Distinguish fetch abort error from other errors
+                if (err.name === "AbortError") {
+                    console.log("Fetch aborted");
+                } else {
+                    emptyData();
+                }
+            } finally {
+                loading.off();
+            }
         },
+        // The exhaustive-deps warning here is suppressed
+        // but be cautious when doing this in other scenarios
         // eslint-disable-next-line react-hooks/exhaustive-deps
         []
     );
 
     const reload = useCallback(() => {
+        console.debug("useFetchPageData", "reload");
+        console.log([params, fetchData, emptyData]);
         loading.on();
+
         const url = new URL(window.location.href);
-        filter.toSearchParams(url.searchParams);
-        sort.toSearchParams(url.searchParams);
-        pagination.toSearchParams(url.searchParams);
+        createFilterQuery(url.searchParams);
+        createSortQuery(url.searchParams);
+        createPaginationQuery(url.searchParams);
 
         const qs = url.searchParams.toString();
 
         const folderId = params?.folderId;
-        const fileId = params.fileId;
+        const fileId = params?.fileId;
 
         let requestUrl = `folders/${folderId}`;
         if (fileId) requestUrl += `/files/${fileId}`;
         requestUrl += `?${qs}`;
 
         // Cancel the previous request
-        abortController.current?.abort();
+        if (abortController.current) {
+            console.debug("useFetchPageData", "reload", "abort previous");
+            abortController.current.abort();
+        }
         // Create a new AbortController for the new request
         abortController.current = new AbortController();
 
@@ -98,15 +125,23 @@ export function useFetchPageData() {
 
         fetchData(requestUrl);
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [filter, pagination, sort, params]);
+    }, [
+        createFilterQuery,
+        createSortQuery,
+        createPaginationQuery,
+        params,
+        fetchData,
+        emptyData,
+    ]);
 
     useEffect(() => {
+        console.debug("useFetchPageData", "useEffect #3 (reload)");
+
         reload();
-        return () => {
-            // Abort ongoing fetch when the component is unmounted
-            abortController.current?.abort();
-        };
     }, [reload]);
 
-    return { data, isLoading, reload };
+    return useMemo(
+        () => ({ data, isLoading, reload }),
+        [data, isLoading, reload]
+    );
 }

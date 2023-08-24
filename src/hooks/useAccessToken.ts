@@ -1,3 +1,4 @@
+import { config } from "@/config";
 import Cookies from "js-cookie";
 import { useEffect } from "react";
 
@@ -7,7 +8,7 @@ export function useAccessToken() {
     }
 
     useEffect(() => {
-        if (!getToken()) {
+        if (!getToken() && config.env !== "dev") {
             const currentUrl = window.location.href;
             window.location.href = `/api/auth/login?returnTo=${encodeURI(
                 currentUrl

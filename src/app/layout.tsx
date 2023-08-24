@@ -1,11 +1,6 @@
 "use client";
 import { NoSSR, PageLoader, SideBar, TopBar } from "@/components";
-import {
-    MenuProvider,
-    OrgProvider,
-    PageLoadingConsumer,
-    PageLoadingProvider,
-} from "@/hooks";
+import { MenuProvider, OrgProvider, PageLoadingProvider } from "@/hooks";
 import { Layout } from "antd";
 import { Content, Header } from "antd/es/layout/layout";
 import { useToken } from "antd/es/theme/internal";
@@ -23,6 +18,7 @@ export default function RootLayout({ children }: PropsWithChildren) {
                 <html lang="en">
                     <Head />
                     <body style={{ margin: 0 }}>
+                        <PageLoader />
                         <Providers>
                             <Layout
                                 style={
@@ -33,34 +29,24 @@ export default function RootLayout({ children }: PropsWithChildren) {
                                 }
                             >
                                 <MenuProvider>
-                                    <PageLoadingConsumer>
-                                        {({ isLoading }) => {
-                                            if (isLoading)
-                                                return <PageLoader />;
-                                            return (
-                                                <NoSSR>
-                                                    <SideBar />
-                                                    <Layout
-                                                        style={{
-                                                            height: "100vh",
-                                                        }}
-                                                    >
-                                                        <Header
-                                                            style={HeaderStyle}
-                                                        >
-                                                            <TopBar />
-                                                        </Header>
-                                                        <Content
-                                                            style={ContentStyle}
-                                                            className="content"
-                                                        >
-                                                            {children}
-                                                        </Content>
-                                                    </Layout>
-                                                </NoSSR>
-                                            );
-                                        }}
-                                    </PageLoadingConsumer>
+                                    <NoSSR>
+                                        <SideBar />
+                                        <Layout
+                                            style={{
+                                                height: "100vh",
+                                            }}
+                                        >
+                                            <Header style={HeaderStyle}>
+                                                <TopBar />
+                                            </Header>
+                                            <Content
+                                                style={ContentStyle}
+                                                className="content"
+                                            >
+                                                {children}
+                                            </Content>
+                                        </Layout>
+                                    </NoSSR>
                                 </MenuProvider>
                             </Layout>
                         </Providers>

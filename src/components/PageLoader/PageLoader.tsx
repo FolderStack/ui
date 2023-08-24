@@ -1,6 +1,9 @@
+import { usePageLoading } from "@/hooks";
 import "./loader.css";
 
 export function PageLoader() {
+    const { isLoading } = usePageLoading();
+
     return (
         <div
             style={{
@@ -10,6 +13,7 @@ export function PageLoader() {
                 position: "absolute",
                 top: 0,
                 left: 0,
+                display: isLoading ? "block" : "none",
             }}
         >
             <div

@@ -53,7 +53,6 @@ export function CreateFolderModal() {
             }),
             headers: {
                 "Content-Type": "application/json",
-                "X-CSRF": csrf,
                 Authorization: Cookies.get("fsat") ?? "",
             },
         })

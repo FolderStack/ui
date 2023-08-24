@@ -30,7 +30,6 @@ export function DeleteSelectedModal() {
                 ids: selected,
             }),
             headers: {
-                "X-CSRF": csrf,
                 Authorization: Cookies.get("fsat") ?? "",
             },
         })

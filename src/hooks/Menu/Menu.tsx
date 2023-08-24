@@ -143,7 +143,6 @@ export function MenuProvider({ initialOpenState = [], children }: MenuProps) {
                 method: "PATCH",
                 body: JSON.stringify({ items: reduceItems(items) }),
                 headers: {
-                    "X-CSRF": csrf,
                     Authorization: Cookies.get("fsat") ?? "",
                 },
             })

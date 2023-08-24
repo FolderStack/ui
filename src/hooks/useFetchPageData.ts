@@ -49,7 +49,6 @@ export function useFetchPageData() {
                 const res = await fetch(`${config.api.baseUrl}/${url}`, {
                     signal: abortController.current?.signal,
                     headers: {
-                        "X-CSRF": csrf,
                         Authorization: Cookies.get("fsat") ?? "",
                     },
                 });

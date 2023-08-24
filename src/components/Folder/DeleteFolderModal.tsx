@@ -31,7 +31,6 @@ export function DeleteFolderModal() {
         fetch(`${config.api.baseUrl}/folders/${folderId}`, {
             method: "DELETE",
             headers: {
-                "X-CSRF": csrf,
                 Authorization: Cookies.get("fsat") ?? "",
             },
         })

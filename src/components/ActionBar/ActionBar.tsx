@@ -32,7 +32,6 @@ export function ActionBar() {
         fetch(`${config.api.baseUrl}/folders/${currentFolder}`, {
             method: "PATCH",
             headers: {
-                "X-CSRF": csrf,
                 Authorization: Cookies.get("fsat") ?? "",
             },
             body: JSON.stringify({ name: value }),

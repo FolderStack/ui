@@ -64,7 +64,6 @@ export function UploadModal({ isOpen }: UploadModalProps) {
                 fileType: file.type,
             }),
             headers: {
-                "X-CSRF": csrf,
                 Authorization: Cookies.get("fsat") ?? "",
             },
         });
@@ -171,7 +170,6 @@ export function UploadModal({ isOpen }: UploadModalProps) {
                     fileNames: upload.files.map((f) => f.name),
                 }),
                 headers: {
-                    "X-CSRF": csrf,
                     Authorization: Cookies.get("fsat") ?? "",
                 },
             })

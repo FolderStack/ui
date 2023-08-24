@@ -4,9 +4,15 @@ import {
     AccessTokenErrorCode,
     GetAccessTokenResult,
 } from "@auth0/nextjs-auth0";
+import { Agent } from "https";
 import * as JWT from "jsonwebtoken";
 import { NextRequest, NextResponse } from "next/server";
+import fetch from "node-fetch";
 import { getCsrfCookie } from "../getCsrfCookie";
+
+const agent = new Agent({
+    rejectUnauthorized: false,
+});
 
 const handler = async (req: NextRequest) => {
     const url = new URL(req.url!);
@@ -83,9 +89,10 @@ const handler = async (req: NextRequest) => {
                 ? rawBody
                 : undefined,
         headers,
+        agent,
     });
 
-    let result = {};
+    let result: any = {};
     try {
         result = await response.json();
     } catch (err) {

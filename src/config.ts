@@ -6,9 +6,9 @@ function getApiUrl() {
     switch (env) {
         case "production":
         case "prod":
-            return "https://api.folderstack.io/api/v1/";
+            return "https://api.folderstack.io/v1";
         case "staging":
-            return "https://staging-api.folderstack.io/api/v1";
+            return "https://staging-api.folderstack.io/v1";
         case "development":
         case "dev":
         case "local":

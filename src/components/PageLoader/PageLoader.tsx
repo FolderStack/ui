@@ -9,6 +9,7 @@ export function PageLoader() {
             style={{
                 width: "100vw",
                 height: "100vh",
+                backgroundColor: "white",
                 zIndex: 99999,
                 position: "absolute",
                 top: 0,

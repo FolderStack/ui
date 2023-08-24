@@ -10,11 +10,11 @@ import { NextRequest, NextResponse } from "next/server";
 import fetch, { FetchError } from "node-fetch";
 import { getCsrfCookie } from "../getCsrfCookie";
 
-const agent = new Agent({
-    rejectUnauthorized: false,
-});
-
 const handler = async (req: NextRequest) => {
+    const agent = new Agent({
+        rejectUnauthorized: false,
+    });
+
     const url = new URL(req.url!);
     const pathname = url.pathname.split("/api/")[1];
     const query = url.search;
@@ -85,6 +85,7 @@ const handler = async (req: NextRequest) => {
         }
     }
 
+    console.log(headers);
     const response = await fetch(apiUrl, {
         method: req.method,
         body:

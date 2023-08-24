@@ -48,7 +48,7 @@ export async function GET(req: NextRequest) {
     const userState: Record<string, any> = {};
 
     if (accessToken) {
-        Cookies.set("fsat", accessToken, cookieOptions);
+        Cookies.set("fsat", accessToken, { ...cookieOptions, httpOnly: false });
 
         try {
             const tokenBody = JWT.decode(accessToken);

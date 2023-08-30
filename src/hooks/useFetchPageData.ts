@@ -51,7 +51,7 @@ export function useFetchPageData() {
     // Fallback to a lower page if the pageSize is increased beyond the total data size
     // so that we don't remain on a page that no longer exists.
     useEffect(() => {
-        const totalItems = data?.pagination.totalItems ?? 0;
+        const totalItems = data?.pagination?.totalItems ?? 0;
         if ((page - 1) * pageSize > totalItems && page > 1) {
             console.debug("useFetchPageData", "useEffect #2 (set pagination)");
             change(page - 1, pageSize);

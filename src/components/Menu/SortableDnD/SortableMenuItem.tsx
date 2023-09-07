@@ -32,11 +32,10 @@ export function SortableMenuItem(ctx: any) {
             type: "click",
         });
 
-        menu.handleClick(menuEvent);
-
         const url = new URL(window.location.href);
         url.searchParams.set("page", "1");
         router.push(`/folder/${ctx.item.id}${url.search}`);
+        menu.handleClick(menuEvent);
     }
 
     const handleOpen = useCallback(

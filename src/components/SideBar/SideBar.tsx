@@ -27,9 +27,9 @@ const DragHandle = forwardRef(function DragHandleComponent(
                 icon={<RxWidth style={{ marginTop: 4 }} />}
                 className="resize-button"
                 style={{
-                    position: "absolute",
+                    position: "fixed",
                     bottom: 32,
-                    left: (props as any).width + 16,
+                    left: (props as any).width - 16,
                     borderRadius: 1000,
                 }}
             />

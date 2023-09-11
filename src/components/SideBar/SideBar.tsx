@@ -15,6 +15,7 @@ const DragHandle = forwardRef(function DragHandleComponent(
     props: any,
     ref: any
 ) {
+    console.log("side drag handle", props, ref);
     const dragProps: any = {
         ...props,
     };

@@ -3,12 +3,19 @@ import {
     MenuDropdownToggleEvent,
     MenuItemClickEvent,
     useMenu,
-    usePagination,
 } from "@/hooks";
 import { Row } from "antd";
 import { useParams, useRouter } from "next/navigation";
-import { useCallback, useMemo } from "react";
+import {
+    useCallback,
+    useContext,
+    useEffect,
+    useMemo,
+    useRef,
+    useState,
+} from "react";
 import { AiOutlineMinus, AiOutlinePlus } from "react-icons/ai";
+import { SideBarContext } from "../Menu";
 import { DragHandle } from "./DragHandle";
 
 export interface MenuItemProps extends IMenuItem {
@@ -16,10 +23,12 @@ export interface MenuItemProps extends IMenuItem {
 }
 
 export function SortableMenuItem(ctx: any) {
+    const sideBarContext = useContext(SideBarContext);
     const menu = useMenu();
     const router = useRouter();
     const params = useParams();
-    const pagination = usePagination();
+    const labelRef = useRef<HTMLLabelElement>(null);
+    const containerRef = useRef<HTMLDivElement>(null);
 
     function handleClick(e: React.MouseEvent) {
         e.preventDefault();
@@ -92,11 +101,32 @@ export function SortableMenuItem(ctx: any) {
         );
     }, [ctx, handleOpen]);
 
+    const [width, setWidth] = useState("70%");
+
+    useEffect(() => {
+        if (
+            labelRef.current &&
+            containerRef.current &&
+            sideBarContext.siderRef?.current
+        ) {
+            const labelWidth = labelRef.current.clientWidth;
+            const contWidth = containerRef.current.clientWidth;
+            const siderWidth = sideBarContext.siderRef.current?.clientWidth;
+
+            console.log({ labelWidth, contWidth, siderWidth });
+
+            if (ctx.childCount > 0) {
+            }
+        }
+    }, [labelRef, containerRef, sideBarContext, ctx]);
+
     return (
-        <div onClick={handleClick} className={mainClass}>
+        <div ref={containerRef} onClick={handleClick} className={mainClass}>
             <Row className={labelClass}>
                 <DragHandle />
-                <label>{ctx.item.name}</label>
+                <label style={{ width }} ref={labelRef}>
+                    {ctx.item.name}
+                </label>
                 <div className="dropdown-icon">
                     {ctx.childCount > 0 && dropdownIcon}
                 </div>

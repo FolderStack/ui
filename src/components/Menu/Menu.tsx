@@ -1,10 +1,18 @@
 import { useMenu, useTree } from "@/hooks";
 import { SortableTree } from "dnd-kit-sortable-tree";
-import { useCallback, useMemo } from "react";
+import { RefObject, createContext, useCallback, useMemo } from "react";
 import { SortableTreeItem } from "./SortableDnD/SortableTreeContext";
 import "./menu.css";
 
-export function SideMenu() {
+interface Props {
+    siderRef?: RefObject<HTMLDivElement> | null;
+}
+
+export const SideBarContext = createContext<Props>({
+    siderRef: null,
+});
+
+export function SideMenu({ siderRef }: Props) {
     const menu = useMenu();
     const { tree } = useTree();
 
@@ -43,11 +51,13 @@ export function SideMenu() {
 
     return (
         <div className="menu--root-container">
-            <SortableTree
-                items={items}
-                onItemsChanged={onDragChange}
-                TreeItemComponent={SortableTreeItem as any}
-            />
+            <SideBarContext.Provider value={{ siderRef }}>
+                <SortableTree
+                    items={items}
+                    onItemsChanged={onDragChange}
+                    TreeItemComponent={SortableTreeItem as any}
+                />
+            </SideBarContext.Provider>
         </div>
     );
 }

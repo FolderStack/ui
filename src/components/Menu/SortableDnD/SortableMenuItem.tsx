@@ -123,18 +123,13 @@ export function SortableMenuItem(ctx: any) {
         }
     }, [labelRef, containerRef, sideBarContext, ctx]);
 
+    const maxWidth = sideBarContext?.siderRef?.current?.offsetWidth ?? 0;
+
     return (
         <div ref={containerRef} onClick={handleClick} className={mainClass}>
-            <Row className={labelClass}>
+            <Row className={labelClass} style={{ maxWidth }}>
                 <DragHandle />
-                <label
-                    style={{
-                        width,
-                        maxWidth:
-                            sideBarContext?.siderRef?.current?.offsetWidth ?? 0,
-                    }}
-                    ref={labelRef}
-                >
+                <label style={{ width }} ref={labelRef}>
                     {ctx.item.name}
                 </label>
                 <div className="dropdown-icon">

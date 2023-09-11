@@ -56,9 +56,7 @@ function SideBarComponent() {
             handle={<DragHandle {...{ width }} />}
             width={width}
             axis="x"
-            onResize={(_, { size }) => {
-                setWidth(size.width);
-            }}
+            onResize={(_, { size }) => setWidth(size.width)}
             minConstraints={[initialWidth, -1]}
         >
             <Sider

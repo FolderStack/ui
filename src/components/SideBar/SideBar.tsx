@@ -3,6 +3,7 @@
 import { useOrg } from "@/hooks";
 import { Button, Image, Row } from "antd";
 import Sider from "antd/es/layout/Sider";
+import { useRouter } from "next/navigation";
 import React, { forwardRef, useMemo, useState } from "react";
 import { RxWidth } from "react-icons/rx";
 import { Resizable } from "react-resizable";
@@ -38,8 +39,13 @@ const INITIAL_WIDTH = 320;
 function SideBarComponent() {
     const org = useOrg();
     const [width, setWidth] = useState(INITIAL_WIDTH);
+    const router = useRouter();
 
     const logo = useMemo(() => org?.config?.logo, [org]);
+
+    function goHome() {
+        router.push("/");
+    }
 
     return (
         <Resizable
@@ -65,7 +71,9 @@ function SideBarComponent() {
                         preview={false}
                         style={{
                             padding: "24px 32px 24px 32px",
+                            cursor: "pointer",
                         }}
+                        onClick={goHome}
                     />
                 ) : (
                     <div style={{ height: "24px" }} />

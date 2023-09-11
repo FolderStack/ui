@@ -14,7 +14,7 @@
 }
 
 .menu--root-container > li {
-    padding-right: 24px;
+    padding-right: 16px;
 }
 
 .menu--root-container > .menu--item.open {
@@ -43,17 +43,18 @@
 
 .menu--item.active > .menu--label {
     background: #53575e;
+    padding-left: 6px;
 }
 
 .menu--label label {
     font-size: 16px;
-    padding-left: 28px;
+    padding-left: 2px;
     overflow: hidden; 
     text-overflow: ellipsis; 
     white-space: nowrap;
     word-wrap: normal;
     flex-wrap: nowrap;
-    max-width: 85%;
+    max-width: 70%;
     text-align: left;
     cursor: pointer;
 }
@@ -61,8 +62,9 @@
 .menu--item-drag-handle {
     font-size: 12px;
     position: absolute;
-    left: 8px;
+    left: -16px;
     visibility: hidden;
+    color: #222 !important;
 }
 
 .menu--label:hover {

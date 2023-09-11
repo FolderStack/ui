@@ -88,7 +88,6 @@ export function MenuProvider({ initialOpenState = [], children }: MenuProps) {
             setActive(e.id);
             const path = tree.getPath(active);
             path && setActivePath(path);
-            setTransitioningItem(null);
         }
     }
 
@@ -193,6 +192,7 @@ export function MenuProvider({ initialOpenState = [], children }: MenuProps) {
                 setActivePath(path);
             }
         }
+        setTransitioningItem(null);
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [active, tree]);
 

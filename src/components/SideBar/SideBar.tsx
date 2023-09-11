@@ -11,7 +11,10 @@ import { SideMenu } from "../Menu";
 import { SearchBar } from "../SearchBar";
 import "./sidebar.css";
 
-const DragHandle = forwardRef(function DragHandleComponent(props, ref: any) {
+const DragHandle = forwardRef(function DragHandleComponent(
+    props: any,
+    ref: any
+) {
     const dragProps: any = {
         ...props,
     };
@@ -26,7 +29,7 @@ const DragHandle = forwardRef(function DragHandleComponent(props, ref: any) {
                 style={{
                     position: "absolute",
                     bottom: 32,
-                    right: -16,
+                    left: (props as any).width + 16,
                     borderRadius: 1000,
                 }}
             />
@@ -49,7 +52,7 @@ function SideBarComponent() {
 
     return (
         <Resizable
-            handle={<DragHandle />}
+            handle={<DragHandle {...{ width }} />}
             width={width}
             axis="x"
             onResize={(_, { size }) => {

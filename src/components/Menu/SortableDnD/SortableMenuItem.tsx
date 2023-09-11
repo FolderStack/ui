@@ -101,7 +101,7 @@ export function SortableMenuItem(ctx: any) {
         );
     }, [ctx, handleOpen]);
 
-    const [width, setWidth] = useState("70%");
+    const [labelMaxWidth, setLabelMaxWidth] = useState("70%");
 
     useEffect(() => {
         if (
@@ -116,9 +116,9 @@ export function SortableMenuItem(ctx: any) {
             console.log({ labelWidth, contWidth, siderWidth });
 
             if (ctx.childCount > 0) {
-                setWidth("80%");
+                setLabelMaxWidth("80%");
             } else {
-                setWidth("100%");
+                setLabelMaxWidth("90%");
             }
         }
     }, [labelRef, containerRef, sideBarContext, ctx]);
@@ -129,9 +129,7 @@ export function SortableMenuItem(ctx: any) {
         <div ref={containerRef} onClick={handleClick} className={mainClass}>
             <Row className={labelClass} style={{ maxWidth }}>
                 <DragHandle />
-                <label style={{ width }} ref={labelRef}>
-                    {ctx.item.name}
-                </label>
+                <label ref={labelRef}>{ctx.item.name}</label>
                 <div className="dropdown-icon">
                     {ctx.childCount > 0 && dropdownIcon}
                 </div>

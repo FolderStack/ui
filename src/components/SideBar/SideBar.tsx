@@ -4,7 +4,7 @@ import { useOrg } from "@/hooks";
 import { Button, Image, Row } from "antd";
 import Sider from "antd/es/layout/Sider";
 import { useRouter } from "next/navigation";
-import React, { forwardRef, useMemo, useRef, useState } from "react";
+import React, { forwardRef, useMemo, useState } from "react";
 import { RxWidth } from "react-icons/rx";
 import { Resizable } from "react-resizable";
 import { SideMenu } from "../Menu";
@@ -43,7 +43,6 @@ function SideBarComponent() {
     const [initialWidth] = useState(320);
     const [width, setWidth] = useState(initialWidth);
     const router = useRouter();
-    const siderRef = useRef<HTMLDivElement>(null);
 
     const logo = useMemo(() => org?.config?.logo, [org]);
 
@@ -60,7 +59,6 @@ function SideBarComponent() {
             minConstraints={[initialWidth, -1]}
         >
             <Sider
-                ref={siderRef}
                 style={{ background: "white", position: "relative" }}
                 width={width}
                 className="sider--container"
@@ -84,7 +82,7 @@ function SideBarComponent() {
                 <Row style={{ padding: "0px 28px 12px 28px" }}>
                     <SearchBar />
                 </Row>
-                <SideMenu {...{ siderRef }} />
+                <SideMenu />
             </Sider>
         </Resizable>
     );

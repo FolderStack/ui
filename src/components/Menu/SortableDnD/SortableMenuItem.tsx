@@ -111,11 +111,14 @@ export function SortableMenuItem(ctx: any) {
         ) {
             const labelWidth = labelRef.current.clientWidth;
             const contWidth = containerRef.current.clientWidth;
-            const siderWidth = sideBarContext.siderRef.current?.clientWidth;
+            const siderWidth = sideBarContext.siderRef.current?.offsetWidth;
 
             console.log({ labelWidth, contWidth, siderWidth });
 
             if (ctx.childCount > 0) {
+                setWidth("80%");
+            } else {
+                setWidth("100%");
             }
         }
     }, [labelRef, containerRef, sideBarContext, ctx]);
@@ -124,7 +127,14 @@ export function SortableMenuItem(ctx: any) {
         <div ref={containerRef} onClick={handleClick} className={mainClass}>
             <Row className={labelClass}>
                 <DragHandle />
-                <label style={{ width }} ref={labelRef}>
+                <label
+                    style={{
+                        width,
+                        maxWidth:
+                            sideBarContext?.siderRef?.current?.offsetWidth ?? 0,
+                    }}
+                    ref={labelRef}
+                >
                     {ctx.item.name}
                 </label>
                 <div className="dropdown-icon">

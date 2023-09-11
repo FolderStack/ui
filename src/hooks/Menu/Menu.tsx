@@ -88,6 +88,7 @@ export function MenuProvider({ initialOpenState = [], children }: MenuProps) {
             setActive(e.id);
             const path = tree.getPath(active);
             path && setActivePath(path);
+            setTransitioningItem(null);
         }
     }
 

@@ -41,7 +41,7 @@ const DragHandle = forwardRef(function DragHandleComponent(
 function SideBarComponent() {
     const org = useOrg();
     const [initialWidth] = useState(320);
-    const [width, setWidth] = useState(0);
+    const [width, setWidth] = useState(initialWidth);
     const router = useRouter();
     const siderRef = useRef<HTMLDivElement>(null);
 

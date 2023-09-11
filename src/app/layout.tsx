@@ -42,12 +42,7 @@ export default function RootLayout({ children }: PropsWithChildren) {
                                 <MenuProvider>
                                     <NoSSR>
                                         <SideBar />
-                                        <Layout
-                                            style={{
-                                                height: "100%",
-                                                minHeight: "100vh",
-                                            }}
-                                        >
+                                        <Layout>
                                             <Header style={HeaderStyle}>
                                                 <TopBar />
                                             </Header>

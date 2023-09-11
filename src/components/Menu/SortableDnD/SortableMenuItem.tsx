@@ -6,16 +6,8 @@ import {
 } from "@/hooks";
 import { Row } from "antd";
 import { useParams, useRouter } from "next/navigation";
-import {
-    useCallback,
-    useContext,
-    useEffect,
-    useMemo,
-    useRef,
-    useState,
-} from "react";
+import { useCallback, useMemo } from "react";
 import { AiOutlineMinus, AiOutlinePlus } from "react-icons/ai";
-import { SideBarContext } from "../Menu";
 import { DragHandle } from "./DragHandle";
 
 export interface MenuItemProps extends IMenuItem {
@@ -23,12 +15,9 @@ export interface MenuItemProps extends IMenuItem {
 }
 
 export function SortableMenuItem(ctx: any) {
-    const sideBarContext = useContext(SideBarContext);
     const menu = useMenu();
     const router = useRouter();
     const params = useParams();
-    const labelRef = useRef<HTMLLabelElement>(null);
-    const containerRef = useRef<HTMLDivElement>(null);
 
     function handleClick(e: React.MouseEvent) {
         e.preventDefault();
@@ -101,35 +90,11 @@ export function SortableMenuItem(ctx: any) {
         );
     }, [ctx, handleOpen]);
 
-    const [labelMaxWidth, setLabelMaxWidth] = useState("70%");
-
-    useEffect(() => {
-        if (
-            labelRef.current &&
-            containerRef.current &&
-            sideBarContext.siderRef?.current
-        ) {
-            const labelWidth = labelRef.current.clientWidth;
-            const contWidth = containerRef.current.clientWidth;
-            const siderWidth = sideBarContext.siderRef.current?.offsetWidth;
-
-            console.log({ labelWidth, contWidth, siderWidth });
-
-            if (ctx.childCount > 0) {
-                setLabelMaxWidth("80%");
-            } else {
-                setLabelMaxWidth("90%");
-            }
-        }
-    }, [labelRef, containerRef, sideBarContext, ctx]);
-
-    const maxWidth = sideBarContext?.siderRef?.current?.offsetWidth ?? 0;
-
     return (
-        <div ref={containerRef} onClick={handleClick} className={mainClass}>
-            <Row className={labelClass} style={{ maxWidth }}>
+        <div onClick={handleClick} className={mainClass}>
+            <Row className={labelClass}>
                 <DragHandle />
-                <label ref={labelRef}>{ctx.item.name}</label>
+                <label>{ctx.item.name}</label>
                 <div className="dropdown-icon">
                     {ctx.childCount > 0 && dropdownIcon}
                 </div>

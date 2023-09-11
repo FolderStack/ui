@@ -4,7 +4,7 @@ import { useOrg } from "@/hooks";
 import { Button, Image, Row } from "antd";
 import Sider from "antd/es/layout/Sider";
 import { useRouter } from "next/navigation";
-import React, { forwardRef, useEffect, useMemo, useRef, useState } from "react";
+import React, { forwardRef, useMemo, useRef, useState } from "react";
 import { RxWidth } from "react-icons/rx";
 import { Resizable } from "react-resizable";
 import { SideMenu } from "../Menu";
@@ -40,7 +40,7 @@ const DragHandle = forwardRef(function DragHandleComponent(
 
 function SideBarComponent() {
     const org = useOrg();
-    const [initialWidth, setInitialWidth] = useState(0);
+    const [initialWidth] = useState(320);
     const [width, setWidth] = useState(0);
     const router = useRouter();
     const siderRef = useRef<HTMLDivElement>(null);
@@ -50,15 +50,6 @@ function SideBarComponent() {
     function goHome() {
         router.push("/");
     }
-
-    useEffect(() => {
-        if (siderRef.current) {
-            const clientWidth = siderRef.current.clientWidth;
-            if (!initialWidth && clientWidth) {
-                setInitialWidth(clientWidth);
-            }
-        }
-    }, [siderRef, initialWidth]);
 
     return (
         <Resizable

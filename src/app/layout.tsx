@@ -44,7 +44,7 @@ export default function RootLayout({ children }: PropsWithChildren) {
                                         <SideBar />
                                         <Layout
                                             style={{
-                                                height: "100vh",
+                                                height: "100%",
                                             }}
                                         >
                                             <Header style={HeaderStyle}>

@@ -6,7 +6,7 @@ import {
 } from "@/hooks";
 import { Row } from "antd";
 import { useParams, useRouter } from "next/navigation";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo } from "react";
 import { AiOutlineMinus, AiOutlinePlus } from "react-icons/ai";
 import { DragHandle } from "./DragHandle";
 
@@ -18,13 +18,12 @@ export function SortableMenuItem(ctx: any) {
     const menu = useMenu();
     const router = useRouter();
     const params = useParams();
-    const [isTransitioning, setIsTransitioning] = useState(false);
 
     function handleClick(e: React.MouseEvent) {
         e.preventDefault();
         e.stopPropagation();
 
-        setIsTransitioning(true);
+        menu.setTransitioningItem(ctx.item.id); // Set the transitioning item to the clicked item's ID
 
         const menuEvent = e as MenuItemClickEvent;
         Object.assign(menuEvent, {
@@ -62,13 +61,15 @@ export function SortableMenuItem(ctx: any) {
     const mainClass = useMemo(() => {
         const base = "menu--item";
         const dropdownOpen = ctx.item?.isOpen ? " open" : "";
-        const active = isActive || isTransitioning ? " active" : ""; // Add isTransitioning check here
+        const active =
+            isActive || menu.transitioningItem === ctx.item.id ? " active" : ""; // Update this check
+
         const childActive = menu.activePath.includes(ctx.item.id)
             ? " active-child"
             : "";
 
         return `${base}${dropdownOpen}${active}${childActive}`;
-    }, [isActive, ctx, menu, isTransitioning]);
+    }, [isActive, ctx, menu]);
 
     const labelClass = useMemo(() => {
         const base = "menu--label";

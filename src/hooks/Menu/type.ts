@@ -32,4 +32,6 @@ export interface IMenuContext {
     handleClick(e: MenuItemClickEvent | MenuDropdownToggleEvent): void;
     getParent(folderId: string): string | undefined;
     setOrder(items: IdTree[]): void;
+    transitioningItem: null | string;
+    setTransitioningItem(item: string): void;
 }

@@ -36,6 +36,10 @@ const MenuContext = createContext<IMenuContext>({
     setOrder(items: IdTree[]) {
         //
     },
+    transitioningItem: null,
+    setTransitioningItem() {
+        //
+    },
 });
 
 interface MenuProps extends PropsWithChildren {
@@ -49,6 +53,10 @@ export function MenuProvider({ initialOpenState = [], children }: MenuProps) {
     const [activePath, setActivePath] = useState<string[]>([]);
     const [messageApi, contextHolder] = useMessage();
     const [items, setItems] = useState<BasicTree[]>(menuTree.tree ?? []);
+    const [transitioningItem, setTransitioningItem] = useState<string | null>(
+        null
+    );
+
     const params = useParams();
     const getHeaders = useRequestHeaders();
 
@@ -197,6 +205,8 @@ export function MenuProvider({ initialOpenState = [], children }: MenuProps) {
                 handleClick,
                 getParent,
                 setOrder,
+                transitioningItem,
+                setTransitioningItem,
             }}
         >
             {contextHolder}

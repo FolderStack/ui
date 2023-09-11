@@ -84,7 +84,7 @@ const ContentStyle = {
     marginTop: "24px",
     paddingInline: "50px",
     color: "black",
-    height: "calc(100vh - 210px)",
+    height: "100%",
     paddingBottom: "80px",
     overflow: "scroll",
 };

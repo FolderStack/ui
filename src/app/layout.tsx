@@ -45,6 +45,7 @@ export default function RootLayout({ children }: PropsWithChildren) {
                                         <Layout
                                             style={{
                                                 height: "100%",
+                                                minHeight: "100vh",
                                             }}
                                         >
                                             <Header style={HeaderStyle}>

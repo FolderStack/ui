@@ -1,8 +1,9 @@
 import { FolderData } from "@/types";
-import { Image, Row } from "antd";
+import { Row } from "antd";
 import { useToken } from "antd/es/theme/internal";
 import Title from "antd/es/typography/Title";
 import { useRouter } from "next/navigation";
+import { BiSolidFolder } from "react-icons/bi";
 import "./folder.css";
 
 interface FolderProps {
@@ -38,7 +39,14 @@ export function Folder({ data, table: isTable = false }: FolderProps) {
                         {data.name}
                     </Title>
                 </Row>
-                <Image
+                <BiSolidFolder
+                    style={{
+                        objectFit: "fill",
+                        height: "100%",
+                        width: "100%",
+                    }}
+                />
+                {/* <Image
                     preview={false}
                     src="https://via.placeholder.com/200x200.png"
                     alt="image"
@@ -50,7 +58,7 @@ export function Folder({ data, table: isTable = false }: FolderProps) {
                         width: "100%",
                         display: isTable ? "none" : undefined,
                     }}
-                />
+                /> */}
             </Row>
         </Row>
     );

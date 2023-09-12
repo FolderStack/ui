@@ -94,9 +94,9 @@ export function UploadModal({ isOpen }: UploadModalProps) {
                 if (file && uploadUrl) {
                     axios
                         .put(uploadUrl, form, {
-                            // headers: {
-                            //     // "Content-Type": "multipart/form-data",
-                            // },
+                            headers: {
+                                "Content-Type": file.type,
+                            },
                             onUploadProgress: throttle((evt) => {
                                 const progress = evt.progress ?? 0.5;
                                 update(["progress", i, progress * 100]);

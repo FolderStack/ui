@@ -1,6 +1,6 @@
 import { useSelection } from "@/hooks";
 import { FileData } from "@/types";
-import { Button, Checkbox, Image, Row } from "antd";
+import { Button, Checkbox, Image, Row, Tooltip } from "antd";
 import ButtonGroup from "antd/es/button/button-group";
 import { useToken } from "antd/es/theme/internal";
 import Title from "antd/es/typography/Title";
@@ -129,12 +129,21 @@ export function File({ data, table: isTable = false }: FileProps) {
                 }}
             >
                 <ButtonGroup style={{ alignItems: "center" }}>
-                    <Button
-                        href={data.asset ?? "#"}
-                        target="_blank"
-                        rel="noopener nofollow"
-                        icon={<AiOutlineDownload className="ai-icon" />}
-                    />
+                    {data.asset ? (
+                        <Button
+                            href={data.asset}
+                            target="_blank"
+                            rel="noopener nofollow"
+                            icon={<AiOutlineDownload className="ai-icon" />}
+                        />
+                    ) : (
+                        <Tooltip title="File not currently downloadable">
+                            <Button
+                                disabled
+                                icon={<AiOutlineDownload className="ai-icon" />}
+                            />
+                        </Tooltip>
+                    )}
                     {/* <Button
                         icon={
                             <AiOutlineInfoCircle

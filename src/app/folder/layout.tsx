@@ -1,3 +1,4 @@
+"use client";
 import { DropZone } from "@/components";
 import { usePageData, useUpload } from "@/hooks";
 import { PropsWithChildren } from "react";

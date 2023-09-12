@@ -89,7 +89,7 @@ export function UploadModal({ isOpen }: UploadModalProps) {
                 const uploadUrl = urls[file.name];
 
                 const form = new FormData();
-                form.append(file.name, file);
+                form.append("file", file);
 
                 if (file && uploadUrl) {
                     axios

@@ -121,6 +121,7 @@ export function File({ data, table: isTable = false }: FileProps) {
             </Row>
             <Row
                 justify="end"
+                align="bottom"
                 style={{
                     width: "100%",
                     paddingInline: "8px",

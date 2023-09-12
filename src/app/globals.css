@@ -2,9 +2,9 @@
     transform: translateY(2px);
 }
 
-.ant-btn-group .ant-btn-primary {
-  /* border-left-color: rgba(0, 0, 0, 1) !important;
-  border-right-color: rgba(0, 0, 0, 1) !important; */
+.ant-btn-group >.ant-btn-primary:not(:first-child):not(:disabled),
+.ant-btn-group >.ant-btn-primary:not(:last-child):not(:disabled) {
+  border-inline-end-color: none !important;
 }
 
 .ant-btn {

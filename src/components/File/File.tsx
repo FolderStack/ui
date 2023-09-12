@@ -5,11 +5,7 @@ import ButtonGroup from "antd/es/button/button-group";
 import { useToken } from "antd/es/theme/internal";
 import Title from "antd/es/typography/Title";
 import { useEffect, useMemo, useState } from "react";
-import {
-    AiOutlineDownload,
-    AiOutlineInfoCircle,
-    AiOutlineStar,
-} from "react-icons/ai";
+import { AiOutlineDownload } from "react-icons/ai";
 import { BiSolidFile } from "react-icons/bi";
 
 interface FileProps {
@@ -127,7 +123,7 @@ export function File({ data, table: isTable = false }: FileProps) {
                         rel="noopener nofollow"
                         icon={<AiOutlineDownload className="ai-icon" />}
                     />
-                    <Button
+                    {/* <Button
                         icon={
                             <AiOutlineInfoCircle
                                 style={{ marginTop: "3px" }}
@@ -142,7 +138,7 @@ export function File({ data, table: isTable = false }: FileProps) {
                                 className="ai-icon"
                             />
                         }
-                    />
+                    /> */}
                 </ButtonGroup>
             </Row>
         </Row>

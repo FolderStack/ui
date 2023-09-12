@@ -88,9 +88,6 @@ export function UploadModal({ isOpen }: UploadModalProps) {
                 const file = upload.files[i];
                 const uploadUrl = urls[file.name];
 
-                const form = new FormData();
-                form.append("file", file);
-
                 if (file && uploadUrl) {
                     axios
                         .put(uploadUrl, file, {
@@ -98,9 +95,7 @@ export function UploadModal({ isOpen }: UploadModalProps) {
                                 "Content-Type": file.type,
                             },
                             onUploadProgress: throttle((evt) => {
-                                const progress = Math.round(
-                                    (evt.loaded * 100) / evt.total
-                                );
+                                const progress = evt.progress ?? 0.5;
                                 update(["progress", i, progress * 100]);
                             }, 500),
                             signal: ctrl.signal,

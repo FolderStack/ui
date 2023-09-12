@@ -1,13 +1,10 @@
 "use client";
-import { DropZone, FolderGrid } from "@/components";
+import { FolderGrid } from "@/components";
 import { FolderList } from "@/components/Folder/FolderList";
-import { useDisplayType, usePageData, useUpload } from "@/hooks";
+import { useDisplayType } from "@/hooks";
 import { useMemo } from "react";
 
 export default function FolderPage() {
-    const pageData = usePageData();
-    const upload = useUpload();
-
     const displayType = useDisplayType();
 
     const content = useMemo(() => {
@@ -17,9 +14,5 @@ export default function FolderPage() {
         return <FolderGrid />;
     }, [displayType]);
 
-    return (
-        <DropZone onDrop={upload.openModal}>
-            {pageData.isLoading ? <></> : content}
-        </DropZone>
-    );
+    return content;
 }

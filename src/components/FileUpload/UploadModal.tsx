@@ -98,7 +98,9 @@ export function UploadModal({ isOpen }: UploadModalProps) {
                                 "Content-Type": file.type,
                             },
                             onUploadProgress: throttle((evt) => {
-                                const progress = evt.progress ?? 0.5;
+                                const progress = Math.round(
+                                    (evt.loaded * 100) / evt.total
+                                );
                                 update(["progress", i, progress * 100]);
                             }, 500),
                             signal: ctrl.signal,

@@ -93,7 +93,7 @@ export function UploadModal({ isOpen }: UploadModalProps) {
 
                 if (file && uploadUrl) {
                     axios
-                        .put(uploadUrl, form, {
+                        .put(uploadUrl, file, {
                             headers: {
                                 "Content-Type": file.type,
                             },

@@ -4,7 +4,8 @@
 
 .ant-btn-group >.ant-btn-primary:not(:first-child):not(:disabled),
 .ant-btn-group >.ant-btn-primary:not(:last-child):not(:disabled) {
-  border-inline-end-color: none !important;
+  border-inline-start-color: rgba(0,0,0,0) !important;
+  border-inline-end-color: rgba(0,0,0,0) !important;
 }
 
 .ant-btn {

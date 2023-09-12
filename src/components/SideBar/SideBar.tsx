@@ -1,14 +1,13 @@
 "use client";
 
 import { useOrg } from "@/hooks";
-import { Button, Image, Row } from "antd";
+import { Button, Image } from "antd";
 import Sider from "antd/es/layout/Sider";
 import { useRouter } from "next/navigation";
 import React, { forwardRef, useMemo, useState } from "react";
 import { RxWidth } from "react-icons/rx";
 import { Resizable } from "react-resizable";
 import { SideMenu } from "../Menu";
-import { SearchBar } from "../SearchBar";
 import "./sidebar.css";
 
 const DragHandle = forwardRef(function DragHandleComponent(
@@ -79,9 +78,9 @@ function SideBarComponent() {
                 ) : (
                     <div style={{ height: "24px" }} />
                 )}
-                <Row style={{ padding: "0px 28px 12px 28px" }}>
+                {/* <Row style={{ padding: "0px 28px 12px 28px" }}>
                     <SearchBar />
-                </Row>
+                </Row> */}
                 <SideMenu />
             </Sider>
         </Resizable>

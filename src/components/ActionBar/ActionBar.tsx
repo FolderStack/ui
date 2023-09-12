@@ -2,12 +2,11 @@
 import { config } from "@/config";
 import { usePageData, useRequestHeaders, useTree, useUser } from "@/hooks";
 import { gotoLogin } from "@/utils";
-import { Button, Row } from "antd";
+import { Row } from "antd";
 import useMessage from "antd/es/message/useMessage";
 import Title from "antd/es/typography/Title";
 import { useEffect, useState } from "react";
 import { FilterActions } from "../FilterBar/FilterActions";
-import { DisplayTypeActions } from "./DisplayTypeActions";
 import { SortActions } from "./SortActions";
 
 export function ActionBar() {
@@ -61,10 +60,11 @@ export function ActionBar() {
             </Title>
             <Row align="middle" style={{ marginBottom: "16px", gap: "16px" }}>
                 <SortActions />
-                <Button.Group>
+                <FilterActions />
+                {/* <Button.Group>
                     <FilterActions />
                     <DisplayTypeActions />
-                </Button.Group>
+                </Button.Group> */}
             </Row>
         </Row>
     );

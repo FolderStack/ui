@@ -10,6 +10,7 @@ import {
     AiOutlineInfoCircle,
     AiOutlineStar,
 } from "react-icons/ai";
+import { BiSolidFile } from "react-icons/bi";
 
 interface FileProps {
     data: FileData;
@@ -44,7 +45,7 @@ export function File({ data, table: isTable = false }: FileProps) {
                 .replace(/\/\//gi, "/")
                 .replace("https:/", "https://");
         }
-        return "https://via.placeholder.com/200x200.png";
+        return null;
     }, [data.thumbnail]);
 
     const containerStyle = useMemo(() => {
@@ -90,11 +91,25 @@ export function File({ data, table: isTable = false }: FileProps) {
                     </Row>
                 </Row>
                 <Row style={{ width: "100%", justifyContent: "center" }}>
-                    <Image
-                        src={thumbnail}
-                        alt="image"
-                        style={{ objectFit: "contain", borderRadius: "2px" }}
-                    />
+                    {thumbnail ? (
+                        <Image
+                            src={thumbnail}
+                            alt="image"
+                            style={{
+                                objectFit: "contain",
+                                borderRadius: "2px",
+                            }}
+                        />
+                    ) : (
+                        <BiSolidFile
+                            style={{
+                                color: token.colorIcon,
+                                height: "60%",
+                                width: "100%",
+                                display: isTable ? "none" : undefined,
+                            }}
+                        />
+                    )}
                 </Row>
             </Row>
             <Row justify="end" style={{ width: "100%", paddingInline: "8px" }}>

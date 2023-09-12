@@ -34,7 +34,7 @@ export function Folder({ data, table: isTable = false }: FolderProps) {
                 <Row align="top">
                     <BiSolidFolder
                         style={{
-                            objectFit: "fill",
+                            color: theme.colorIcon,
                             display: isTable ? undefined : "none",
                         }}
                     />

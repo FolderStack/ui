@@ -90,7 +90,14 @@ export function File({ data, table: isTable = false }: FileProps) {
                         </Checkbox>
                     </Row>
                 </Row>
-                <Row style={{ width: "100%", justifyContent: "center" }}>
+                <Row
+                    style={{
+                        width: "100%",
+                        height: "100%",
+                        justifyContent: "center",
+                        alignItems: "center",
+                    }}
+                >
                     {thumbnail ? (
                         <Image
                             src={thumbnail}

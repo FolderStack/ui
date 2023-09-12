@@ -12,6 +12,7 @@ interface FolderProps {
 }
 
 export function Folder({ data, table: isTable = false }: FolderProps) {
+    const [, theme] = useToken();
     const router = useRouter();
     const [, token] = useToken();
 
@@ -31,6 +32,12 @@ export function Folder({ data, table: isTable = false }: FolderProps) {
         >
             <Row className="folder-contents" justify="start">
                 <Row align="top">
+                    <BiSolidFolder
+                        style={{
+                            objectFit: "fill",
+                            display: isTable ? undefined : "none",
+                        }}
+                    />
                     <Title
                         level={5}
                         className="folder-title"
@@ -41,9 +48,10 @@ export function Folder({ data, table: isTable = false }: FolderProps) {
                 </Row>
                 <BiSolidFolder
                     style={{
-                        objectFit: "fill",
-                        height: "100%",
+                        color: theme.colorIcon,
+                        height: "60%",
                         width: "100%",
+                        display: isTable ? "none" : undefined,
                     }}
                 />
                 {/* <Image

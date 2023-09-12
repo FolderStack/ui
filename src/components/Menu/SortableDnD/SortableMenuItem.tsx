@@ -6,7 +6,7 @@ import {
 } from "@/hooks";
 import { Row } from "antd";
 import { useParams, useRouter } from "next/navigation";
-import { useCallback, useMemo } from "react";
+import { useCallback, useMemo, useReducer } from "react";
 import { AiOutlineMinus, AiOutlinePlus } from "react-icons/ai";
 import { DragHandle } from "./DragHandle";
 
@@ -18,6 +18,7 @@ export function SortableMenuItem(ctx: any) {
     const menu = useMenu();
     const router = useRouter();
     const params = useParams();
+    const [, forceRender] = useReducer((x) => x + 1, 0);
 
     function handleClick(e: React.MouseEvent) {
         e.preventDefault();
@@ -33,6 +34,7 @@ export function SortableMenuItem(ctx: any) {
         });
 
         menu.handleClick(menuEvent);
+        forceRender();
 
         const url = new URL(window.location.href);
         url.searchParams.set("page", "1");

@@ -61,7 +61,11 @@ export function File({ data, table: isTable = false }: FileProps) {
 
     return (
         <Row style={containerStyle}>
-            <Row style={{ padding: "16px" }} align="top" justify="start">
+            <Row
+                style={{ padding: "16px", width: "100%" }}
+                align="top"
+                justify="start"
+            >
                 <Row
                     align="middle"
                     justify="space-between"
@@ -115,7 +119,14 @@ export function File({ data, table: isTable = false }: FileProps) {
                     )}
                 </Row>
             </Row>
-            <Row justify="end" style={{ width: "100%", paddingInline: "8px" }}>
+            <Row
+                justify="end"
+                style={{
+                    width: "100%",
+                    paddingInline: "8px",
+                    paddingBottom: "8px",
+                }}
+            >
                 <ButtonGroup style={{ alignItems: "center" }}>
                     <Button
                         href={data.asset ?? "#"}

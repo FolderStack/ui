@@ -1,6 +1,6 @@
 import { PageParamProps } from "@/types/params";
 import mongoose from "mongoose";
-import { FolderModel, IFolder } from "../models/folder";
+import { FolderModel, IFolder } from "../models";
 
 export async function getFolder(
     params: PageParamProps

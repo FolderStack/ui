@@ -1,4 +1,4 @@
-import { BasicFolder, FolderModel } from "../models/folder";
+import { BasicFolder, FolderModel } from "../models";
 
 export function arrayToTree(folders: BasicFolder[], parent?: string) {
     const tree: BasicFolder[] = [];

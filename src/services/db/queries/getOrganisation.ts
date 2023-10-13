@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { IOrganisation, OrganisationModel } from "../models/org";
+import { IOrganisation, OrganisationModel } from "../models";
 
 export async function getOrganisation(
     orgId: string

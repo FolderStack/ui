@@ -2,7 +2,7 @@ import { getFolder } from "@/services/db/queries/getFolder";
 import { getFolderContents } from "@/services/db/queries/getFolderContents";
 import { PageParamProps } from "@/types/params";
 import { getSortFilterAndPaginationParams } from "@/utils/getSortFilterAndPaginationParams";
-import { AdminActions } from "./components/AdminActions";
+import { AdminActions } from "./components/Admin/AdminActions";
 import { FolderPageContent } from "./components/FolderPageContent";
 import { PaginationActions } from "./components/Pagination/PaginationActions";
 import { QueryActions } from "./components/QueryActions";
@@ -28,17 +28,15 @@ export default async function FolderPage(pageParams: PageParamProps) {
         <main className="w-full p-6">
             <section id="query-actions" className="w-full space-y-8">
                 <QueryActions {...pageParams} title={title} />
-                <div className="w-full flex flex-row justify-between">
+                <div className="w-full flex flex-row justify-between items-center">
                     <AdminActions />
-                    {data?.items && (
-                        <PaginationActions
-                            {...{
-                                page,
-                                pageSize,
-                                totalItems: data.pagination.totalItems,
-                            }}
-                        />
-                    )}
+                    <PaginationActions
+                        {...{
+                            page,
+                            pageSize,
+                            totalItems: data?.pagination?.totalItems ?? 0,
+                        }}
+                    />
                 </div>
             </section>
             <div className="h-8" />

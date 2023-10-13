@@ -52,7 +52,7 @@ export function FilterActions({ from, to, fileTypes }: FilterActionProps) {
                 <div className="flex flex-col h-full items-end">
                     <button
                         type="submit"
-                        className="mt-auto h-[42px] rounded bg-secondary-600 px-4 py-1 text-sm font-semibold text-white shadow-sm hover:bg-secondary-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondary-600"
+                        className="mt-auto h-[42px] text-white font-medium inline-flex justify-center rounded border border-transparent bg-primary-300 px-4 py-2 hover:opacity-80 focus:outline-none"
                     >
                         Apply Filters
                     </button>

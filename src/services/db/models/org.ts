@@ -1,17 +1,21 @@
-import mongoose, { Document, Schema } from "mongoose";
+import mongoose, { Schema } from "mongoose";
 
 export interface IOrganisation extends Document {
     name: string;
     id: string;
 }
 
-// Folder Schema
+// Organisation Schema
 const OrganisationSchema = new Schema<IOrganisation>({
     name: { type: String, required: true },
     id: { type: String, required: true },
 });
 
-export const OrganisationModel = mongoose.model<IOrganisation>(
-    "Organisation",
-    OrganisationSchema
-);
+let OrganisationModel: mongoose.Model<IOrganisation>;
+try {
+    OrganisationModel = mongoose.model<IOrganisation>('Organisation')
+} catch (error) {
+    OrganisationModel = mongoose.model<IOrganisation>('Organisation', OrganisationSchema)
+}
+
+export { OrganisationModel }

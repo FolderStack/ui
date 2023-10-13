@@ -1,7 +1,7 @@
 import { PageParamProps } from "@/types/params";
 import { getSortFilterAndPaginationParams } from "@/utils/getSortFilterAndPaginationParams";
 import mongoose from "mongoose";
-import { FolderModel, IFolder } from "../models/folder";
+import { FolderModel, IFolder } from "../models";
 
 export async function getFolderContents(params: PageParamProps): Promise<{
     items: IFolder[];

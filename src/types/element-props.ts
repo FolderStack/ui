@@ -1,0 +1,1 @@
+export type ElementProps<T> = React.DetailedHTMLProps<React.InputHTMLAttributes<T>, T>

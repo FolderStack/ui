@@ -1,45 +1,65 @@
-import md5 from "md5";
-import fs from 'fs';
+import { authOptions } from "@/services/auth";
 import { s3Client } from "@/services/aws/s3";
 import { FileModel } from "@/services/db/models";
+import { mongoConnect } from "@/services/db/mongodb";
+import { PageParamProps } from "@/types/params";
 import { PutObjectCommand } from "@aws-sdk/client-s3";
-import { NextApiRequest, NextApiResponse } from "next";
+import md5 from "md5";
 import { getServerSession } from "next-auth";
-import { formidable } from 'formidable';
-import { authOptions } from "@/services/auth";
+import { NextRequest, NextResponse } from "next/server";
 
-export const POST = async (req: NextApiRequest, res: NextApiResponse) => {
-    const session = await getServerSession(req, res, authOptions);
-    if (!session?.user?.orgId) {
-        return res.status(401).json({ success: false, message: 'Unauthorized' });
+export const POST = async (req: NextRequest, { params }: PageParamProps) => {
+    const session = await getServerSession(authOptions);
+    const userId = session?.user?.id;
+    const orgId = session?.user?.orgId;
+
+    if (!orgId || !userId) {
+        return new NextResponse(
+            JSON.stringify({ success: false, message: "Unauthorized" }),
+            { status: 401 }
+        );
     }
 
-    const { folderId } = req.query;
+    const { folderId } = params;
     if (!folderId) {
-        return res.status(400).json({ success: false, message: 'No folder ID provided.' });
+        return new NextResponse(
+            JSON.stringify({
+                success: false,
+                message: "No folder ID provided",
+            }),
+            { status: 400 }
+        );
     }
-
-    const form = formidable();
 
     try {
-        const [_, files] = await form.parse<string, 'file'>(req);
-        const filesArray = files.file;
+        const formData = await req.formData();
+        const files = Array.from(formData.entries())
+            .filter(([key]) => key.startsWith("file"))
+            .map(([_, value]) => value) as File[];
 
-        if (!filesArray || filesArray.length === 0) {
-            return res.status(400).json({ success: false, message: 'No files uploaded.' });
+        if (!files || files.length === 0) {
+            return new NextResponse(
+                JSON.stringify({
+                    success: false,
+                    message: "No files uploaded",
+                }),
+                { status: 400 }
+            );
         }
 
         const savedFiles = [];
-        for (const file of filesArray) {
-            const name = file.originalFilename || file.newFilename;
-            const buffer = await fs.promises.readFile(file.filepath);
-            const mimeType = (file as any).type ?? 'application/octetstream';
+        await mongoConnect();
+        for (const file of files) {
+            const name = file.name;
+            const buffer = await file.arrayBuffer();
+            const mimeType = file.type ?? "application/octetstream";
             const fileSize = file.size;
 
             const putObject = {
                 Bucket: process.env.AWS_BUCKET_NAME,
-                Key: `${folderId}/${md5(name)}`,
-                Body: buffer,
+                Key: `assets/${orgId}/${folderId}/${md5(name)}`,
+                Body: Buffer.from(buffer),
+                ContentType: mimeType,
             };
 
             const s3Url = `https://${process.env.AWS_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${putObject.Key}`;
@@ -53,22 +73,21 @@ export const POST = async (req: NextApiRequest, res: NextApiResponse) => {
                 folderId,
                 s3Key: putObject.Key,
                 s3Url,
-                createdBy: session.user.id,
+                createdBy: userId,
             });
 
             const savedFile = await newFile.save();
             savedFiles.push(savedFile);
         }
 
-        return res.status(201).json({ success: true, files: savedFiles });
-
+        return new NextResponse(
+            JSON.stringify({ success: true, files: savedFiles }),
+            { status: 201 }
+        );
     } catch (error: any) {
-        return res.status(500).json({ success: false, message: error.message });
+        return new NextResponse(
+            JSON.stringify({ success: true, message: error.message }),
+            { status: 500 }
+        );
     }
-};
-
-export const config = {
-    api: {
-        bodyParser: false,
-    },
 };

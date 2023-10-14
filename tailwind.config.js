@@ -1,8 +1,11 @@
+const { nextui } = require("@nextui-org/react");
+
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   content: [
     './src/**/*.{js,ts,jsx,tsx,mdx,css}',
     "./node_modules/tailwind-datepicker-react/dist/**/*.js",
+    "./node_modules/@nextui-org/theme/dist/**/*.{js,ts,jsx,tsx}"
   ],
   theme: {
     extend: {
@@ -54,9 +57,11 @@ module.exports = {
       },
     }
   },
+  darkMode: "class",
   plugins: [
     require('@tailwindcss/forms'),
-    require('@tailwindcss/typography')
+    require('@tailwindcss/typography'),
+    nextui()
   ],
   experimental: {
     applyComplexClasses: true,

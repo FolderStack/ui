@@ -1,4 +1,4 @@
-import { FileModel, IFile } from "../models/file";
+import { FileModel, IFile } from "../models";
 import { isValidId } from "../utils/isValidID";
 
 export const createFile = async (

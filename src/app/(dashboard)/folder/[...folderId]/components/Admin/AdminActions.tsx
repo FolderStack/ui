@@ -1,5 +1,5 @@
 import { CreateFolderModal } from "./CreateFolderModal";
-import { UploadModal } from "./UploadModal";
+import { UploadModal } from "./Upload/UploadModal";
 
 export async function AdminActions() {
     return (

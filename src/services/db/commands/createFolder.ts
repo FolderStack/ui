@@ -11,7 +11,10 @@ export async function createFolder(data: Partial<IFolder>) {
 
     const session = await mongoose.startSession();
     await session.withTransaction(async (sess) => {
-        // Create the new folder
+        if (!(typeof data.parent === "string" && data.parent.length > 0)) {
+            delete data.parent;
+        }
+
         const newFolder = new FolderModel(data);
         const savedFolder = await newFolder.save({ session: sess });
 

@@ -4,32 +4,34 @@ import { PageParamProps } from "@/types/params";
 import { getSortFilterAndPaginationParams } from "@/utils/getSortFilterAndPaginationParams";
 import { FolderModel, IFile, IFolder } from "../models";
 import { mongoConnect } from "../mongodb";
+import { isValidId } from "../utils";
 
 export async function getFolderContents(params: PageParamProps) {
     let { folderId } = params.params;
     const { sort, sortBy, page, pageSize, ...filter } =
         getSortFilterAndPaginationParams(params);
 
-    if (folderId instanceof Array) {
-        folderId = folderId[0] ?? null;
-    }
+    folderId = isValidId(folderId) ? toObjectId(folderId) : null;
 
-    if (!folderId) return null;
+    const matchCondition =
+        folderId === null
+            ? { parent: { $eq: null } }
+            : {
+                  $or: [
+                      { parent: toObjectId(folderId) },
+                      { _id: toObjectId(folderId) },
+                  ],
+              };
 
     const countPipeline: any[] = [
         {
-            $match: {
-                $or: [
-                    { parent: toObjectId(folderId) },
-                    { _id: toObjectId(folderId) },
-                ],
-            },
+            $match: matchCondition,
         },
         {
             $facet: {
-                childFolders: [{ $match: { parent: toObjectId(folderId) } }],
+                childFolders: [{ $match: { parent: folderId } }],
                 parentFiles: [
-                    { $match: { _id: toObjectId(folderId) } },
+                    { $match: { _id: folderId } },
                     { $unwind: "$files" },
                     // ... your existing filter logic here
                 ],
@@ -50,19 +52,14 @@ export async function getFolderContents(params: PageParamProps) {
     // Construct the aggregation pipeline
     let pipeline: any[] = [
         {
-            $match: {
-                $or: [
-                    { parent: toObjectId(folderId) }, // Match child folders
-                    { _id: toObjectId(folderId) }, // Match the parent folder itself to get its files
-                ],
-            },
+            $match: matchCondition,
         },
         {
             $facet: {
                 childFolders: [
                     {
                         $match: {
-                            parent: toObjectId(folderId),
+                            parent: folderId,
                         },
                     },
                     {
@@ -74,7 +71,7 @@ export async function getFolderContents(params: PageParamProps) {
                 parentFiles: [
                     {
                         $match: {
-                            _id: toObjectId(folderId),
+                            _id: folderId,
                         },
                     },
                     {
@@ -155,7 +152,6 @@ export async function getFolderContents(params: PageParamProps) {
     ];
 
     await mongoConnect();
-    // Execute the aggregation query
 
     const [items, count] = await Promise.allSettled([
         FolderModel.aggregate(pipeline).exec(),

@@ -1,12 +1,12 @@
 "use client";
 
-import ReactDom from "react-dom";
-import { Fragment, useEffect, useState } from "react";
-import { Dialog, Transition } from "@headlessui/react";
 import { Input } from "@/components/Input";
-import { createFolderAction } from "./actions";
+import { Dialog, Transition } from "@headlessui/react";
 import { useParams } from "next/navigation";
-import { RiFolderAddFill } from 'react-icons/ri'
+import { Fragment, useEffect, useMemo, useState } from "react";
+import ReactDom from "react-dom";
+import { RiFolderAddFill } from "react-icons/ri";
+import { createFolderAction } from "./actions";
 
 const useFormState = (ReactDom as any).experimental_useFormState;
 const useFormStatus = (ReactDom as any).experimental_useFormStatus;
@@ -34,7 +34,11 @@ export function CreateFolderModal() {
         if (state.success && isOpen) {
             setIsOpen(false);
         }
-    }, [state, isOpen]);
+    }, [state]);
+
+    const parent = useMemo(() => {
+        return params.folderId ? String(params.folderId) : null;
+    }, [params]);
 
     return (
         <>
@@ -43,7 +47,9 @@ export function CreateFolderModal() {
                 onClick={() => setIsOpen(true)}
             >
                 <div className="flex flex-row items-center space-x-2">
-                    <span><RiFolderAddFill /></span>
+                    <span>
+                        <RiFolderAddFill />
+                    </span>
                     <span>Create Folder</span>
                 </div>
             </button>
@@ -96,13 +102,13 @@ export function CreateFolderModal() {
                                             autoFocus
                                             onFocus={(e) => e.target.select()}
                                         />
-                                        <input
-                                            type="hidden"
-                                            name="parent"
-                                            value={params[
-                                                "folderId"
-                                            ].toString()}
-                                        />
+                                        {parent && (
+                                            <input
+                                                type="hidden"
+                                                name="parent"
+                                                value={parent}
+                                            />
+                                        )}
 
                                         <div className="ml-auto space-x-4">
                                             <button

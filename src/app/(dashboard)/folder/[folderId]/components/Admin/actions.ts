@@ -3,19 +3,16 @@
 import { authOptions } from "@/services/auth";
 import { createFolder } from "@/services/db/commands/createFolder";
 import { getServerSession } from "next-auth";
-import { revalidateTag } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { redirect } from "next/navigation";
 
 export async function createFolderAction(_: any, form: FormData) {
     const name = form.get("name");
-    const parent = form.get("parent");
+    let parent = form.get("parent");
+    parent = typeof parent === "string" && parent.length > 0 ? parent : null;
 
     if (typeof name !== "string") {
         return { success: false, message: "Invalid name" };
-    }
-
-    if (parent && typeof parent !== "string") {
-        return { success: false, message: "Invalid parent folder" };
     }
 
     const session = await getServerSession(authOptions);
@@ -31,10 +28,14 @@ export async function createFolderAction(_: any, form: FormData) {
             name,
             orgId,
             createdBy: userId,
-            parent: parent ?? undefined,
+            parent,
         });
 
-        revalidateTag(parent ?? "root");
+        if (parent) {
+            revalidateTag(parent);
+        } else {
+            revalidatePath("/folder");
+        }
 
         return { success: true, message: "Created folder" };
     } catch (error: any) {

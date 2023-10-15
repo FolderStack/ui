@@ -12,22 +12,36 @@ interface Toast {
 }
 
 const ToastContext = createContext({
-    add(title: string, message: string, type: "success" | "error", id?: string) {
-        console.log('noop')
+    add(
+        title: string,
+        message: string,
+        type: "success" | "error",
+        id?: string
+    ) {
         // noop
-    }
-})
+    },
+});
 
 interface ToastProviderProps extends PropsWithChildren {
     timeout?: number;
 }
 
-export function ToastProvider({ children, timeout = 5000 }: ToastProviderProps) {
+export function ToastProvider({
+    children,
+    timeout = 5000,
+}: ToastProviderProps) {
     const [toasts, setToasts] = useState<Toast[]>([]);
 
-    function add(title: string, message: string, type: "success" | "error", id?: string) {
+    function add(
+        title: string,
+        message: string,
+        type: "success" | "error",
+        id?: string
+    ) {
         const toastId = id || Math.random().toString(36).substring(2, 9);
-        const hash = String(title + message + type).toLowerCase().replace(/\s/g, '');
+        const hash = String(title + message + type)
+            .toLowerCase()
+            .replace(/\s/g, "");
 
         if (exists(hash) || exists(toastId)) return;
 
@@ -51,11 +65,13 @@ export function ToastProvider({ children, timeout = 5000 }: ToastProviderProps) 
                 className="pointer-events-none fixed inset-0 flex items-end px-4 py-6 sm:items-start sm:p-6"
             >
                 <div className="flex w-full flex-col items-center space-y-4 sm:items-end">
-                    {toasts.map((toast) => <Toast {...toast} key={toast.id} />)}
+                    {toasts.map((toast) => (
+                        <Toast {...toast} key={toast.id} />
+                    ))}
                 </div>
             </div>
         </ToastContext.Provider>
-    )
+    );
 }
 
 export function useToast() {

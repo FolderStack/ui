@@ -18,6 +18,8 @@ export async function deleteFolder(folderId: string): Promise<any> {
     await session.withTransaction(
         async (sess) => {
             const deleteFilesFromS3 = async (folder: IFolder) => {
+                if (!folder.files.length) return;
+
                 const objectIdentifiers = folder.files.map((file: IFile) => ({
                     Key: file.s3Key,
                 }));

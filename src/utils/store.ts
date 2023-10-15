@@ -2,7 +2,6 @@ const createStore = () => {
     let data: any | null = null;
 
     const setData = (next: any) => {
-        console.log("setData", next);
         data = next;
     };
 

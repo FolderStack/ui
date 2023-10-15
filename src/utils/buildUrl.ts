@@ -7,7 +7,6 @@ export function buildUrl({ params, searchParams }: PageParamProps) {
     if (!folderId) return null;
 
     const {
-        display = "grid",
         page = "1",
         pageSize = "20",
         sort = "asc",
@@ -19,7 +18,7 @@ export function buildUrl({ params, searchParams }: PageParamProps) {
 
     const url = new URL(api.url + `/folders/${folderId}`);
 
-    url.searchParams.set("display", display.toString());
+    // url.searchParams.set("display", display.toString());
     url.searchParams.set("page", page.toString());
     url.searchParams.set("pageSize", pageSize.toString());
     url.searchParams.set("sort", sort.toString());

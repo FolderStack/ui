@@ -32,6 +32,8 @@
         "p-limit": "^4.0.0",
         "postcss": "8.4.31",
         "react": "18.3.0-next-fecc288b7-20221025",
+        "react-dnd": "^16.0.1",
+        "react-dnd-html5-backend": "^16.0.1",
         "react-dom": "18.3.0-next-fecc288b7-20221025",
         "react-dropzone": "^14.2.3",
         "react-icons": "^4.11.0",

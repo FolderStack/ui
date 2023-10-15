@@ -1,6 +1,7 @@
 "use client";
 
 import { useSession } from "next-auth/react";
+import { Suspense } from "react";
 import { CreateFolderModal } from "./CreateFolderModal";
 import { UploadModal } from "./Upload/UploadModal";
 
@@ -12,8 +13,12 @@ export function AdminActions() {
 
     return (
         <div className="flex flex-row space-x-4">
-            <CreateFolderModal />
-            <UploadModal />
+            <Suspense>
+                <CreateFolderModal />
+            </Suspense>
+            <Suspense>
+                <UploadModal />
+            </Suspense>
         </div>
     );
 }

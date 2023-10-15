@@ -1,6 +1,7 @@
-import mongoose, { Document, ObjectId, Schema } from "mongoose";
+import mongoose, { ObjectId, Schema } from "mongoose";
 
 export interface IFile {
+    id: string;
     s3Key: string;
     s3Url: string;
     name: string;
@@ -32,7 +33,8 @@ try {
     FileModel = mongoose.model<IFile>("File", FileSchema);
 }
 
-export interface IFolder extends Document {
+export interface IFolder {
+    id: string;
     name: string;
     parent: string | null;
     orgId: string;

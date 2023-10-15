@@ -1,8 +1,8 @@
-import { api } from "@/config/api";
 import { flags } from "@/config/flags";
+import { getFolder } from "@/services/db/queries/getFolder";
+import { getFolderContents } from "@/services/db/queries/getFolderContents";
 import { PageParamProps } from "@/types/params";
 import { getSortFilterAndPaginationParams } from "@/utils/getSortFilterAndPaginationParams";
-import { store } from "@/utils/store";
 import { AdminActions } from "./components/Admin/AdminActions";
 import { FolderPageContent } from "./components/FolderPageContent";
 import { PaginationActions } from "./components/Pagination/PaginationActions";
@@ -11,51 +11,27 @@ import { SelectActions } from "./components/Select/SelectActions";
 import { SelectionProvider } from "./components/Select/SelectContext";
 
 export default async function FolderPage(pageParams: PageParamProps) {
-    store.setData(pageParams);
-
-    // const [currentPage, pageData] = await Promise.allSettled([
-    //     getFolder(pageParams),
-    //     getFolderContents(pageParams),
-    // ]);
-
-    const folderId = pageParams.params.folderId;
-    const query = Object.entries(pageParams.searchParams).reduce(
-        (a, [key, value]) => {
-            return (a += `${key}=${encodeURIComponent(value)}`);
-        },
-        ""
-    );
-
-    console.log({ query });
-
-    console.log({ url: `${api.url}/api/v1/folders/${folderId}?${query}` });
-    const pageData = await fetch(
-        `${api.url}/api/v1/folders/${folderId}?${query}`,
-        {
-            next: { tags: [folderId] },
-        }
-    );
-
-    console.log(pageData);
+    const [currentPage, pageData] = await Promise.allSettled([
+        getFolder(pageParams),
+        getFolderContents(pageParams),
+    ]);
 
     const { page, pageSize } = getSortFilterAndPaginationParams({
         searchParams: pageParams.searchParams,
     });
 
-    const title = "Testing";
-    const data = { items: [], pagination: { totalItems: 0 } };
-    // const title =
-    //     currentPage.status === "fulfilled"
-    //         ? currentPage?.value?.name || ""
-    //         : "";
+    const title =
+        currentPage.status === "fulfilled"
+            ? currentPage?.value?.name || ""
+            : "";
 
-    // const data = pageData.status === "fulfilled" ? pageData?.value : null;
+    const data = pageData.status === "fulfilled" ? pageData?.value : null;
 
     return (
         <main className="w-full p-6">
             <SelectionProvider>
                 <section id="query-actions" className="w-full space-y-8">
-                    <QueryActions {...pageParams} title={title} />
+                    <QueryActions params={pageParams} title={title} />
                     <div className="w-full flex flex-row justify-between items-center">
                         <div className="flex flex-row space-x-4">
                             <AdminActions />

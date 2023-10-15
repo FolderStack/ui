@@ -1,26 +1,42 @@
 "use client";
 import { classNames } from "@/utils";
 import Image from "next/image";
-import { useMemo, useState } from "react";
+import { MouseEvent, useMemo, useState } from "react";
+import { useDrag } from "react-dnd";
 import { useSelection } from "../Select/SelectContext";
 import { FileMenu } from "./FileMenu";
 
 export function File({ ...item }: any) {
-    const { isSelected: selectedFn, add, remove } = useSelection();
+    const { isSelected: selectedFn, add, remove, selected } = useSelection();
 
     const isSelected = useMemo(
         () => selectedFn(item.id),
         [item.id, selectedFn]
     );
 
+    const [, dragRef] = useDrag({
+        type: "ITEM",
+        item: { id: item.id, selected: isSelected ? selected : null },
+    });
+
     const [fileMenuOpen, setFileMenuOpen] = useState(false);
+
+    function handleClick(e: MouseEvent<HTMLDivElement>) {
+        e.stopPropagation();
+
+        if (e.ctrlKey) {
+            isSelected ? remove(item.id) : add(item.id);
+        }
+    }
 
     return (
         <div
+            ref={dragRef}
             className={classNames(
                 "relative group/file shadow-md h-52 rounded bg-gray-200 cursor-default border hover:border-primary-500 hover:shadow-lg min-h-unit-24",
                 isSelected ? "border-primary-500" : "border-transparent"
             )}
+            onClick={handleClick}
         >
             <div
                 className={classNames(

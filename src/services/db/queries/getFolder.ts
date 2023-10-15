@@ -3,6 +3,7 @@ import { toObjectId } from "@/services/db/utils/toObjectId";
 import { PageParamProps } from "@/types/params";
 import { FolderModel } from "../models";
 import { mongoConnect } from "../mongodb";
+import { isValidId } from "../utils";
 
 export async function getFolder(params: PageParamProps) {
     let { folderId } = params.params;
@@ -10,8 +11,21 @@ export async function getFolder(params: PageParamProps) {
         folderId = folderId[0] ?? null;
     }
 
+    folderId = isValidId(folderId) ? toObjectId(folderId) : null;
+
+    if (folderId === null) {
+        return {
+            id: null,
+            name: "Home",
+            parent: null,
+            createdBy: "system",
+            createdAt: new Date(0).toISOString(),
+            updatedAt: null,
+        };
+    }
+
     const pipeline = [
-        { $match: { _id: toObjectId(folderId) } },
+        { $match: { _id: folderId } },
         {
             $project: {
                 name: 1,

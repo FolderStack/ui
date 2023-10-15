@@ -1,3 +1,9 @@
+"use client";
+
+import { DndProvider } from "react-dnd";
+import { HTML5Backend } from "react-dnd-html5-backend";
+import { DragProvider } from "./Items/Drag/DragContext";
+import { DragLayer } from "./Items/Drag/DragLayer";
 import { File } from "./Items/File";
 import { Folder } from "./Items/Folder";
 
@@ -13,12 +19,17 @@ export function FolderPageContent({ items = [] }: FolderPageContentProps) {
                 gridTemplateColumns: "repeat(auto-fill, minmax(180px, 1fr))",
             }}
         >
-            {items.map((item) => {
-                if (item.type === "folder") {
-                    return <Folder key={item.id} {...item} />;
-                }
-                return <File key={item.id} {...item} />;
-            })}
+            <DndProvider backend={HTML5Backend}>
+                <DragProvider>
+                    <DragLayer {...{ items }} />
+                    {items.map((item) => {
+                        if (item.type === "folder") {
+                            return <Folder key={item.id} {...item} />;
+                        }
+                        return <File key={item.id} {...item} />;
+                    })}
+                </DragProvider>
+            </DndProvider>
         </div>
     );
 }

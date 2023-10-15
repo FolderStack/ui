@@ -1,9 +1,10 @@
 "use client";
 import { classNames } from "@/utils";
 import { calculatePagination } from "@/utils/calculatePagination";
-import { useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import { FiChevronLeft, FiChevronRight } from "react-icons/fi";
-import { CurrentQueryVals } from "../CurrentQueryVals";
+import { useSelection } from "../Select/SelectContext";
 
 interface PaginationActionsProps {
     totalItems: number;
@@ -16,16 +17,18 @@ export function PaginationActions({
     page,
     pageSize,
 }: PaginationActionsProps) {
-    const formRef = useRef<HTMLFormElement>(null);
+    const router = useRouter();
+    const selection = useSelection();
     const [currPage, setPage] = useState(page);
     const [currPageSize, setPageSize] = useState(pageSize);
 
-    const maxPages = Math.max(1, Math.floor(totalItems / pageSize));
+    const maxPages = Math.max(1, Math.ceil(totalItems / pageSize));
     const pageNumbers = calculatePagination(page, maxPages);
 
     function onChange(newVal: number) {
-        setPage(Math.min(Math.max(1, newVal), maxPages));
-        onSubmit();
+        const newPage = Math.min(Math.max(1, newVal), maxPages);
+        setPage(newPage);
+        onSubmit(newPage, currPageSize);
     }
 
     function onChangePageSize(newVal: number) {
@@ -35,17 +38,17 @@ export function PaginationActions({
         if (currPage > newMaxPages) {
             onChange(newMaxPages);
         } else {
-            onSubmit();
+            onSubmit(currPage, newVal);
         }
     }
 
-    function onSubmit() {
-        setTimeout(() => {
-            if (formRef.current) {
-                console.log({ currPage, currPageSize });
-                formRef.current.requestSubmit();
-            }
-        }, 5);
+    function onSubmit(newPage: number, newPageSize: number) {
+        const url = new URL(window.location.href);
+        url.searchParams.set("page", newPage.toString());
+        url.searchParams.set("pageSize", newPageSize.toString());
+
+        selection.setState([]);
+        router.push(url.pathname + url.search);
     }
 
     useEffect(() => {
@@ -56,12 +59,7 @@ export function PaginationActions({
     }, [page]);
 
     return (
-        <form
-            method="GET"
-            ref={formRef}
-            className="flex flex-row space-x-6 ml-auto"
-        >
-            <CurrentQueryVals exclude={["page", "pageSize"]} />
+        <div className="flex flex-row space-x-6 ml-auto">
             <div className="flex flex-row items-center space-x-2 select-none">
                 <button
                     disabled={page === 1}
@@ -76,10 +74,10 @@ export function PaginationActions({
                             key={i}
                             onClick={() => onChange(pN)}
                             className={classNames(
-                                "rounded bg-gray-200 px-2 border-2 border-solid",
+                                "rounded px-2 border-2 border-solid font-medium ",
                                 pN === currPage
-                                    ? "border-primary-500"
-                                    : "border-transparent"
+                                    ? "border-transparent text-white bg-primary-400 hover:opacity-80"
+                                    : "border-primary-400 bg-white hover:opacity-80"
                             )}
                         >
                             {pN}
@@ -130,6 +128,6 @@ export function PaginationActions({
                 </span>
                 <input type="hidden" name="pageSize" value={currPageSize} />
             </div>
-        </form>
+        </div>
     );
 }

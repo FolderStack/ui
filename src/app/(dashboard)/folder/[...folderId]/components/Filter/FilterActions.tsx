@@ -1,7 +1,7 @@
 "use client";
-import { DatePicker } from "@/components/DatePicker";
-import { useRef } from "react";
-import { CurrentQueryVals } from "../CurrentQueryVals";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import Datepicker from "react-tailwindcss-datepicker";
 
 interface FilterActionProps {
     from?: string;
@@ -10,38 +10,63 @@ interface FilterActionProps {
 }
 
 export function FilterActions({ from, to, fileTypes }: FilterActionProps) {
-    const formRef = useRef<HTMLFormElement>(null);
+    const router = useRouter();
 
-    function onClear() {
-        if (formRef.current) {
-            formRef.current.reset();
-            formRef.current.requestSubmit();
+    const [dateRange, setDateRange] = useState<{
+        startDate: string | Date | null;
+        endDate: string | Date | null;
+    } | null>({
+        startDate:
+            from && !Number.isNaN(new Date(from).getTime())
+                ? new Date(from)
+                : null,
+        endDate:
+            to && !Number.isNaN(new Date(to).getTime()) ? new Date(to) : null,
+    });
+
+    const [currFts, setFts] = useState(fileTypes ?? null);
+
+    function apply() {
+        const url = new URL(window.location.href);
+
+        if (dateRange) {
+            dateRange.startDate &&
+                url.searchParams.set(
+                    "from",
+                    new Date(dateRange.startDate).toISOString()
+                );
+            dateRange.endDate &&
+                url.searchParams.set(
+                    "to",
+                    new Date(dateRange.endDate).toISOString()
+                );
         }
+
+        currFts && url.searchParams.set("fileTypes", currFts.join(","));
+
+        router.replace(url.pathname + url.search);
+    }
+
+    function clear() {
+        const url = new URL(window.location.href);
+
+        setDateRange(null);
+        setFts(null);
+
+        url.searchParams.delete("from");
+        url.searchParams.delete("to");
+        url.searchParams.delete("fileTypes");
+
+        router.replace(url.pathname + url.search);
     }
 
     return (
-        <form method="GET" className="flex flex-row space-x-4" ref={formRef}>
-            <CurrentQueryVals exclude={["from", "to", "fileTypes"]} />
+        <div className="flex flex-row space-x-4">
             <div>
-                <label htmlFor="from">Filter from</label>
-                <DatePicker
-                    name="from"
-                    initialValue={
-                        from && !Number.isNaN(new Date(from).getTime())
-                            ? new Date(from)
-                            : undefined
-                    }
-                />
-            </div>
-            <div>
-                <label htmlFor="to">Filter to</label>
-                <DatePicker
-                    name="to"
-                    initialValue={
-                        to && !Number.isNaN(new Date(to).getTime())
-                            ? new Date(to)
-                            : undefined
-                    }
+                <label htmlFor="from">Select dates</label>
+                <Datepicker
+                    value={dateRange}
+                    onChange={(v) => setDateRange(v)}
                 />
             </div>
             {/* <div>
@@ -51,22 +76,22 @@ export function FilterActions({ from, to, fileTypes }: FilterActionProps) {
             <div className="flex flex-row h-100 space-x-4">
                 <div className="flex flex-col h-full items-end">
                     <button
-                        type="submit"
+                        onClick={apply}
                         className="mt-auto h-[42px] text-white font-medium inline-flex justify-center rounded border border-transparent bg-primary-300 px-4 py-2 hover:opacity-80 focus:outline-none"
                     >
-                        Apply Filters
+                        Apply
                     </button>
                 </div>
-                {/* <div className="flex flex-col h-full items-end">
+                <div className="flex flex-col h-full items-end">
                     <button
-                        onClick={onClear}
+                        onClick={clear}
                         className="mt-auto h-[42px] rounded bg-secondary-600 px-4 py-1 text-sm font-semibold text-white shadow-sm hover:bg-secondary-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondary-600"
                     >
                         Clear
                     </button>
-                </div> */}
+                </div>
             </div>
-        </form>
+        </div>
     );
 }
 

@@ -1,10 +1,12 @@
+import { removeObjectIds } from "@/services/db/utils/removeObjectIds";
 import { BasicFolder, FolderModel } from "../models";
+import { mongoConnect } from "../mongodb";
 
 export function arrayToTree(folders: BasicFolder[], parent?: string) {
     const tree: BasicFolder[] = [];
     folders.forEach((folder) => {
         if (folder.parent === parent) {
-            const children = arrayToTree(folders, folder._id);
+            const children = arrayToTree(folders, folder.id);
             if (children.length) {
                 folder.children = children;
             }
@@ -14,9 +16,9 @@ export function arrayToTree(folders: BasicFolder[], parent?: string) {
     return tree;
 }
 
-export async function getFolderTree(orgId: string): Promise<BasicFolder[]> {
+export async function getFolderTree(orgId: string) {
     const pipeline = [
-        { $match: { organisationId: orgId } },
+        { $match: { orgId } },
         {
             $graphLookup: {
                 from: "folders", // the collection name should be 'folders' as per Mongoose conventions
@@ -31,13 +33,15 @@ export async function getFolderTree(orgId: string): Promise<BasicFolder[]> {
             $project: {
                 name: 1,
                 parent: 1,
-                organisationId: 1,
+                orgId: 1,
                 tree: 1,
                 depth: 1,
+                order: 1,
             },
         },
     ];
 
+    await mongoConnect();
     const folderTree = await FolderModel.aggregate(pipeline).exec();
-    return folderTree;
+    return removeObjectIds<BasicFolder[]>(folderTree);
 }

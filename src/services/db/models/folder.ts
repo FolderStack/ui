@@ -1,4 +1,4 @@
-import mongoose, { Document, Schema } from "mongoose";
+import mongoose, { Document, ObjectId, Schema } from "mongoose";
 
 export interface IFile {
     s3Key: string;
@@ -9,6 +9,7 @@ export interface IFile {
     createdBy: string;
     createdAt: Date;
     updatedAt: Date;
+    folderId: ObjectId;
 }
 
 // File Schema (Embedded)
@@ -21,15 +22,15 @@ export const FileSchema = new Schema<IFile>({
     createdBy: { type: String, required: true },
     createdAt: { type: Date, default: Date.now },
     updatedAt: { type: Date, default: Date.now },
+    folderId: { type: mongoose.Types.ObjectId },
 });
 
 let FileModel: mongoose.Model<IFile>;
 try {
-    FileModel = mongoose.model<IFile>('File')
+    FileModel = mongoose.model<IFile>("File");
 } catch (error) {
-    FileModel = mongoose.model<IFile>('File', FileSchema)
+    FileModel = mongoose.model<IFile>("File", FileSchema);
 }
-
 
 export interface IFolder extends Document {
     name: string;
@@ -40,13 +41,15 @@ export interface IFolder extends Document {
     updatedAt: Date;
     children: string[];
     files: IFile[];
+    order?: number;
 }
 
 export interface BasicFolder {
-    _id: string;
+    id: string;
     name: string;
     parent?: string;
     children?: BasicFolder[];
+    order?: number;
 }
 
 // Folder Schema
@@ -58,14 +61,15 @@ const FolderSchema = new Schema<IFolder>({
     createdAt: { type: Date, default: Date.now },
     updatedAt: { type: Date, default: Date.now },
     children: [{ type: Schema.Types.ObjectId, ref: "Folder" }],
+    order: { type: Number },
     files: [FileSchema],
 });
 
 let FolderModel: mongoose.Model<IFolder>;
 try {
-    FolderModel = mongoose.model<IFolder>('Folder')
+    FolderModel = mongoose.model<IFolder>("Folder");
 } catch (error) {
-    FolderModel = mongoose.model<IFolder>('Folder', FolderSchema)
+    FolderModel = mongoose.model<IFolder>("Folder", FolderSchema);
 }
 
-export { FileModel, FolderModel }
+export { FileModel, FolderModel };

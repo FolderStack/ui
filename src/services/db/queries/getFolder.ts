@@ -1,16 +1,17 @@
+import { removeObjectIds } from "@/services/db/utils/removeObjectIds";
+import { toObjectId } from "@/services/db/utils/toObjectId";
 import { PageParamProps } from "@/types/params";
-import mongoose from "mongoose";
-import { FolderModel, IFolder } from "../models";
+import { FolderModel } from "../models";
+import { mongoConnect } from "../mongodb";
 
-export async function getFolder(
-    params: PageParamProps
-): Promise<IFolder | null> {
-    const { folderId } = params.params;
-
-    if (!folderId) return null;
+export async function getFolder(params: PageParamProps) {
+    let { folderId } = params.params;
+    if (folderId instanceof Array) {
+        folderId = folderId[0] ?? null;
+    }
 
     const pipeline = [
-        { $match: { _id: new mongoose.Types.ObjectId(folderId) } },
+        { $match: { _id: toObjectId(folderId) } },
         {
             $project: {
                 name: 1,
@@ -23,10 +24,11 @@ export async function getFolder(
         },
     ];
 
+    await mongoConnect();
     const [folderInfo] = await FolderModel.aggregate(pipeline).exec();
 
     if (folderInfo) {
-        return folderInfo;
+        return removeObjectIds(folderInfo);
     }
 
     return null;

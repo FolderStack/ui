@@ -10,7 +10,7 @@ export function FolderPageContent({ items = [] }: FolderPageContentProps) {
         <div
             className="grid gap-4"
             style={{
-                gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))",
+                gridTemplateColumns: "repeat(auto-fill, minmax(180px, 1fr))",
             }}
         >
             {items.map((item) => {

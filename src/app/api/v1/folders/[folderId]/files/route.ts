@@ -1,7 +1,6 @@
 import { authOptions } from "@/services/auth";
 import { s3Client } from "@/services/aws/s3";
-import { FileModel } from "@/services/db/models";
-import { mongoConnect } from "@/services/db/mongodb";
+import { createFile } from "@/services/db/commands/createFile";
 import { PageParamProps } from "@/types/params";
 import { PutObjectCommand } from "@aws-sdk/client-s3";
 import md5 from "md5";
@@ -20,7 +19,11 @@ export const POST = async (req: NextRequest, { params }: PageParamProps) => {
         );
     }
 
-    const { folderId } = params;
+    let { folderId } = params;
+    if (folderId instanceof Array) {
+        folderId = folderId[0] ?? null;
+    }
+
     if (!folderId) {
         return new NextResponse(
             JSON.stringify({
@@ -33,60 +36,49 @@ export const POST = async (req: NextRequest, { params }: PageParamProps) => {
 
     try {
         const formData = await req.formData();
-        const files = Array.from(formData.entries())
-            .filter(([key]) => key.startsWith("file"))
-            .map(([_, value]) => value) as File[];
+        const file = formData.get("file") as File;
 
-        if (!files || files.length === 0) {
+        if (!file) {
             return new NextResponse(
                 JSON.stringify({
                     success: false,
-                    message: "No files uploaded",
+                    message: "No file uploaded",
                 }),
                 { status: 400 }
             );
         }
 
-        const savedFiles = [];
-        await mongoConnect();
-        for (const file of files) {
-            const name = file.name;
-            const buffer = await file.arrayBuffer();
-            const mimeType = file.type ?? "application/octetstream";
-            const fileSize = file.size;
+        const name = file.name;
+        const buffer = await file.arrayBuffer();
+        const mimeType = file.type ?? "application/octetstream";
+        const fileSize = file.size;
 
-            const putObject = {
-                Bucket: process.env.AWS_BUCKET_NAME,
-                Key: `assets/${orgId}/${folderId}/${md5(name)}`,
-                Body: Buffer.from(buffer),
-                ContentType: mimeType,
-            };
+        const putObject = {
+            Bucket: process.env.AWS_BUCKET_NAME,
+            Key: `assets/${orgId}/${folderId}/${md5(name)}`,
+            Body: Buffer.from(buffer),
+            ContentType: mimeType,
+        };
 
-            const s3Url = `https://${process.env.AWS_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${putObject.Key}`;
+        const s3Url = `https://${process.env.AWS_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${putObject.Key}`;
 
-            await s3Client.send(new PutObjectCommand(putObject));
+        await s3Client.send(new PutObjectCommand(putObject));
 
-            const newFile = new FileModel({
-                name,
-                fileSize,
-                mimeType,
-                folderId,
-                s3Key: putObject.Key,
-                s3Url,
-                createdBy: userId,
-            });
+        await createFile(folderId, {
+            name,
+            fileSize,
+            mimeType,
+            s3Key: putObject.Key,
+            s3Url,
+            createdBy: userId,
+        });
 
-            const savedFile = await newFile.save();
-            savedFiles.push(savedFile);
-        }
-
-        return new NextResponse(
-            JSON.stringify({ success: true, files: savedFiles }),
-            { status: 201 }
-        );
+        return new NextResponse(JSON.stringify({ success: true }), {
+            status: 201,
+        });
     } catch (error: any) {
         return new NextResponse(
-            JSON.stringify({ success: true, message: error.message }),
+            JSON.stringify({ success: false, message: error.message }),
             { status: 500 }
         );
     }

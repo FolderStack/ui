@@ -33,16 +33,17 @@ export function UploadRow({
     const progressColor = progress === 100 ? "success" : "default";
 
     return (
-        <div className="flex flex-row w-full justify-between">
+        <div className="flex flex-row w-full justify-between transition-all ease-in-out ">
             <div className="w-[60%] truncate">{file.name}</div>
             <div className="flex flex-row space-x-2 items-center">
-                {progress > 0 && progress < 100 && (
+                {progress !== null && progress > 0 && progress < 100 && (
                     <CircularProgress
                         aria-label="Uploading..."
                         classNames={{
                             svg: "w-4 h-4",
                         }}
-                        value={progress}
+                        isIndeterminate={progress === 99}
+                        value={progress === 99 ? undefined : progress}
                         color={progressColor}
                     />
                 )}
@@ -72,7 +73,7 @@ export function UploadRow({
                     </Tooltip>
                 )}
                 <span>{formatFileSize(file.size)}</span>
-                {progress <= 0 && (
+                {progress !== null && progress <= 0 && (
                     <span
                         className="cursor-pointer hover:text-red-500"
                         role="button"

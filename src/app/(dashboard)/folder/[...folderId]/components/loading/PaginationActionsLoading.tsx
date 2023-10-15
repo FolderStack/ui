@@ -1,6 +1,8 @@
+import { flags } from "@/config/flags";
 import { FiChevronLeft, FiChevronRight } from "react-icons/fi";
 
 export function PaginationActionsLoading() {
+    if (!flags.showPagination) return null;
     return (
         <form className="flex flex-row space-x-6 ml-auto">
             <div className="flex flex-row items-center space-x-2 select-none">

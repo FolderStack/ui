@@ -1,11 +1,15 @@
 import { useState } from "react";
-import DP from "tailwind-datepicker-react";
-import { IDatePickerProps } from "tailwind-datepicker-react/types/Components/DatePicker";
 
-interface DatePickerProps extends Omit<IDatePickerProps, "show" | "setShow"> {
+interface Options extends Omit<Partial<IOptions>, "theme"> {
+    theme?: Partial<IOptions["theme"]>;
+}
+
+interface DatePickerProps
+    extends Omit<IDatePickerProps, "show" | "setShow" | "options"> {
     initialValue?: Date;
     onChange?: (date: Date) => void;
     name: string;
+    options?: Options;
 }
 
 export function DatePicker({

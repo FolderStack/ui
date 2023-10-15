@@ -1,5 +1,5 @@
 export interface ProgressState {
-    progress: number;
+    progress: number | null;
     file: File;
     confirmed?: boolean;
 }
@@ -29,6 +29,11 @@ export function progressReducer(
         value.file === actionExists.file
     ) {
         // Ignore late changes to the state after an error occurs.
+        return newState;
+    }
+
+    if (value.progress === null) {
+        newState.splice(index, 1);
         return newState;
     }
 

@@ -1,3 +1,4 @@
+import { flags } from "@/config/flags";
 import { getFolder } from "@/services/db/queries/getFolder";
 import { getFolderContents } from "@/services/db/queries/getFolderContents";
 import { PageParamProps } from "@/types/params";
@@ -6,8 +7,12 @@ import { AdminActions } from "./components/Admin/AdminActions";
 import { FolderPageContent } from "./components/FolderPageContent";
 import { PaginationActions } from "./components/Pagination/PaginationActions";
 import { QueryActions } from "./components/QueryActions";
+import { SelectActions } from "./components/Select/SelectActions";
+import { SelectionProvider } from "./components/Select/SelectContext";
 
 export default async function FolderPage(pageParams: PageParamProps) {
+    // store.setData(pageParams);
+
     const [currentPage, pageData] = await Promise.allSettled([
         getFolder(pageParams),
         getFolderContents(pageParams),
@@ -26,23 +31,33 @@ export default async function FolderPage(pageParams: PageParamProps) {
 
     return (
         <main className="w-full p-6">
-            <section id="query-actions" className="w-full space-y-8">
-                <QueryActions {...pageParams} title={title} />
-                <div className="w-full flex flex-row justify-between items-center">
-                    <AdminActions />
-                    <PaginationActions
-                        {...{
-                            page,
-                            pageSize,
-                            totalItems: data?.pagination?.totalItems ?? 0,
-                        }}
-                    />
-                </div>
-            </section>
-            <div className="h-8" />
-            <section id="folder-contents">
-                {data && <FolderPageContent items={data.items} />}
-            </section>
+            <SelectionProvider>
+                <section id="query-actions" className="w-full space-y-8">
+                    <QueryActions {...pageParams} title={title} />
+                    <div className="w-full flex flex-row justify-between items-center">
+                        <div className="flex flex-row space-x-4">
+                            <AdminActions />
+                            {flags.showSelectActions && (
+                                <SelectActions items={data?.items ?? []} />
+                            )}
+                        </div>
+                        {flags.showPagination && (
+                            <PaginationActions
+                                {...{
+                                    page,
+                                    pageSize,
+                                    totalItems:
+                                        data?.pagination?.totalItems ?? 0,
+                                }}
+                            />
+                        )}
+                    </div>
+                </section>
+                <div className="h-8" />
+                <section id="folder-contents">
+                    {data && <FolderPageContent items={data.items ?? []} />}
+                </section>
+            </SelectionProvider>
         </main>
     );
 }

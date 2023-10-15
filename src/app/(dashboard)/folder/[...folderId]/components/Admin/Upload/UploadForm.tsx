@@ -3,6 +3,7 @@ import { classNames } from "@/utils";
 import axios, { AxiosError, AxiosProgressEvent, CanceledError } from "axios";
 import { throttle } from "lodash";
 import { useParams, useRouter } from "next/navigation";
+import plimit from "p-limit";
 import {
     FormEvent,
     useMemo,
@@ -16,7 +17,7 @@ import { UploadRow } from "./UploadRow";
 import { progressReducer } from "./progressReducer";
 
 interface UploadFormProps {
-    onDone(): void;
+    onDone(refresh?: boolean): void;
 }
 
 export function UploadForm({ onDone }: UploadFormProps) {
@@ -34,8 +35,14 @@ export function UploadForm({ onDone }: UploadFormProps) {
 
     const abortController = useRef<AbortController | null>(null);
 
-    function removeFile(file: File) {
+    function removeFile(file: File, idx: number) {
         setFiles((files) => files.filter((f) => f !== file));
+        // Remove from progress...
+        updateProgress({
+            file,
+            index: idx,
+            progress: null,
+        });
     }
 
     function handleSubmit(e: FormEvent<HTMLFormElement>) {
@@ -44,22 +51,21 @@ export function UploadForm({ onDone }: UploadFormProps) {
         const folderId = params.folderId.toString();
 
         startTransition(async () => {
+            const limit = plimit(3);
             abortController.current = new AbortController();
 
-            await Promise.allSettled(
-                files.map(async (file, i) => {
-                    const formData = new FormData();
-                    formData.append(`file`, file);
+            const promises = files.map(async (file, i) => {
+                const formData = new FormData();
+                formData.append(`file`, file);
 
-                    // Skip the file if it's already been uploaded.
-                    // Useful when trying to re-upload because an error occured,
-                    // but don't want to re-upload successful files.
-                    const fileStatus = uploadProgress.find(
-                        (v) => v.file === file
-                    );
-                    if (fileStatus?.progress === 100) return Promise.resolve();
+                // Skip the file if it's already been uploaded.
+                // Useful when trying to re-upload because an error occured,
+                // but don't want to re-upload successful files.
+                const fileStatus = uploadProgress.find((v) => v.file === file);
+                if (fileStatus?.progress === 100) return Promise.resolve();
 
-                    return await axios
+                return limit(() =>
+                    axios
                         .post(`/api/v1/folders/${folderId}/files`, formData, {
                             headers: {
                                 "Content-Type": "multipart/form-data",
@@ -129,27 +135,50 @@ export function UploadForm({ onDone }: UploadFormProps) {
                                 error:
                                     err?.message ?? "An unknown error occured",
                             });
-                        });
-                })
-            );
+                        })
+                );
+            });
+
+            await Promise.allSettled(promises);
+            abortController.current = null;
         });
     }
 
-    function close() {
-        onDone();
-        setFiles([]);
-        updateProgress("clear");
-    }
-
     const totalUploading = files.length;
-    const totalErrors = uploadProgress.filter(
-        ({ progress }) => progress === -1
-    ).length;
-    const totalFinished = uploadProgress.filter(
-        ({ progress }) => progress !== -1 && progress === 100
-    ).length;
+    const totalErrors = useMemo(
+        () => uploadProgress.filter(({ progress }) => progress === -1).length,
+        [uploadProgress]
+    );
+    const totalFinished = useMemo(
+        () =>
+            uploadProgress.filter(
+                ({ progress }) => progress !== -1 && progress === 100
+            ).length,
+        [uploadProgress]
+    );
 
-    const uploadFinished = totalUploading - (totalErrors + totalFinished) === 0;
+    const uploadFinished = useMemo(
+        () => totalUploading - (totalErrors + totalFinished) === 0,
+        [totalErrors, totalFinished, totalUploading]
+    );
+
+    const allUploaded = useMemo(
+        () => totalUploading === totalFinished && totalUploading > 0,
+        [totalFinished, totalUploading]
+    );
+
+    function close() {
+        if (abortController.current) {
+            abortController.current.abort();
+        }
+
+        onDone();
+        router.refresh();
+        setTimeout(() => {
+            setFiles([]);
+            updateProgress("clear");
+        }, 1000);
+    }
 
     const submitText = useMemo(() => {
         if (pending) {
@@ -159,7 +188,8 @@ export function UploadForm({ onDone }: UploadFormProps) {
             return "Uploading";
         }
         return "Upload";
-    }, [uploadProgress, pending, files.length]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, undefined);
 
     return (
         <form
@@ -170,10 +200,10 @@ export function UploadForm({ onDone }: UploadFormProps) {
                 <div className="flex flex-col space-y-1">
                     {files.map((file, idx) => (
                         <UploadRow
-                            key={idx}
+                            key={file.name + file.lastModified + file.size}
                             file={file}
                             progress={uploadProgress[idx]}
-                            onRemove={() => removeFile(file)}
+                            onRemove={() => removeFile(file, idx)}
                         />
                     ))}
                 </div>
@@ -183,9 +213,7 @@ export function UploadForm({ onDone }: UploadFormProps) {
                 className={classNames(
                     "w-full border-dashed border-2 border-gray-300 rounded flex justify-center items-center hover:bg-gray-100 transition-all ease-in-out",
                     classNames(
-                        pending
-                            ? "cursor-not-allowed opacity-50"
-                            : "cursor-pointer",
+                        allUploaded || pending ? "hidden" : "cursor-pointer",
                         classNames(files.length ? "h-24" : "h-52")
                     )
                 )}
@@ -200,15 +228,23 @@ export function UploadForm({ onDone }: UploadFormProps) {
             <div className="ml-auto space-x-4">
                 <button
                     type="reset"
-                    className="font-medium inline-flex justify-center rounded border border-transparent hover:bg-gray-300 px-4 py-2 hover:opacity-80 focus:outline-none"
+                    className={classNames(
+                        "transition-all ease-in-out font-medium inline-flex justify-center rounded border border-transparent  px-4 py-2 hover:opacity-80 focus:outline-none",
+                        allUploaded
+                            ? "text-white bg-primary-300"
+                            : "hover:bg-gray-300"
+                    )}
                     onClick={close}
                 >
                     {uploadFinished ? "Done" : "Cancel"}
                 </button>
                 <button
-                    disabled={pending || !files.length || uploadFinished}
+                    disabled={pending || !files.length}
                     type="submit"
-                    className="text-white font-medium inline-flex justify-center rounded border border-transparent bg-primary-300 px-4 py-2 hover:opacity-80 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
+                    className={classNames(
+                        "transition-all ease-in-out text-white font-medium inline-flex justify-center rounded border border-transparent bg-primary-300 px-4 py-2 hover:opacity-80 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed",
+                        allUploaded ? "hidden" : "visible"
+                    )}
                 >
                     {submitText ?? "Upload"}
                 </button>

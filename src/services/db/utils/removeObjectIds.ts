@@ -15,7 +15,12 @@ type Sanitized<T> = {
 
 export function removeObjectIds<T>(obj: T): Sanitized<T> {
     if (Array.isArray(obj)) {
-        return obj.map(removeObjectIds) as unknown as Sanitized<T>;
+        return obj.map(removeObjectIds).filter((val) => {
+            if (typeof val === "object" && val !== null) {
+                return Object.keys(val).length > 0;
+            }
+            return true;
+        }) as unknown as Sanitized<T>;
     }
 
     if (typeof obj === "object" && obj !== null) {
@@ -26,18 +31,24 @@ export function removeObjectIds<T>(obj: T): Sanitized<T> {
                 key = "id" as any;
             }
 
-            if (value instanceof mongoose.Types.ObjectId) {
-                sanitized[key] = value.toString();
+            if (typeof value === "function") {
+                continue;
             } else if (value instanceof Date) {
                 sanitized[key] = value.toISOString();
-            } else if (typeof value === "object") {
+            } else if (value instanceof Array) {
                 sanitized[key] = removeObjectIds(value);
+            } else if (typeof value === "object" && value !== null) {
+                if (value instanceof mongoose.mongo.ObjectId) {
+                    sanitized[key] = value.toString();
+                } else {
+                    sanitized[key] = removeObjectIds(value);
+                }
             } else {
                 sanitized[key] = value;
             }
         }
+
         return sanitized as Sanitized<T>;
     }
-
     return obj as Sanitized<T>;
 }

@@ -25,9 +25,27 @@ export type SortFilterAndPaginationParams =
     | (Sort & Filter & Pagination)
     | (Sort & NoFilter & Pagination);
 
+type Params = {
+    searchParams: PageParamProps["searchParams"];
+};
+
 export function getSortFilterAndPaginationParams({
     searchParams,
-}: Pick<PageParamProps, "searchParams">) {
+}: Params): SortFilterAndPaginationParams {
+    if (searchParams instanceof URLSearchParams) {
+        searchParams = Array.from(searchParams.entries()).reduce(
+            (acc, [key, value]) => {
+                Object.assign(acc, {
+                    [key]: Array.isArray(value)
+                        ? value.join(",")
+                        : String(value),
+                });
+                return acc;
+            },
+            {} as PageParamProps["searchParams"]
+        ) as { [key: string]: string | string[] | undefined };
+    }
+
     const sort = String(searchParams["sort"] ?? "asc");
     const sortBy = String(searchParams["sortBy"] ?? "name");
     const page = Number(searchParams["page"] ?? "1");

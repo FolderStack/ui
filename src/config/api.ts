@@ -1,3 +1,3 @@
 export const api = {
-    url: "http://localhost:4000",
+    url: process.env.NEXTAUTH_URL,
 };

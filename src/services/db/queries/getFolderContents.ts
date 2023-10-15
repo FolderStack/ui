@@ -176,8 +176,6 @@ export async function getFolderContents(params: PageParamProps) {
 
     const totalItems = count.value[0]?.totalItems ?? 0;
 
-    console.log(items, totalItems);
-
     return {
         items: removeObjectIds<(IFolder | IFile)[]>(items.value),
         pagination: {

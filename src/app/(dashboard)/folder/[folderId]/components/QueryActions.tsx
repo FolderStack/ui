@@ -2,6 +2,7 @@ import { Heading } from "@/components/Typography";
 import { flags } from "@/config/flags";
 import { PageParamProps } from "@/types/params";
 import { getSortFilterAndPaginationParams } from "@/utils/getSortFilterAndPaginationParams";
+import { Breadcrumbs } from "./Breadcrumbs/Breadcrumbs";
 import { FilterActions } from "./Filter/FilterActions";
 import { FilterDisplayAction } from "./Filter/FilterDisplayAction";
 import { SortActions } from "./Sort/SortActions";
@@ -19,7 +20,7 @@ export function QueryActions({
         <div className="w-full space-y-4">
             <div className="flex flex-row space-between items-center w-full">
                 <span>
-                    {/* <Breadcrumbs /> */}
+                    <Breadcrumbs />
                     <Heading>{title || "Home"}</Heading>
                 </span>
                 <span className="flex flex-row space-x-2 ml-auto">

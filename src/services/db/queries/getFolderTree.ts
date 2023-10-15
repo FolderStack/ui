@@ -2,20 +2,6 @@ import { removeObjectIds } from "@/services/db/utils/removeObjectIds";
 import { BasicFolder, FolderModel } from "../models";
 import { mongoConnect } from "../mongodb";
 
-export function arrayToTree(folders: BasicFolder[], parent?: string) {
-    const tree: BasicFolder[] = [];
-    folders.forEach((folder) => {
-        if (folder.parent === parent) {
-            const children = arrayToTree(folders, folder.id);
-            if (children.length) {
-                folder.children = children;
-            }
-            tree.push(folder);
-        }
-    });
-    return tree;
-}
-
 export async function getFolderTree(orgId: string) {
     const pipeline = [
         { $match: { orgId } },

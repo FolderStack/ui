@@ -1,42 +1,39 @@
 "use client";
 import { classNames } from "@/utils";
 import Image from "next/image";
-import { MouseEvent, useMemo, useState } from "react";
-import { useDrag } from "react-dnd";
+import { useMemo, useState } from "react";
 import { useSelection } from "../Select/SelectContext";
+import { useSelectOnControlClick } from "../Select/useOnCtrlSelect";
+import { useDragAndDrop } from "./Drag/useDragAndDrop";
 import { FileMenu } from "./FileMenu";
 
 export function File({ ...item }: any) {
-    const { isSelected: selectedFn, add, remove, selected } = useSelection();
+    const { isBeingDragged, isOver, dragRef } = useDragAndDrop(item);
+    const { onClick } = useSelectOnControlClick(item);
 
+    const { isSelected: selectedFn, add, remove } = useSelection();
     const isSelected = useMemo(
         () => selectedFn(item.id),
         [item.id, selectedFn]
     );
 
-    const [, dragRef] = useDrag({
-        type: "ITEM",
-        item: { id: item.id, selected: isSelected ? selected : null },
-    });
-
     const [fileMenuOpen, setFileMenuOpen] = useState(false);
-
-    function handleClick(e: MouseEvent<HTMLDivElement>) {
-        e.stopPropagation();
-
-        if (e.ctrlKey) {
-            isSelected ? remove(item.id) : add(item.id);
-        }
-    }
 
     return (
         <div
             ref={dragRef}
             className={classNames(
-                "relative group/file shadow-md h-52 rounded bg-gray-200 cursor-default border hover:border-primary-500 hover:shadow-lg min-h-unit-24",
-                isSelected ? "border-primary-500" : "border-transparent"
+                isOver || isSelected
+                    ? "border-primary-500"
+                    : "border-transparent",
+                "relative group/file shadow-md h-52 rounded bg-gray-200 cursor-pointer border hover:border-primary-500 hover:shadow-lg min-h-unit-24",
+                isOver && !isBeingDragged
+                    ? "shadow-xl bg-gray-300"
+                    : isBeingDragged
+                    ? "opacity-60"
+                    : ""
             )}
-            onClick={handleClick}
+            onClick={onClick as any}
         >
             <div
                 className={classNames(

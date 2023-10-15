@@ -34,48 +34,50 @@ export async function moveItems(
                     // It's a folder
                     // Remove from old parent
                     if (folder.parent) {
-                        await FolderModel.findByIdAndUpdate(
-                            folder.parent,
-                            { $pull: { children: itemId } },
-                            { session: sess }
-                        ).exec();
+                        await FolderModel.findByIdAndUpdate(folder.parent, {
+                            $pull: { children: itemId },
+                        })
+                            .session(sess)
+                            .exec();
                     }
 
                     // Add to new parent
-                    await FolderModel.findByIdAndUpdate(
-                        targetId,
-                        { $push: { children: itemId } },
-                        { session: sess }
-                    ).exec();
+                    await FolderModel.findByIdAndUpdate(targetId, {
+                        $push: { children: itemId },
+                    })
+                        .session(sess)
+                        .exec();
 
                     // Update the folder itself
-                    await FolderModel.findByIdAndUpdate(
-                        itemId,
-                        { parent: targetId },
-                        { session: sess }
-                    ).exec();
+                    await FolderModel.findByIdAndUpdate(itemId, {
+                        parent: targetId,
+                    })
+                        .session(sess)
+                        .exec();
                 } else {
                     // It's a file
                     // Find the parent folder of this file
-                    const parentFolder = await FolderModel.findOne(
-                        { files: { $elemMatch: { id: itemId } } },
-                        { session: sess }
-                    ).exec();
+                    const parentFolder = await FolderModel.findOne({
+                        files: { $elemMatch: { _id: itemId } },
+                    })
+                        .session(sess)
+                        .exec();
 
                     if (parentFolder) {
                         // Remove file from old folder
-                        await FolderModel.findByIdAndUpdate(
-                            parentFolder._id,
-                            { $pull: { files: { id: itemId } } },
-                            { session: sess }
-                        ).exec();
+                        await FolderModel.findByIdAndUpdate(parentFolder._id, {
+                            $pull: { files: { _id: itemId } },
+                        })
+                            .session(sess)
+                            .exec();
 
                         // Add file to new folder
                         await FolderModel.findByIdAndUpdate(
                             targetId,
-                            { $push: { files: { id: itemId } } }, // Adjust this based on your actual file schema
-                            { session: sess }
-                        ).exec();
+                            { $push: { files: { _id: itemId } } } // Adjust this based on your actual file schema
+                        )
+                            .session(sess)
+                            .exec();
                     } else {
                         throw new Error(`File with ID ${itemId} not found.`);
                     }

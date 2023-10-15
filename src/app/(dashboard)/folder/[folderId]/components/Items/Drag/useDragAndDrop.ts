@@ -8,7 +8,7 @@ import { useDraggingState } from "./DragContext";
 
 export function useDragAndDrop(
     item: IFolder | IFile,
-    onDrop: (ids: string[]) => void
+    onDrop?: (ids: string[]) => void
 ) {
     const { dragging, onDragChange, dragId } = useDraggingState();
     const { isSelected: selectedFn, selected } = useSelection();
@@ -35,7 +35,7 @@ export function useDragAndDrop(
             if (id === item.id) return;
 
             const draggedItems = selected ? Array.from(selected) : [id];
-            onDrop(draggedItems);
+            if (onDrop) onDrop(draggedItems);
         },
     });
 

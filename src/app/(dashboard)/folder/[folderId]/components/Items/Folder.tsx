@@ -20,6 +20,7 @@ export function Folder({ ...item }: FolderProps) {
 
     function onDrop(ids: string[]) {
         startTransition(async () => {
+            console.log(ids, item.id);
             await moveItems(ids, item.id);
             router.refresh();
         });

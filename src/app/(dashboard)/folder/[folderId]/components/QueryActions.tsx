@@ -20,7 +20,7 @@ export function QueryActions({ title = "", params }: QueryActionsProps) {
     return (
         <div className="w-full space-y-4">
             <div className="flex flex-row space-between items-center w-full">
-                <span>
+                <span className="w-[80%]">
                     <Suspense>
                         <Breadcrumbs {...params} />
                     </Suspense>

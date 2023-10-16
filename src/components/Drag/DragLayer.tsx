@@ -83,7 +83,7 @@ export function DragLayer({ items = [] as any[] }) {
                     className="absolute bg-primary-400 rounded-sm w-52 truncate text-sm text-white flex items-center justify-start p-2 z-20 shadow-lg"
                     ref={previewRef}
                 >
-                    <span>{currentItem.name}</span>
+                    <span>{currentItem?.name}</span>
                 </div>
                 {item.selected?.length && item.selected.length > 1 && (
                     <div

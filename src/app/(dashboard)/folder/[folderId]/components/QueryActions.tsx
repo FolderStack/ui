@@ -15,12 +15,7 @@ interface QueryActionsProps {
 }
 
 export function QueryActions({ title = "", tree = [] }: QueryActionsProps) {
-    const initial =
-        typeof window !== "undefined"
-            ? window.localStorage.getItem("lastTitle") || title
-            : title;
-
-    const [currTitle, setTitle] = useState(initial);
+    const [currTitle, setTitle] = useState(title);
 
     const searchParams = useSearchParams();
 
@@ -34,7 +29,7 @@ export function QueryActions({ title = "", tree = [] }: QueryActionsProps) {
             window.localStorage.setItem("lastTitle", title);
             setTitle(title);
         } else {
-            setTitle(initial);
+            setTitle(window.localStorage.getItem("lastTitle") || title);
         }
     }, [title]);
 

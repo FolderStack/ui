@@ -1,6 +1,7 @@
 "use client";
 
 import { deleteFile } from "@/services/db/commands/deleteFile";
+import { deleteFolder } from "@/services/db/commands/deleteFolder";
 import { Menu, Transition } from "@headlessui/react";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
@@ -8,19 +9,24 @@ import { useParams } from "next/navigation";
 import { Fragment, useTransition } from "react";
 import {
     RiDeleteBin4Line,
+    RiEdit2Fill,
     RiFileDownloadLine,
     RiMoreFill,
 } from "react-icons/ri";
-import { useSelection } from "../Select/SelectContext";
+import { useSWRConfig } from "swr";
+import { useSelection } from "../../../../../../hooks/SelectContext";
 
 interface FileMenuProps {
     item: any;
     onOpenState(b: boolean): void;
+    toggleEdit(): void;
 }
 
-export function FileMenu({ item, onOpenState }: FileMenuProps) {
+export function FileMenu({ item, onOpenState, toggleEdit }: FileMenuProps) {
     const { folderId } = useParams();
     const selection = useSelection();
+    const { mutate } = useSWRConfig();
+
     const user = useSession();
     const isAdmin = user.data?.user?.role === "admin";
     const orgId = user.data?.user?.orgId;
@@ -30,13 +36,19 @@ export function FileMenu({ item, onOpenState }: FileMenuProps) {
     function onDelete() {
         if (!orgId || !isAdmin) return;
         startTransition(async () => {
-            await deleteFile(item.id, folderId.toString(), orgId);
+            if (item.type === "file") {
+                await deleteFile(item.id, folderId.toString(), orgId);
+            } else if (!item.root) {
+                await deleteFolder(item.id);
+            }
+
             selection.remove(item.id);
+            mutate(`/api/v1/folders/${folderId ?? "@root"}/contents`);
         });
     }
 
     return (
-        <Menu as="div">
+        <Menu as="div" onClick={(e) => e.stopPropagation()}>
             {({ open, close }) => {
                 setTimeout(() => onOpenState(open), 100);
                 return (
@@ -59,19 +71,25 @@ export function FileMenu({ item, onOpenState }: FileMenuProps) {
                             leaveTo="transform opacity-0 scale-95"
                         >
                             <Menu.Items className="-mt-2 p-0 absolute right-0 text-left z-10 w-28 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
-                                {/* <Menu.Item
-                        as="div"
-                        className="hover:bg-gray-100 px-2 py-1 text-sm flex flex-row space-x-2 items-center rounded-t-md"
-                    >
-                        <span>
-                            <RiShareBoxFill />
-                        </span>
-                        <span>Share</span>
-                    </Menu.Item> */}
+                                <Menu.Item>
+                                    <div
+                                        onClick={toggleEdit}
+                                        className="hover:bg-gray-50 font-medium px-2 py-1 text-sm flex flex-row space-x-2 items-center hover:rounded-t-md"
+                                    >
+                                        <span>
+                                            <RiEdit2Fill />
+                                        </span>
+                                        <span>Rename</span>
+                                    </div>
+                                </Menu.Item>
                                 <hr />
                                 <Menu.Item>
                                     <Link
-                                        href={item.s3Url}
+                                        href={
+                                            item.type === "file"
+                                                ? item.s3Url
+                                                : "#"
+                                        }
                                         target="_blank"
                                         download
                                         className="hover:bg-gray-50 font-medium px-2 py-1 text-sm flex flex-row space-x-2 items-center hover:rounded-t-md"

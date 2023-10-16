@@ -2,10 +2,11 @@
 
 import { Input } from "@/components/Input";
 import { Dialog, Transition } from "@headlessui/react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { Fragment, useEffect, useMemo, useState } from "react";
 import ReactDom from "react-dom";
 import { RiFolderAddFill } from "react-icons/ri";
+import { useSWRConfig } from "swr";
 import { createFolderAction } from "./actions";
 
 const useFormState = (ReactDom as any).experimental_useFormState;
@@ -29,16 +30,22 @@ export function CreateFolderModal() {
     const params = useParams();
     const [isOpen, setIsOpen] = useState(false);
     const [state, dispatch] = useFormState(createFolderAction, {});
-
-    useEffect(() => {
-        if (state.success && isOpen) {
-            setIsOpen(false);
-        }
-    }, [state]);
+    const { mutate } = useSWRConfig();
+    const router = useRouter();
 
     const parent = useMemo(() => {
         return params.folderId ? String(params.folderId) : null;
     }, [params]);
+
+    useEffect(() => {
+        if (state.success && isOpen) {
+            setIsOpen(false);
+
+            mutate(`/api/v1/tree`);
+            mutate(`/api/v1/folders/${parent ?? "@root"}/contents`);
+            router.refresh();
+        }
+    }, [state]);
 
     return (
         <>

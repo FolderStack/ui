@@ -25,7 +25,6 @@ export const createFile = async (
         async (session) => {
             // Create the new file
 
-            console.log({ data });
             const newFile = new FileModel(data);
 
             // Update the folder

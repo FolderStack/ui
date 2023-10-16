@@ -1,13 +1,21 @@
 "use client";
+import { updateFile } from "@/services/db/commands/updateFile";
 import { classNames } from "@/utils";
 import Image from "next/image";
-import { useMemo, useState } from "react";
-import { useSelection } from "../Select/SelectContext";
+import { useMemo, useRef, useState, useTransition } from "react";
+import { useSWRConfig } from "swr";
+import { useDragAndDrop } from "../../../../../../components/Drag/useDragAndDrop";
+import { useSelection } from "../../../../../../hooks/SelectContext";
 import { useSelectOnControlClick } from "../Select/useOnCtrlSelect";
-import { useDragAndDrop } from "./Drag/useDragAndDrop";
 import { FileMenu } from "./FileMenu";
 
 export function File({ ...item }: any) {
+    const { mutate } = useSWRConfig();
+
+    const editRef = useRef<HTMLInputElement>(null);
+    const [editing, setEditing] = useState(false);
+    const [editValue, setEditValue] = useState(item.name);
+
     const { isBeingDragged, isOver, dragRef } = useDragAndDrop(item);
     const { onClick } = useSelectOnControlClick(item);
 
@@ -18,6 +26,26 @@ export function File({ ...item }: any) {
     );
 
     const [fileMenuOpen, setFileMenuOpen] = useState(false);
+
+    const onStartEdit = () => {
+        setEditing(true);
+        setTimeout(() => {
+            if (editRef.current) {
+                editRef.current.focus();
+                editRef.current.select();
+            }
+        }, 100);
+    };
+
+    const [editPending, startTransition] = useTransition();
+    const submitEdit = () => {
+        setEditing(false);
+        startTransition(async () => {
+            await updateFile(String(item.id), { name: editValue });
+
+            mutate(`/api/v1/folders/${String(item.id)}/contents`);
+        });
+    };
 
     return (
         <div
@@ -68,7 +96,11 @@ export function File({ ...item }: any) {
                 )}
                 style={{ top: "-4px", right: "0px" }}
             >
-                <FileMenu item={item} onOpenState={setFileMenuOpen} />
+                <FileMenu
+                    item={item}
+                    onOpenState={setFileMenuOpen}
+                    toggleEdit={onStartEdit}
+                />
             </div>
             <div className="p-4 space-y-4 mt-4">
                 <div className="w-full relative h-28 overflow-hidden select-none">
@@ -81,9 +113,22 @@ export function File({ ...item }: any) {
                         alt="image"
                     />
                 </div>
-                <div className="text-xs line-clamp-2 text-ellipsis">
-                    {item.name}
-                </div>
+                {!editing ? (
+                    <div className="text-xs line-clamp-2 text-ellipsis">
+                        {editValue}
+                    </div>
+                ) : (
+                    <input
+                        className="text-sm"
+                        type="text"
+                        value={editValue}
+                        onBlur={submitEdit}
+                        onSubmit={submitEdit}
+                        onKeyDown={(e) => e.code === "Enter" && submitEdit()}
+                        onChange={(e) => setEditValue(e.target.value)}
+                        ref={editRef}
+                    />
+                )}
             </div>
         </div>
     );

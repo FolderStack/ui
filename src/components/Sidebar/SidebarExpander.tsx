@@ -19,7 +19,14 @@ export function SidebarExpander({ children }: PropsWithChildren) {
             minConstraints={[initialWidth, -1]}
             maxConstraints={[MAX_WIDTH, -1]}
         >
-            <aside style={{ width }} className={"h-full"}>
+            <aside
+                style={{
+                    width,
+                    minWidth: INITIAL_WIDTH + "px",
+                    maxWidth: MAX_WIDTH + "px",
+                }}
+                className={"h-full"}
+            >
                 {children}
             </aside>
         </Resizable>

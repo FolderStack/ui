@@ -4,7 +4,7 @@ import { calculatePagination } from "@/utils/calculatePagination";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { FiChevronLeft, FiChevronRight } from "react-icons/fi";
-import { useSelection } from "../Select/SelectContext";
+import { useSelection } from "../../../../../../hooks/SelectContext";
 
 interface PaginationActionsProps {
     totalItems: number;

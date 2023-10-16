@@ -13,6 +13,7 @@ import {
     useTransition,
 } from "react";
 import { useDropzone } from "react-dropzone";
+import { useSWRConfig } from "swr";
 import { UploadRow } from "./UploadRow";
 import { progressReducer } from "./progressReducer";
 
@@ -25,6 +26,7 @@ export function UploadForm({ onDone }: UploadFormProps) {
     const router = useRouter();
     const [uploadProgress, updateProgress] = useReducer(progressReducer, []);
     const [pending, startTransition] = useTransition();
+    const { mutate } = useSWRConfig();
 
     const [files, setFiles] = useState<File[]>([]);
     const { getRootProps } = useDropzone({
@@ -145,6 +147,8 @@ export function UploadForm({ onDone }: UploadFormProps) {
             });
 
             await Promise.allSettled(promises);
+            mutate(`/api/v1/folders/${folderId ?? "@root"}/contents`);
+
             abortController.current = null;
         });
     }

@@ -1,6 +1,6 @@
 import { IFile, IFolder } from "@/services/db/models";
 import { useEffect, useMemo, useState } from "react";
-import { useSelection } from "./SelectContext";
+import { useSelection } from "../../../../../../hooks/SelectContext";
 
 export function useSelectOnControlClick(item: IFile | IFolder) {
     const { isSelected: selectedFn, add, remove } = useSelection();
@@ -37,7 +37,9 @@ export function useSelectOnControlClick(item: IFile | IFolder) {
             e.preventDefault();
             e.stopPropagation();
             isSelected ? remove(String(item.id)) : add(String(item.id));
+            return true;
         }
+        return false;
     };
 
     return { onClick, isSelected };

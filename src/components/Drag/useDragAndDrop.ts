@@ -3,7 +3,7 @@
 import { IFile, IFolder } from "@/services/db/models";
 import { useEffect, useMemo } from "react";
 import { useDrag, useDrop } from "react-dnd";
-import { useSelection } from "../../Select/SelectContext";
+import { useSelection } from "../../hooks/SelectContext";
 import { useDraggingState } from "./DragContext";
 
 export function useDragAndDrop(

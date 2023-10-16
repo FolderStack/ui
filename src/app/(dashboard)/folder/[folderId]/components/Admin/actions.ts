@@ -24,7 +24,7 @@ export async function createFolderAction(_: any, form: FormData) {
     }
 
     try {
-        await createFolder({
+        await createFolder(orgId, {
             name,
             orgId,
             createdBy: userId,

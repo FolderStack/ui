@@ -6,22 +6,26 @@ import mongoose from "mongoose";
 import { revalidatePath } from "next/cache";
 import { FolderModel } from "../models";
 import { mongoConnect } from "../mongodb";
+import { findOrCreateRootFolder } from "../queries/findOrCreateRootFolder";
 import { isValidId } from "../utils/isValidID";
 
 export async function deleteFile(
     fileId: string,
-    folderId: string
+    folderId: string,
+    orgId: string
 ): Promise<any> {
     if (!isValidId(fileId)) {
         throw new Error("Invalid file ID");
     }
 
-    if (!isValidId(folderId)) {
+    const isRoot = folderId === "@root";
+
+    if (!isRoot && !isValidId(folderId)) {
         throw new Error("Invalid parent ID");
     }
 
     const id = toObjectId(fileId);
-    const parent = toObjectId(folderId);
+    let parent = isRoot ? folderId : toObjectId(folderId);
 
     await mongoConnect();
 
@@ -29,9 +33,16 @@ export async function deleteFile(
     await session.withTransaction(
         async (sess) => {
             // Fetch the parent folder to get the file's S3 key
-            const folder = await FolderModel.findById(parent)
-                .session(sess)
-                .exec();
+            let folder;
+            if (isRoot) {
+                folder = await findOrCreateRootFolder(orgId, session);
+                parent = folder._id;
+            } else {
+                folder = await FolderModel.findById(parent)
+                    .session(sess)
+                    .exec();
+            }
+
             if (!folder) {
                 throw new Error("Folder not found");
             }
@@ -58,12 +69,14 @@ export async function deleteFile(
                 { session: sess }
             ).exec();
 
-            const deleteObject = {
-                Bucket: process.env.AWS_BUCKET_NAME,
-                Key: s3Key,
-            };
+            if (s3Key && typeof s3Key === "string" && s3Key.length > 0) {
+                const deleteObject = {
+                    Bucket: process.env.AWS_BUCKET_NAME,
+                    Key: s3Key,
+                };
 
-            await s3Client.send(new DeleteObjectCommand(deleteObject));
+                await s3Client.send(new DeleteObjectCommand(deleteObject));
+            }
 
             // Commit the transaction
             await sess.commitTransaction();

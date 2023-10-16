@@ -34,16 +34,17 @@ try {
 }
 
 export interface IFolder {
-    id: string;
+    id: string | mongoose.Types.ObjectId;
     name: string;
-    parent: string | null;
-    orgId: string;
+    parent: string | mongoose.Types.ObjectId | null;
+    orgId: string | mongoose.Types.ObjectId;
     createdBy: string;
     createdAt: Date;
     updatedAt: Date;
-    children: string[];
+    children: (string | mongoose.Types.ObjectId)[];
     files: IFile[];
     order?: number;
+    root?: boolean;
 }
 
 export interface BasicFolder {
@@ -63,6 +64,7 @@ const FolderSchema = new Schema<IFolder>({
     createdAt: { type: Date, default: Date.now },
     updatedAt: { type: Date, default: Date.now },
     children: [{ type: Schema.Types.ObjectId, ref: "Folder" }],
+    root: { type: Boolean },
     order: { type: Number },
     files: [FileSchema],
 });

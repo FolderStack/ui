@@ -1,8 +1,9 @@
 import mongoose from "mongoose";
 import { FolderModel, IFolder } from "../models/folder";
 import { mongoConnect } from "../mongodb";
+import { findOrCreateRootFolder } from "../queries/findOrCreateRootFolder";
 
-export async function createFolder(data: Partial<IFolder>) {
+export async function createFolder(orgId: string, data: Partial<IFolder>) {
     if (!data || !data.name || !data.orgId) {
         throw new Error("Missing required fields for folder creation.");
     }
@@ -19,9 +20,15 @@ export async function createFolder(data: Partial<IFolder>) {
         const savedFolder = await newFolder.save({ session: sess });
 
         if (data.parent) {
-            const parentFolder = await FolderModel.findById(
-                data.parent
-            ).session(sess);
+            let parentFolder;
+            if (data.parent === "@root") {
+                parentFolder = await findOrCreateRootFolder(orgId);
+            } else {
+                parentFolder = await FolderModel.findById(data.parent).session(
+                    sess
+                );
+            }
+
             if (!parentFolder) {
                 throw new Error("Parent folder not found");
             }

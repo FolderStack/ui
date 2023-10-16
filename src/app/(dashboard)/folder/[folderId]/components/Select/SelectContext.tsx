@@ -1,5 +1,11 @@
 "use client";
-import { PropsWithChildren, createContext, useContext, useState } from "react";
+import {
+    PropsWithChildren,
+    createContext,
+    useContext,
+    useEffect,
+    useState,
+} from "react";
 
 const SelectionContext = createContext({
     selected: [] as string[],
@@ -20,7 +26,14 @@ const SelectionContext = createContext({
     },
 });
 
-export function SelectionProvider({ children }: PropsWithChildren) {
+interface SelectionProviderProps extends PropsWithChildren {
+    items?: any[];
+}
+
+export function SelectionProvider({
+    children,
+    items = [],
+}: SelectionProviderProps) {
     const [selected, setSelected] = useState<string[]>([]);
 
     function add(id: string) {
@@ -51,6 +64,18 @@ export function SelectionProvider({ children }: PropsWithChildren) {
     function setState(val: string[]) {
         setSelected(val);
     }
+
+    // If items change, remove excess selections to ensure
+    // button states are reflected properly etc.
+    useEffect(() => {
+        const newState = [];
+        for (const id in selected) {
+            if (items.find((v) => v.id === id)) {
+                newState.push(id);
+            }
+        }
+        setState(newState);
+    }, [items]);
 
     return (
         <SelectionContext.Provider

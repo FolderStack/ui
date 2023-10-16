@@ -64,7 +64,7 @@ export const POST = async (req: NextRequest, { params }: PageParamProps) => {
 
         await s3Client.send(new PutObjectCommand(putObject));
 
-        await createFile(folderId, {
+        await createFile(folderId, orgId, {
             name,
             fileSize,
             mimeType,

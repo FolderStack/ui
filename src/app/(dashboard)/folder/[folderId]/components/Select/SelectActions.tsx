@@ -37,13 +37,17 @@ export function SelectActions({ items = [] }: SelectActionsProps) {
     };
 
     const deleteSelected = () => {
+        const orgId = user.data?.user?.orgId;
+        if (!orgId) return;
+        const parent = (folderId ?? "@root").toString();
+
         startTransition(async () => {
             const result = await Promise.allSettled(
                 selection.selected.map(async (id) => {
                     const item = items.find((i) => i.id === id);
                     if (item) {
                         if (item.type === "file") {
-                            await deleteFile(id, folderId.toString());
+                            await deleteFile(id, parent, orgId);
                         } else {
                             await deleteFolder(id);
                         }

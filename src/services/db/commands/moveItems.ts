@@ -64,6 +64,17 @@ export async function moveItems(
                         .exec();
 
                     if (parentFolder) {
+                        // Retrieve the full file object
+                        const fileObj = parentFolder.files.find(
+                            (file) => (file as any)._id.toString() === itemId
+                        );
+
+                        if (!fileObj) {
+                            throw new Error(
+                                `File object for ID ${itemId} not found.`
+                            );
+                        }
+
                         // Remove file from old folder
                         await FolderModel.findByIdAndUpdate(parentFolder._id, {
                             $pull: { files: { _id: itemId } },
@@ -71,11 +82,10 @@ export async function moveItems(
                             .session(sess)
                             .exec();
 
-                        // Add file to new folder
-                        await FolderModel.findByIdAndUpdate(
-                            targetId,
-                            { $push: { files: { _id: itemId } } } // Adjust this based on your actual file schema
-                        )
+                        // Add file to new folder with all properties
+                        await FolderModel.findByIdAndUpdate(targetId, {
+                            $push: { files: fileObj },
+                        })
                             .session(sess)
                             .exec();
                     } else {

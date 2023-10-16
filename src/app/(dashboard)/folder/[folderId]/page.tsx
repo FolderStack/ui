@@ -29,7 +29,7 @@ export default async function FolderPage(pageParams: PageParamProps) {
 
     return (
         <main className="w-full p-6">
-            <SelectionProvider>
+            <SelectionProvider items={data?.items ?? []}>
                 <section id="query-actions" className="w-full space-y-8">
                     <QueryActions params={pageParams} title={title} />
                     <div className="w-full flex flex-row justify-between items-center">

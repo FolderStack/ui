@@ -11,21 +11,71 @@ export async function getFolderContents(params: PageParamProps) {
     const { sort, sortBy, page, pageSize, ...filter } =
         getSortFilterAndPaginationParams(params);
 
-    folderId = isValidId(folderId) ? toObjectId(folderId) : null;
+    folderId =
+        !folderId || folderId === "@root"
+            ? "@root"
+            : isValidId(folderId)
+            ? toObjectId(folderId)
+            : null;
 
-    const matchCondition =
-        folderId === null
-            ? { parent: { $eq: null } }
-            : {
-                  $or: [
-                      { parent: toObjectId(folderId) },
-                      { _id: toObjectId(folderId) },
-                  ],
-              };
+    if (!folderId) return null;
+
+    const isRoot = folderId === "@root";
+
+    const matchConditionForFolders = {
+        parent: isRoot ? null : toObjectId(folderId),
+        root: { $ne: true }, // Exclude the virtual root folder from childFolders
+    };
+
+    const matchConditionForFiles = isRoot
+        ? { root: true } // Specifically match only the virtual root folder for files
+        : { _id: toObjectId(folderId) };
+
+    const filterPipeline = [
+        ...(filter.filterVisible === "1"
+            ? [
+                  ...(filter.from
+                      ? [
+                            {
+                                $match: {
+                                    createdAt: {
+                                        $gte: new Date(filter.from),
+                                    },
+                                },
+                            },
+                        ]
+                      : []),
+                  ...(filter.to
+                      ? [
+                            {
+                                $match: {
+                                    createdAt: {
+                                        $lte: new Date(filter.to),
+                                    },
+                                },
+                            },
+                        ]
+                      : []),
+                  ...(filter.fileTypes
+                      ? [
+                            {
+                                $match: {
+                                    mimeType: {
+                                        $in: filter.fileTypes,
+                                    },
+                                },
+                            },
+                        ]
+                      : []),
+              ]
+            : []),
+    ];
 
     const countPipeline: any[] = [
         {
-            $match: matchCondition,
+            $match: {
+                $or: [matchConditionForFolders, matchConditionForFiles],
+            },
         },
         {
             $facet: {
@@ -33,8 +83,8 @@ export async function getFolderContents(params: PageParamProps) {
                 parentFiles: [
                     { $match: { _id: folderId } },
                     { $unwind: "$files" },
-                    // ... your existing filter logic here
                 ],
+                ...filterPipeline,
             },
         },
         {
@@ -52,15 +102,15 @@ export async function getFolderContents(params: PageParamProps) {
     // Construct the aggregation pipeline
     let pipeline: any[] = [
         {
-            $match: matchCondition,
+            $match: {
+                $or: [matchConditionForFolders, matchConditionForFiles],
+            },
         },
         {
             $facet: {
                 childFolders: [
                     {
-                        $match: {
-                            parent: folderId,
-                        },
+                        $match: matchConditionForFolders,
                     },
                     {
                         $addFields: {
@@ -70,9 +120,7 @@ export async function getFolderContents(params: PageParamProps) {
                 ],
                 parentFiles: [
                     {
-                        $match: {
-                            _id: folderId,
-                        },
+                        $match: matchConditionForFiles,
                     },
                     {
                         $unwind: "$files",
@@ -80,43 +128,7 @@ export async function getFolderContents(params: PageParamProps) {
                     {
                         $replaceRoot: { newRoot: "$files" },
                     },
-                    ...(filter.filterVisible === "1"
-                        ? [
-                              ...(filter.from
-                                  ? [
-                                        {
-                                            $match: {
-                                                createdAt: {
-                                                    $gte: new Date(filter.from),
-                                                },
-                                            },
-                                        },
-                                    ]
-                                  : []),
-                              ...(filter.to
-                                  ? [
-                                        {
-                                            $match: {
-                                                createdAt: {
-                                                    $lte: new Date(filter.to),
-                                                },
-                                            },
-                                        },
-                                    ]
-                                  : []),
-                              ...(filter.fileTypes
-                                  ? [
-                                        {
-                                            $match: {
-                                                mimeType: {
-                                                    $in: filter.fileTypes,
-                                                },
-                                            },
-                                        },
-                                    ]
-                                  : []),
-                          ]
-                        : []),
+                    ...filterPipeline,
                     {
                         $addFields: {
                             type: "file",

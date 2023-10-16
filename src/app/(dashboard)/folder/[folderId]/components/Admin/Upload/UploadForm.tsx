@@ -48,7 +48,8 @@ export function UploadForm({ onDone }: UploadFormProps) {
     function handleSubmit(e: FormEvent<HTMLFormElement>) {
         e.preventDefault();
 
-        const folderId = params.folderId.toString();
+        // TODO: Handle uploading to the root directory... maybe use orgId as the id of that folder?
+        const folderId = params.folderId ?? null;
 
         startTransition(async () => {
             const limit = plimit(3);
@@ -66,36 +67,40 @@ export function UploadForm({ onDone }: UploadFormProps) {
 
                 return limit(() =>
                     axios
-                        .post(`/api/v1/folders/${folderId}/files`, formData, {
-                            headers: {
-                                "Content-Type": "multipart/form-data",
-                            },
-                            signal: abortController.current?.signal,
-                            onUploadProgress: throttle(
-                                (progressEvent: AxiosProgressEvent) => {
-                                    const progress = Math.round(
-                                        (progressEvent.loaded * 100) /
-                                            (progressEvent.total ?? 1)
-                                    );
-                                    if (progress < 100) {
-                                        // Update the progress as usual if it's less than 100%
-                                        updateProgress({
-                                            progress,
-                                            index: i,
-                                            file,
-                                        });
-                                    } else {
-                                        // If progress is 100%, set an intermediate state like 99% until we're sure it's successful
-                                        updateProgress({
-                                            progress: 99,
-                                            index: i,
-                                            file,
-                                        });
-                                    }
+                        .post(
+                            `/api/v1/folders/${folderId ?? "@root"}/files`,
+                            formData,
+                            {
+                                headers: {
+                                    "Content-Type": "multipart/form-data",
                                 },
-                                500
-                            ),
-                        })
+                                signal: abortController.current?.signal,
+                                onUploadProgress: throttle(
+                                    (progressEvent: AxiosProgressEvent) => {
+                                        const progress = Math.round(
+                                            (progressEvent.loaded * 100) /
+                                                (progressEvent.total ?? 1)
+                                        );
+                                        if (progress < 100) {
+                                            // Update the progress as usual if it's less than 100%
+                                            updateProgress({
+                                                progress,
+                                                index: i,
+                                                file,
+                                            });
+                                        } else {
+                                            // If progress is 100%, set an intermediate state like 99% until we're sure it's successful
+                                            updateProgress({
+                                                progress: 99,
+                                                index: i,
+                                                file,
+                                            });
+                                        }
+                                    },
+                                    500
+                                ),
+                            }
+                        )
                         .then(() => {
                             updateProgress({
                                 progress: 100,

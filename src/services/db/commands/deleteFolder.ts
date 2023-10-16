@@ -36,7 +36,9 @@ export async function deleteFolder(folderId: string): Promise<any> {
             };
 
             // Recursive function to delete folder and its children
-            const deleteFolderRecursively = async (id: string) => {
+            const deleteFolderRecursively = async (
+                id: string | mongoose.Types.ObjectId
+            ) => {
                 const folder = await FolderModel.findById(id)
                     .session(sess)
                     .exec();

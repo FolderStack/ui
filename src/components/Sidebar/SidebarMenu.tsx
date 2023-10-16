@@ -1,15 +1,21 @@
 "use client";
 import { Node } from "@/utils/buildTree";
+import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { SidebarMenuItem } from "./SidebarMenuItem";
 
 interface SidebarMenuProps {
     tree: Node[];
-    current: string | null;
 }
 
-export function SidebarMenu({ tree, current }: SidebarMenuProps) {
-    const stored = window.localStorage.getItem("expandedNodes");
+export function SidebarMenu({ tree }: SidebarMenuProps) {
+    const current = useParams().folderId;
+
+    const stored =
+        typeof window === "undefined"
+            ? "[]"
+            : window.localStorage.getItem("expandedNodes");
+
     const initialExpandedNodes = stored
         ? new Set<string>(JSON.parse(stored))
         : new Set<string>();
@@ -18,10 +24,12 @@ export function SidebarMenu({ tree, current }: SidebarMenuProps) {
         useState<Set<string>>(initialExpandedNodes);
 
     useEffect(() => {
-        window.localStorage.setItem(
-            "expandedNodes",
-            JSON.stringify(Array.from(expandedNodes))
-        );
+        if (typeof window !== "undefined") {
+            window.localStorage.setItem(
+                "expandedNodes",
+                JSON.stringify(Array.from(expandedNodes))
+            );
+        }
     }, [expandedNodes]);
 
     const renderNodes = (
@@ -57,7 +65,10 @@ export function SidebarMenu({ tree, current }: SidebarMenuProps) {
 
     return (
         <div className="flex flex-col select-none w-full">
-            {renderNodes(tree.filter((t) => t.name !== "root") ?? [], current)}
+            {renderNodes(
+                tree.filter((t) => t.name !== "root") ?? [],
+                String(current)
+            )}
         </div>
     );
 }

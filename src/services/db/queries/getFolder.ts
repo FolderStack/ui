@@ -1,9 +1,10 @@
+"use server";
 import { removeObjectIds } from "@/services/db/utils/removeObjectIds";
 import { toObjectId } from "@/services/db/utils/toObjectId";
 import { PageParamProps } from "@/types/params";
 import { FolderModel } from "../models";
 import { mongoConnect } from "../mongodb";
-import { isValidId } from "../utils";
+import { isValidId } from "../utils/isValidID";
 
 export async function getFolder(params: PageParamProps) {
     let { folderId } = params.params;

@@ -1,7 +1,7 @@
 // SidebarMenuItem.tsx
 import { classNames } from "@/utils";
 import { Node } from "@/utils/buildTree";
-import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { FiChevronDown, FiChevronRight } from "react-icons/fi";
 
 interface SidebarMenuItemProps {
@@ -17,23 +17,19 @@ export const SidebarMenuItem: React.FC<SidebarMenuItemProps> = ({
     expanded,
     toggleExpand,
 }) => {
-    const router = useRouter();
-
     return (
         <div
             className={classNames(
-                "my-1 rounded-sm flex justify-between items-center cursor-pointer py-1 px-3 ",
+                "my-1 rounded-sm flex justify-between items-center cursor-pointer py-1 px-3",
                 node.id === current ? "bg-blue-200" : ""
             )}
         >
-            <div
+            <Link
                 className="cursor-pointer flex-1 truncate"
-                onClick={() => {
-                    router.push(`/folder/${node.id}`);
-                }}
+                href={`/folder/${node.id}`}
             >
                 {node.name}
-            </div>
+            </Link>
             {node.tree && node.tree.length > 0 && (
                 <div
                     className="w-4 h-4 flex items-center justify-center"

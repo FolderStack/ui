@@ -1,3 +1,4 @@
+"use server";
 import mongoose from "mongoose";
 import { FolderModel, IFolder } from "../models/folder";
 import { mongoConnect } from "../mongodb";

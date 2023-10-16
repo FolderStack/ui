@@ -14,7 +14,7 @@ export function useDragAndDrop(
     const { isSelected: selectedFn, selected } = useSelection();
 
     const isSelected = useMemo(
-        () => selectedFn(item.id),
+        () => selectedFn(String(item.id)),
         [item.id, selectedFn]
     );
 
@@ -57,7 +57,7 @@ export function useDragAndDrop(
 
     useEffect(() => {
         if (!dragId && !dragging) {
-            if (isDragging) onDragChange(item.id, isDragging);
+            if (isDragging) onDragChange(String(item.id), isDragging);
         }
     }, [isDragging]);
 
@@ -73,7 +73,7 @@ export function useDragAndDrop(
         if (
             dragId &&
             dragging &&
-            selected.includes(item.id) &&
+            selected.includes(String(item.id)) &&
             selected.includes(dragId) &&
             isSelected
         ) {

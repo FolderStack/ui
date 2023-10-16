@@ -1,3 +1,4 @@
+"use server";
 import { toObjectId } from "@/services/db/utils/toObjectId";
 import mongoose from "mongoose";
 import { FolderModel, IFile } from "../models";

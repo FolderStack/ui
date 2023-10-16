@@ -1,3 +1,4 @@
+"use server";
 import { removeObjectIds } from "@/services/db/utils/removeObjectIds";
 import { BasicFolder, FolderModel } from "../models";
 import { mongoConnect } from "../mongodb";

@@ -13,9 +13,12 @@ const OrganisationSchema = new Schema<IOrganisation>({
 
 let OrganisationModel: mongoose.Model<IOrganisation>;
 try {
-    OrganisationModel = mongoose.model<IOrganisation>('Organisation')
+    OrganisationModel = mongoose.model<IOrganisation>("Organisation");
 } catch (error) {
-    OrganisationModel = mongoose.model<IOrganisation>('Organisation', OrganisationSchema)
+    OrganisationModel = mongoose.model<IOrganisation>(
+        "Organisation",
+        OrganisationSchema
+    );
 }
 
-export { OrganisationModel }
+export { OrganisationModel };

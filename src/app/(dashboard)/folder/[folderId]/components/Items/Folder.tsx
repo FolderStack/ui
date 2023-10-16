@@ -20,8 +20,7 @@ export function Folder({ ...item }: FolderProps) {
 
     function onDrop(ids: string[]) {
         startTransition(async () => {
-            console.log(ids, item.id);
-            await moveItems(ids, item.id);
+            await moveItems(ids, String(item.id));
             router.refresh();
         });
     }
@@ -34,7 +33,7 @@ export function Folder({ ...item }: FolderProps) {
 
     const { isSelected: selectedFn, add, remove } = useSelection();
     const isSelected = useMemo(
-        () => selectedFn(item.id),
+        () => selectedFn(String(item.id)),
         [item.id, selectedFn]
     );
 
@@ -70,7 +69,9 @@ export function Folder({ ...item }: FolderProps) {
                     style={{ top: "4px", left: "8px" }}
                     onClick={(e) => {
                         e.stopPropagation();
-                        isSelected ? remove(item.id) : add(item.id);
+                        isSelected
+                            ? remove(String(item.id))
+                            : add(String(item.id));
                     }}
                 >
                     <input
@@ -79,7 +80,9 @@ export function Folder({ ...item }: FolderProps) {
                         onClick={(e) => e.stopPropagation()}
                         checked={isSelected}
                         onChange={(v) =>
-                            v.target.checked ? add(item.id) : remove(item.id)
+                            v.target.checked
+                                ? add(String(item.id))
+                                : remove(String(item.id))
                         }
                     />
                 </div>

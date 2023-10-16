@@ -1,3 +1,4 @@
+"use server";
 import { removeObjectIds } from "@/services/db/utils/removeObjectIds";
 import { toObjectId } from "@/services/db/utils/toObjectId";
 import { IOrganisation, OrganisationModel } from "../models";

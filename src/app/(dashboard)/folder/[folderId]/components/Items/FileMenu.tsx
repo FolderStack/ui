@@ -23,12 +23,14 @@ export function FileMenu({ item, onOpenState }: FileMenuProps) {
     const selection = useSelection();
     const user = useSession();
     const isAdmin = user.data?.user?.role === "admin";
+    const orgId = user.data?.user?.orgId;
 
     const [pendingDelete, startTransition] = useTransition();
 
     function onDelete() {
+        if (!orgId || !isAdmin) return;
         startTransition(async () => {
-            await deleteFile(item.id, folderId.toString());
+            await deleteFile(item.id, folderId.toString(), orgId);
             selection.remove(item.id);
         });
     }

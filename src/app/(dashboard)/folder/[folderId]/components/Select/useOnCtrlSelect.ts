@@ -6,7 +6,7 @@ export function useSelectOnControlClick(item: IFile | IFolder) {
     const { isSelected: selectedFn, add, remove } = useSelection();
 
     const isSelected = useMemo(
-        () => selectedFn(item.id),
+        () => selectedFn(String(item.id)),
         [item.id, selectedFn]
     );
 
@@ -36,7 +36,7 @@ export function useSelectOnControlClick(item: IFile | IFolder) {
         if (ctrlActive) {
             e.preventDefault();
             e.stopPropagation();
-            isSelected ? remove(item.id) : add(item.id);
+            isSelected ? remove(String(item.id)) : add(String(item.id));
         }
     };
 

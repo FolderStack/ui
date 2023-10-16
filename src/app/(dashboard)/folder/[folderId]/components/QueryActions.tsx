@@ -1,8 +1,9 @@
 import { Heading } from "@/components/Typography";
 import { flags } from "@/config/flags";
-import { PageParamProps } from "@/types/params";
+import { Node } from "@/utils/buildTree";
 import { getSortFilterAndPaginationParams } from "@/utils/getSortFilterAndPaginationParams";
-import { Suspense } from "react";
+import { useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
 import { Breadcrumbs } from "./Breadcrumbs/Breadcrumbs";
 import { FilterActions } from "./Filter/FilterActions";
 import { FilterDisplayAction } from "./Filter/FilterDisplayAction";
@@ -10,21 +11,39 @@ import { SortActions } from "./Sort/SortActions";
 
 interface QueryActionsProps {
     title: string;
-    params: PageParamProps;
+    tree: Node[];
 }
 
-export function QueryActions({ title = "", params }: QueryActionsProps) {
+export function QueryActions({ title = "", tree = [] }: QueryActionsProps) {
+    const initial =
+        typeof window !== "undefined"
+            ? window.localStorage.getItem("lastTitle") || title
+            : title;
+
+    const [currTitle, setTitle] = useState(initial);
+
+    const searchParams = useSearchParams();
+
     const { sort, sortBy, page, pageSize, ...rest } =
-        getSortFilterAndPaginationParams(params);
+        getSortFilterAndPaginationParams({
+            searchParams: Object.fromEntries(searchParams),
+        });
+
+    useEffect(() => {
+        if (title && title.length > 0) {
+            window.localStorage.setItem("lastTitle", title);
+            setTitle(title);
+        } else {
+            setTitle(initial);
+        }
+    }, [title]);
 
     return (
         <div className="w-full space-y-4">
             <div className="flex flex-row space-between items-center w-full">
                 <span className="w-[80%]">
-                    <Suspense>
-                        <Breadcrumbs {...params} />
-                    </Suspense>
-                    <Heading>{title || "Home"}</Heading>
+                    <Breadcrumbs tree={tree} />
+                    <Heading>{currTitle}&nbsp;</Heading>
                 </span>
                 <span className="flex flex-row space-x-2 ml-auto">
                     {flags.showSort && <SortActions {...{ sort, sortBy }} />}

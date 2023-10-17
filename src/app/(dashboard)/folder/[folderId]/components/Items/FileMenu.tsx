@@ -2,9 +2,9 @@
 
 import { deleteFile } from "@/services/db/commands/deleteFile";
 import { deleteFolder } from "@/services/db/commands/deleteFolder";
+import { downloadSelected } from "@/utils/downloadSelected";
 import { Menu, Transition } from "@headlessui/react";
 import { useSession } from "next-auth/react";
-import Link from "next/link";
 import { useParams } from "next/navigation";
 import { Fragment, useTransition } from "react";
 import {
@@ -32,6 +32,7 @@ export function FileMenu({ item, onOpenState, toggleEdit }: FileMenuProps) {
     const orgId = user.data?.user?.orgId;
 
     const [pendingDelete, startTransition] = useTransition();
+    const [pendingDownload, startDownloadTransition] = useTransition();
 
     function onDelete() {
         if (!orgId || !isAdmin) return;
@@ -44,6 +45,12 @@ export function FileMenu({ item, onOpenState, toggleEdit }: FileMenuProps) {
 
             selection.remove(item.id);
             mutate(`/api/v1/folders/${folderId ?? "@root"}/contents`);
+        });
+    }
+
+    function onDownload() {
+        startDownloadTransition(async () => {
+            await downloadSelected([item.id]);
         });
     }
 
@@ -84,21 +91,15 @@ export function FileMenu({ item, onOpenState, toggleEdit }: FileMenuProps) {
                                 </Menu.Item>
                                 <hr />
                                 <Menu.Item>
-                                    <Link
-                                        href={
-                                            item.type === "file"
-                                                ? item.s3Url
-                                                : "#"
-                                        }
-                                        target="_blank"
-                                        download
+                                    <div
+                                        onClick={onDownload}
                                         className="hover:bg-gray-50 font-medium px-2 py-1 text-sm flex flex-row space-x-2 items-center hover:rounded-t-md"
                                     >
                                         <span>
                                             <RiFileDownloadLine />
                                         </span>
                                         <span>Download</span>
-                                    </Link>
+                                    </div>
                                 </Menu.Item>
                                 <hr />
                                 {isAdmin && (

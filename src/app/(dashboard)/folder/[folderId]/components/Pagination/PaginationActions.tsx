@@ -1,7 +1,7 @@
 "use client";
 import { classNames } from "@/utils";
 import { calculatePagination } from "@/utils/calculatePagination";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { FiChevronLeft, FiChevronRight } from "react-icons/fi";
 import { useSelection } from "../../../../../../hooks/SelectContext";
@@ -12,18 +12,24 @@ interface PaginationActionsProps {
     pageSize: number;
 }
 
-export function PaginationActions({
-    totalItems,
-    page,
-    pageSize,
-}: PaginationActionsProps) {
+export function PaginationActions({ totalItems }: PaginationActionsProps) {
     const router = useRouter();
-    const selection = useSelection();
-    const [currPage, setPage] = useState(page);
-    const [currPageSize, setPageSize] = useState(pageSize);
+    const search = useSearchParams();
 
-    const maxPages = Math.max(1, Math.ceil(totalItems / pageSize));
-    const pageNumbers = calculatePagination(page, maxPages);
+    let initialPage = search.get("page") ?? 1;
+    initialPage = !Number.isNaN(Number(initialPage)) ? Number(initialPage) : 1;
+
+    let initialPageSize = search.get("pageSize") ?? 20;
+    initialPageSize = !Number.isNaN(Number(initialPageSize))
+        ? Number(initialPageSize)
+        : 20;
+
+    const selection = useSelection();
+    const [currPage, setPage] = useState(initialPage);
+    const [currPageSize, setPageSize] = useState(initialPageSize);
+
+    const maxPages = Math.max(1, Math.ceil(totalItems / currPageSize));
+    const pageNumbers = calculatePagination(currPage, maxPages);
 
     function onChange(newVal: number) {
         const newPage = Math.min(Math.max(1, newVal), maxPages);
@@ -52,17 +58,17 @@ export function PaginationActions({
     }
 
     useEffect(() => {
-        if (page > maxPages) {
+        if (currPage > maxPages) {
             onChange(maxPages);
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [page]);
+    }, [currPage]);
 
     return (
         <div className="flex flex-row space-x-6 ml-auto">
             <div className="flex flex-row items-center space-x-2 select-none">
                 <button
-                    disabled={page === 1}
+                    disabled={currPage === 1}
                     onClick={() => onChange(currPage - 1)}
                     className="disabled:opacity-50 disabled:cursor-not-allowed"
                 >
@@ -85,7 +91,7 @@ export function PaginationActions({
                     ))}
                 </div>
                 <button
-                    disabled={page >= maxPages}
+                    disabled={currPage >= maxPages}
                     onClick={() => onChange(currPage + 1)}
                     className="disabled:opacity-50"
                 >
@@ -99,8 +105,10 @@ export function PaginationActions({
                         type="button"
                         onClick={() => onChangePageSize(10)}
                         className={classNames(
-                            "relative inline-flex items-center rounded-l px-3 py-2 text-sm font-semibold text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-10",
-                            pageSize === 10 ? "bg-gray-300" : "bg-white"
+                            "relative inline-flex items-center rounded-l px-3 py-2 text-sm font-semibold ring-1 ring-inset ring-gray-300 hover:opacity-60 focus:z-10",
+                            currPageSize === 10
+                                ? "bg-primary-300 text-white"
+                                : "bg-white"
                         )}
                     >
                         10
@@ -109,8 +117,10 @@ export function PaginationActions({
                         type="button"
                         onClick={() => onChangePageSize(20)}
                         className={classNames(
-                            "relative -ml-px inline-flex items-center  px-3 py-2 text-sm font-semibold text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-10",
-                            pageSize === 20 ? "bg-gray-300" : "bg-white"
+                            "relative -ml-px inline-flex items-center  px-3 py-2 text-sm font-semibold ring-1 ring-inset ring-gray-300 hover:opacity-60 focus:z-10",
+                            currPageSize === 20
+                                ? "bg-primary-300 text-white"
+                                : "bg-white"
                         )}
                     >
                         20
@@ -119,8 +129,10 @@ export function PaginationActions({
                         type="button"
                         onClick={() => onChangePageSize(50)}
                         className={classNames(
-                            "relative -ml-px inline-flex items-center rounded-r px-3 py-2 text-sm font-semibold text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-10",
-                            pageSize === 50 ? "bg-gray-300" : "bg-white"
+                            "relative -ml-px inline-flex items-center rounded-r px-3 py-2 text-sm font-semibold ring-1 ring-inset ring-gray-300 hover:opacity-60 focus:z-10",
+                            currPageSize === 50
+                                ? "bg-primary-300 text-white"
+                                : "bg-white"
                         )}
                     >
                         50

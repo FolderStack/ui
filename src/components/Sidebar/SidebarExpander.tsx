@@ -53,7 +53,7 @@ const DragHandle = forwardRef(function DragHandleComponent(
         <span
             {...dragProps}
             ref={ref}
-            className="h-8 w-8 bg-gray-200 border-2 shadow-lg rounded-full absolute bottom-6 z-40 flex items-center justify-center cursor-pointer hover:bg-gray-100 active:bg-gray-100 transition-background ease-in-out"
+            className="h-8 w-8 bg-gray-200 border-2 shadow-lg rounded-full absolute bottom-6 z-40 flex items-center justify-center cursor-pointer hover:bg-gray-100 active:bg-gray-100 active:cursor-grabbing transition-background ease-in-out"
             style={{ left: width - halfDragWidthOffset + "px" }}
         >
             <RxWidth />

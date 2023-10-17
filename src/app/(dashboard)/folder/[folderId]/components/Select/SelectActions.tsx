@@ -2,6 +2,7 @@
 import { deleteFile } from "@/services/db/commands/deleteFile";
 import { deleteFolder } from "@/services/db/commands/deleteFolder";
 import { classNames } from "@/utils";
+import { downloadSelected } from "@/utils/downloadSelected";
 import { useSession } from "next-auth/react";
 import { useParams } from "next/navigation";
 import { useTransition } from "react";
@@ -24,6 +25,7 @@ export function SelectActions({ items = [] }: SelectActionsProps) {
     const { folderId } = useParams();
     const selection = useSelection();
     const [pendingDelete, startTransition] = useTransition();
+    const [pendingDownload, startDownloadTransition] = useTransition();
 
     const allSelected =
         selection.selected.length === items.length && items.length > 0;
@@ -68,6 +70,13 @@ export function SelectActions({ items = [] }: SelectActionsProps) {
         });
     };
 
+    function downloadSelection() {
+        startDownloadTransition(async () => {
+            const selected = selection.selected;
+            await downloadSelected(selected);
+        });
+    }
+
     return (
         <div className="flex flex-row space-x-4">
             <button
@@ -84,6 +93,7 @@ export function SelectActions({ items = [] }: SelectActionsProps) {
             </button>
             <button
                 disabled={!selection.selected.length}
+                onClick={downloadSelection}
                 className="transition-all ease-in-out text-white font-medium inline-flex justify-center rounded border border-transparent bg-primary-300 px-4 py-2 hover:opacity-80 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
             >
                 <div className="flex flex-row items-center space-x-2">

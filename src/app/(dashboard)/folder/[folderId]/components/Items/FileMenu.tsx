@@ -44,7 +44,11 @@ export function FileMenu({
         if (!orgId || !isAdmin) return;
         startTransition(async () => {
             if (item.type === "file") {
-                await deleteFile(item.id, folderId.toString(), orgId);
+                await deleteFile(
+                    item.id,
+                    folderId ? folderId.toString() : null,
+                    orgId
+                );
             } else if (!item.root) {
                 await deleteFolder(item.id);
             }

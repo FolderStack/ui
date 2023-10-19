@@ -10,13 +10,14 @@ import { isValidId } from "../utils/isValidID";
 
 export async function deleteFile(
     fileId: string,
-    folderId: string,
+    folderId: string | null,
     orgId: string
 ): Promise<any> {
     if (!isValidId(fileId)) {
         throw new Error("Invalid file ID");
     }
 
+    folderId ??= "@root";
     const isRoot = folderId === "@root";
 
     if (!isRoot && !isValidId(folderId)) {

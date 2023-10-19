@@ -45,6 +45,7 @@ export function CreateFolderModal() {
             mutate(`/api/v1/folders/${parent ?? "@root"}/contents`);
             router.refresh();
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [state]);
 
     return (

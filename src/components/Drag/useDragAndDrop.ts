@@ -59,6 +59,7 @@ export function useDragAndDrop(
         if (!dragId && !dragging) {
             if (isDragging) onDragChange(String(item.id), isDragging);
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isDragging]);
 
     useEffect(() => {
@@ -86,6 +87,7 @@ export function useDragAndDrop(
         }
 
         return false;
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isDragging, isSelected, dragId, dragging, item]);
 
     return {

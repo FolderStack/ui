@@ -30,6 +30,7 @@ export function useSelectOnControlClick(item: IFileSystemObject) {
             removeEventListener("keydown", onDown);
             removeEventListener("keyup", onUp);
         };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     const onClick = (e: MouseEvent) => {

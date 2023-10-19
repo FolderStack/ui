@@ -14,6 +14,7 @@ export default function Signin() {
         } else if (status === "authenticated") {
             void router.push("/");
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [status]);
 
     return <div>Signing in...</div>;

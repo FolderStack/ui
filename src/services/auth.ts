@@ -49,12 +49,10 @@ export const authOptions: AuthOptions = {
                   clientId: process.env.OAUTH_CLIENT_ID,
                   clientSecret: process.env.OAUTH_CLIENT_SECRET,
                   type: "oauth",
-                  issuer: "https://furnx.whitepeak.digital",
-                  jwks_endpoint:
-                      "https://furnx.whitepeak.digital?well-known=jwks",
-                  token: "https://furnx.whitepeak.digital/oauth/token",
-                  authorization:
-                      "https://furnx.whitepeak.digital/oauth/authorize",
+                  issuer: process.env.OAUTH_ISSUER,
+                  jwks_endpoint: `${process.env.OAUTH_BASE_URL}?well-known=jwks`,
+                  token: `${process.env.OAUTH_BASE_URL}/oauth/token`,
+                  authorization: `${process.env.OAUTH_BASE_URL}/oauth/authorize`,
                   idToken: true,
                   checks: ["pkce", "state"],
                   profile(profile: any, tokens) {
@@ -78,9 +76,12 @@ export const authOptions: AuthOptions = {
                       client_id: process.env.OAUTH_CLIENT_ID,
                       client_secret: process.env.OAUTH_CLIENT_SECRET,
                       redirect_uris: [
-                          "http://localhost:3000/api/auth/callback/oauth",
+                          `${process.env.NEXTAUTH_URL}/api/auth/callback/oauth`,
                       ],
-                      post_logout_redirect_uris: ["http://localhost:3000"],
+                      post_logout_redirect_uris: [
+                          process.env.OAUTH_LOGOUT_URL ??
+                              process.env.NEXTAUTH_URL!,
+                      ],
                   },
               }
             : CredentialsProvider({

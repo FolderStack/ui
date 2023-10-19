@@ -2,7 +2,7 @@
 import { classNames } from "@/utils";
 import { calculatePagination } from "@/utils/calculatePagination";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { FiChevronLeft, FiChevronRight } from "react-icons/fi";
 import { useSelection } from "../../../../../../hooks/SelectContext";
 
@@ -28,13 +28,16 @@ export function PaginationActions({ totalItems }: PaginationActionsProps) {
     const [currPage, setPage] = useState(initialPage);
     const [currPageSize, setPageSize] = useState(initialPageSize);
 
-    const maxPages = Math.max(1, Math.ceil(totalItems / currPageSize));
+    const maxPages = useMemo(
+        () => Math.max(1, Math.ceil(totalItems / currPageSize)),
+        [totalItems, currPageSize]
+    );
     const pageNumbers = calculatePagination(currPage, maxPages);
 
-    function onChange(newVal: number) {
+    function onChange(newVal: number, ps = currPageSize) {
         const newPage = Math.min(Math.max(1, newVal), maxPages);
         setPage(newPage);
-        onSubmit(newPage, currPageSize);
+        onSubmit(newPage, ps);
     }
 
     function onChangePageSize(newVal: number) {
@@ -42,7 +45,7 @@ export function PaginationActions({ totalItems }: PaginationActionsProps) {
         const newMaxPages = Math.max(1, Math.floor(totalItems / newVal));
 
         if (currPage > newMaxPages) {
-            onChange(newMaxPages);
+            onChange(newMaxPages, newVal);
         } else {
             onSubmit(currPage, newVal);
         }
@@ -59,10 +62,10 @@ export function PaginationActions({ totalItems }: PaginationActionsProps) {
 
     useEffect(() => {
         if (currPage > maxPages) {
-            onChange(maxPages);
+            onChange(maxPages, currPageSize);
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [currPage]);
+    }, [currPage, currPageSize]);
 
     return (
         <div className="flex flex-row space-x-6 ml-auto">

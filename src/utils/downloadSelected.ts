@@ -11,6 +11,7 @@ export async function downloadSelected(selection: string[]) {
     const contentDisposition = response.headers.get("Content-Disposition");
     let filename = "download.zip"; // Default name
 
+    console.log(contentDisposition);
     // Extract filename from Content-Disposition header if available
     if (contentDisposition) {
         const match = contentDisposition.match(/filename="?(.+)"?\b/);
@@ -23,7 +24,7 @@ export async function downloadSelected(selection: string[]) {
     const a = document.createElement("a");
     a.style.display = "none";
     a.href = url;
-    a.download = filename; // Set the filename dynamically
+    a.download = filename;
     document.body.appendChild(a);
     a.click();
 

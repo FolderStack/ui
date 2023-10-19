@@ -20,9 +20,15 @@ interface FileMenuProps {
     item: any;
     onOpenState(b: boolean): void;
     toggleEdit(): void;
+    canEdit?: boolean;
 }
 
-export function FileMenu({ item, onOpenState, toggleEdit }: FileMenuProps) {
+export function FileMenu({
+    item,
+    onOpenState,
+    toggleEdit,
+    canEdit = false,
+}: FileMenuProps) {
     const { folderId } = useParams();
     const selection = useSelection();
     const { mutate } = useSWRConfig();
@@ -78,18 +84,22 @@ export function FileMenu({ item, onOpenState, toggleEdit }: FileMenuProps) {
                             leaveTo="transform opacity-0 scale-95"
                         >
                             <Menu.Items className="-mt-2 p-0 absolute right-0 text-left z-10 w-28 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
-                                <Menu.Item>
-                                    <div
-                                        onClick={toggleEdit}
-                                        className="hover:bg-gray-50 font-medium px-2 py-1 text-sm flex flex-row space-x-2 items-center hover:rounded-t-md"
-                                    >
-                                        <span>
-                                            <RiEdit2Fill />
-                                        </span>
-                                        <span>Rename</span>
-                                    </div>
-                                </Menu.Item>
-                                <hr />
+                                {canEdit && (
+                                    <>
+                                        <Menu.Item>
+                                            <div
+                                                onClick={toggleEdit}
+                                                className="hover:bg-gray-50 font-medium px-2 py-1 text-sm flex flex-row space-x-2 items-center hover:rounded-t-md"
+                                            >
+                                                <span>
+                                                    <RiEdit2Fill />
+                                                </span>
+                                                <span>Rename</span>
+                                            </div>
+                                            <hr />
+                                        </Menu.Item>
+                                    </>
+                                )}
                                 <Menu.Item>
                                     <div
                                         onClick={onDownload}
@@ -102,7 +112,7 @@ export function FileMenu({ item, onOpenState, toggleEdit }: FileMenuProps) {
                                     </div>
                                 </Menu.Item>
                                 <hr />
-                                {isAdmin && (
+                                {canEdit && (
                                     <Menu.Item
                                         as="div"
                                         className="bg-red-500 hover:bg-red-400 text-white font-medium px-2 py-1 text-sm rounded-b-md flex flex-row space-x-2 items-center disabled:opacity-50 disabled:cursor-not-allowed"

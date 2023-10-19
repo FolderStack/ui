@@ -23,11 +23,11 @@ export default function FolderPageLayout(props: any) {
         fetcher
     );
     const { data: folderData, isLoading: loadingContent } = useSWR(
-        `/api/v1/folders/${String(params.folderId)}/contents`,
+        `/api/v1/folders/${String(params.folderId ?? "@root")}/contents`,
         fetcher
     );
     const { data: pageInfo, isLoading: loadingPage } = useSWR(
-        `/api/v1/folders/${String(params.folderId)}`,
+        `/api/v1/folders/${String(params.folderId ?? "@root")}`,
         fetcher
     );
 
@@ -42,7 +42,7 @@ export default function FolderPageLayout(props: any) {
 
     return (
         <SelectionProvider items={folderData?.items ?? []}>
-            <main className="w-full flex flex-row">
+            <main className="w-full flex flex-row overflow-y-scroll">
                 {loadingTree ? <SidebarLoading /> : <Sidebar {...{ tree }} />}
                 <section className="p-6 flex-1">
                     <section id="query-actions" className="w-full space-y-8">

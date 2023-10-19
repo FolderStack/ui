@@ -1,79 +1,50 @@
 import mongoose, { ObjectId, Schema } from "mongoose";
 
-export interface IFile {
+export interface IFileSystemObject {
     id: string;
-    s3Key: string;
-    s3Url: string;
+    type: "file" | "folder";
     name: string;
-    fileSize: number;
-    mimeType: string;
+    s3Key?: string;
+    s3Url?: string;
+    fileSize?: number;
+    mimeType?: string;
+    parent?: string | ObjectId | null;
+    orgId: string | ObjectId;
     createdBy: string;
     createdAt: Date;
     updatedAt: Date;
-    folderId: ObjectId;
-}
-
-// File Schema (Embedded)
-export const FileSchema = new Schema<IFile>({
-    s3Key: { type: String, required: true },
-    s3Url: { type: String, required: true },
-    name: { type: String, required: true },
-    fileSize: { type: Number, required: true },
-    mimeType: { type: String, required: true },
-    createdBy: { type: String, required: true },
-    createdAt: { type: Date, default: Date.now },
-    updatedAt: { type: Date, default: Date.now },
-    folderId: { type: mongoose.Types.ObjectId },
-});
-
-let FileModel: mongoose.Model<IFile>;
-try {
-    FileModel = mongoose.model<IFile>("File");
-} catch (error) {
-    FileModel = mongoose.model<IFile>("File", FileSchema);
-}
-
-export interface IFolder {
-    id: string | mongoose.Types.ObjectId;
-    name: string;
-    parent: string | mongoose.Types.ObjectId | null;
-    orgId: string | mongoose.Types.ObjectId;
-    createdBy: string;
-    createdAt: Date;
-    updatedAt: Date;
-    children: (string | mongoose.Types.ObjectId)[];
-    files: IFile[];
+    children?: (string | ObjectId)[];
     order?: number;
     root?: boolean;
 }
 
-export interface BasicFolder {
-    id: string;
-    name: string;
-    parent?: string;
-    children?: BasicFolder[];
-    order?: number;
-}
-
-// Folder Schema
-const FolderSchema = new Schema<IFolder>({
+// Unified Object Schema
+const FileSystemObjectSchema = new Schema<IFileSystemObject>({
+    type: { type: String, required: true, enum: ["file", "folder"] },
     name: { type: String, required: true },
+    s3Key: { type: String },
+    s3Url: { type: String },
+    fileSize: { type: Number },
+    mimeType: { type: String },
     parent: { type: Schema.Types.ObjectId, default: null },
     orgId: { type: String, required: true },
     createdBy: { type: String, required: true },
     createdAt: { type: Date, default: Date.now },
     updatedAt: { type: Date, default: Date.now },
-    children: [{ type: Schema.Types.ObjectId, ref: "Folder" }],
+    children: [{ type: Schema.Types.ObjectId, ref: "FileSystemObject" }],
     root: { type: Boolean },
     order: { type: Number },
-    files: [FileSchema],
 });
 
-let FolderModel: mongoose.Model<IFolder>;
+let FileSystemObjectModel: mongoose.Model<IFileSystemObject>;
 try {
-    FolderModel = mongoose.model<IFolder>("Folder");
+    FileSystemObjectModel =
+        mongoose.model<IFileSystemObject>("FileSystemObject");
 } catch (error) {
-    FolderModel = mongoose.model<IFolder>("Folder", FolderSchema);
+    FileSystemObjectModel = mongoose.model<IFileSystemObject>(
+        "FileSystemObject",
+        FileSystemObjectSchema
+    );
 }
 
-export { FileModel, FolderModel };
+export { FileSystemObjectModel };

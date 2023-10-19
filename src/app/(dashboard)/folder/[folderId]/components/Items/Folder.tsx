@@ -1,8 +1,9 @@
 "use client";
 import { useMoveOnDrop } from "@/hooks/useMoveOnDrop";
 import { updateFolder } from "@/services/db/commands/updateFolder";
-import { IFolder } from "@/services/db/models";
+import { IFileSystemObject } from "@/services/db/models";
 import { classNames } from "@/utils";
+import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useMemo, useRef, useState, useTransition } from "react";
 import { BiSolidFolder } from "react-icons/bi";
@@ -12,11 +13,14 @@ import { useSelection } from "../../../../../../hooks/SelectContext";
 import { useSelectOnControlClick } from "../Select/useOnCtrlSelect";
 import { FileMenu } from "./FileMenu";
 
-interface FolderProps extends IFolder {
+interface FolderProps extends IFileSystemObject {
     //
 }
 
 export function Folder({ ...item }: FolderProps) {
+    const session = useSession();
+    const isAdmin = session.data?.user?.role === "admin";
+
     const { mutate } = useSWRConfig();
 
     const editRef = useRef<HTMLInputElement>(null);
@@ -79,7 +83,7 @@ export function Folder({ ...item }: FolderProps) {
 
     return (
         <div
-            ref={ref as any}
+            ref={isAdmin ? (ref as any) : undefined}
             onClick={onFolderClick}
             onMouseEnter={prefetch}
             className={isBeingDragged ? "opacity-60" : ""}
@@ -134,6 +138,7 @@ export function Folder({ ...item }: FolderProps) {
                         item={item}
                         onOpenState={setFileMenuOpen}
                         toggleEdit={onStartEdit}
+                        canEdit={isAdmin}
                     />
                 </div>
                 <div className="p-4 space-y-4 mt-4">

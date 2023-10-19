@@ -1,135 +1,90 @@
 import mongoose from "mongoose";
-import { FolderModel } from "../models";
+import { FileSystemObjectModel } from "../models";
+import { mongoConnect } from "../mongodb";
 
-function transformResultWithPaths(
-    result: any[],
-    selection: Set<string>,
-    folderMap: Map<string, string> = new Map(),
-    seenPaths: Set<string> = new Set(),
-    output = [] as any[]
-) {
-    for (const item of result) {
-        const { files: file, ...folder } = item;
+function flatten(item: any, arr = [] as any[]) {
+    const { nested = [], ...rest } = item;
+    arr.push(rest);
+    for (const child of nested) {
+        flatten(child, arr);
+    }
+}
 
-        const fileId = String(file.id);
-        const folderId = String(folder._id);
-        const parentId = folder.parent ? String(folder.parent) : null;
+function getPathToRoot(current: any, items: any[]) {
+    if (!current) return "";
+    let path = current.name;
+    if (current.parent) {
+        path =
+            getPathToRoot(
+                items.find((i: any) => String(i.id) === String(current.parent)),
+                items
+            ) + path;
+    }
+    if (current.type === "folder") {
+        path += "/";
+    }
+    return path;
+}
 
-        let folderPath = `${folder.name}/`;
-
-        if (folderMap.has(folderId)) {
-            folderPath = folderMap.get(folderId)!;
-        } else {
-            if (parentId) {
-                const parentPath = folderMap.get(parentId);
-                if (parentPath) {
-                    folderPath = `${parentPath}/${folderPath}`;
-                }
-            }
-        }
-
-        // If a folder is selected but not yet added, add it.
-        if (selection.has(folderId)) {
-            output.push({
-                id: folderId,
-                type: "folder",
-                name: folder.name,
-                path: folderPath,
-            });
-
-            seenPaths.add(folderPath);
-            folderMap.set(folderId, folderPath);
-            selection.delete(folderId);
-        } else if (selection.has(fileId)) {
-            output.push({
-                id: fileId,
-                type: "file",
-                name: file.name,
-                path: file.name,
-                s3Key: file.s3Key,
-            });
-
-            seenPaths.add(file.name);
-            selection.delete(fileId);
-        }
-
-        // If a folder is added, add it's children
-        const filePath = `${folderPath}${file.name}`;
-        // Avoid adding duplicate files or clashing names that might
-        // cause issues on the frontend
-        if (folderMap.has(folderId) && !seenPaths.has(filePath)) {
-            output.push({
-                id: fileId,
-                type: "file",
-                name: file.name,
-                path: filePath,
-                s3Key: file.s3Key,
-            });
-            seenPaths.add(filePath);
-        }
+function flattenAndFindPaths(items: any[]) {
+    const flat: any[] = [];
+    for (const item of items) {
+        flatten(item, flat);
     }
 
-    return output;
+    return flat.map((item) => ({
+        ...item,
+        path: getPathToRoot(item, flat),
+    }));
 }
 
 export async function getFilesAndFoldersByIds(ids: string[]) {
+    await mongoConnect();
+
     const objectIdArray = ids.map((id) => new mongoose.mongo.ObjectId(id));
 
     const pipeline = [
         {
             $match: {
-                $or: [
-                    { _id: { $in: objectIdArray } }, // For folders
-                    { "files._id": { $in: objectIdArray } }, // For files in folders
-                ],
+                _id: { $in: objectIdArray },
+            },
+        },
+        {
+            $graphLookup: {
+                from: "filesystemobjects",
+                startWith: "$_id",
+                connectFromField: "_id",
+                connectToField: "parent",
+                as: "nested",
+                depthField: "depth",
             },
         },
         {
             $project: {
                 id: "$_id",
-                type: { $literal: "folder" },
+                type: 1,
                 name: 1,
-                files: {
+                parent: 1,
+                s3Key: 1,
+                nested: {
                     $map: {
-                        input: "$files",
-                        as: "file",
+                        input: "$nested",
+                        as: "nestedItem",
                         in: {
-                            id: "$$file._id",
-                            type: { $literal: "file" },
-                            s3Key: "$$file.s3Key",
-                            name: "$$file.name",
-                            mimeType: "$$file.mimeType",
+                            id: "$$nestedItem._id",
+                            name: "$$nestedItem.name",
+                            parent: "$$nestedItem.parent",
+                            type: "$$nestedItem.type",
+                            s3Key: "$$nestedItem.s3Key",
                         },
                     },
                 },
             },
         },
-        {
-            $unwind: {
-                path: "$files",
-                preserveNullAndEmptyArrays: true,
-            },
-        },
     ];
 
-    const result = await FolderModel.aggregate(pipeline);
+    const result = await FileSystemObjectModel.aggregate(pipeline).exec();
+    const flattened = flattenAndFindPaths(result);
 
-    // Initialize an empty array to store the final output
-    const finalResult = transformResultWithPaths(result, new Set(ids));
-
-    return finalResult as (
-        | {
-              id: string;
-              type: "folder";
-              name: string;
-              path: string;
-          }
-        | {
-              id: string;
-              type: "file";
-              s3Key: string;
-              name: string;
-              path: string;
-          }
-    )[];
+    return flattened;
 }

@@ -11,11 +11,17 @@ export function FolderPageContentLoading() {
                 return (
                     <div
                         key={i}
-                        className="rounded animate-pulse bg-gray-200 h-44 p-4 space-y-4"
+                        className="rounded animate-pulse bg-gray-200 p-4 space-y-4"
+                        style={{ height: "208px" }}
                     >
-                        <div className="rounded animate-pulse bg-gray-300 h-24 w-full relative" />
+                        <div className="flex items-center justify-center h-32">
+                            <div
+                                className="rounded animate-pulse bg-gray-300 h-28 relative"
+                                style={{ width: "112px" }}
+                            />
+                        </div>
                         <div
-                            className="rounded animate-pulse bg-gray-300 h-6 relative"
+                            className="rounded animate-pulse bg-gray-300 h-6 relative -mt-2"
                             style={{ width: `${textWidth}%` }}
                         />
                     </div>

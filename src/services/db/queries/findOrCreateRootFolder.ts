@@ -1,25 +1,28 @@
 "use server";
 import mongoose from "mongoose";
-import { FolderModel } from "../models";
+import { FileSystemObjectModel } from "../models";
 
 export async function findOrCreateRootFolder(
     orgId: string,
     session?: mongoose.ClientSession
 ) {
-    let folder = await FolderModel.findOne({ root: true, orgId }).session(
-        session ?? null
-    );
+    let folder = await FileSystemObjectModel.findOne({
+        type: "folder",
+        root: true,
+        orgId,
+    }).session(session ?? null);
+
     if (!folder) {
         folder = (
-            await FolderModel.create(
+            await FileSystemObjectModel.create(
                 [
                     {
-                        name: "root",
+                        name: "Home",
+                        type: "folder",
                         root: true,
                         parent: null,
                         orgId,
-                        files: [],
-                        folder: [],
+                        children: [],
                         createdAt: new Date(),
                         createdBy: "system",
                     },
@@ -28,5 +31,6 @@ export async function findOrCreateRootFolder(
             )
         )[0];
     }
+
     return folder;
 }

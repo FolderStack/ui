@@ -5,7 +5,16 @@ const nextConfig = {
     },
     experimental: {
         serverActions: true
-    }
+    },
+    async redirects() {
+        return [
+            {
+                source: '/',
+                destination: '/folder',
+                permanent: true,
+            },
+        ]
+    },
 }
 
 module.exports = nextConfig

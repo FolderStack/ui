@@ -1,6 +1,7 @@
 "use client";
 import { updateFile } from "@/services/db/commands/updateFile";
 import { classNames } from "@/utils";
+import { useSession } from "next-auth/react";
 import Image from "next/image";
 import { useMemo, useRef, useState, useTransition } from "react";
 import { useSWRConfig } from "swr";
@@ -10,6 +11,9 @@ import { useSelectOnControlClick } from "../Select/useOnCtrlSelect";
 import { FileMenu } from "./FileMenu";
 
 export function File({ ...item }: any) {
+    const session = useSession();
+    const isAdmin = session.data?.user?.role === "admin";
+
     const { mutate } = useSWRConfig();
 
     const editRef = useRef<HTMLInputElement>(null);
@@ -49,7 +53,7 @@ export function File({ ...item }: any) {
 
     return (
         <div
-            ref={dragRef}
+            ref={isAdmin ? dragRef : undefined}
             className={classNames(
                 isOver || isSelected
                     ? "border-primary-500"
@@ -100,6 +104,7 @@ export function File({ ...item }: any) {
                     item={item}
                     onOpenState={setFileMenuOpen}
                     toggleEdit={onStartEdit}
+                    canEdit={isAdmin}
                 />
             </div>
             <div className="p-4 space-y-4 mt-4">

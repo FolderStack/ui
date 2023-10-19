@@ -3,8 +3,7 @@ import { s3Client } from "@/services/aws/s3";
 import { toObjectId } from "@/services/db/utils/toObjectId";
 import { DeleteObjectCommand } from "@aws-sdk/client-s3";
 import mongoose from "mongoose";
-import { revalidatePath } from "next/cache";
-import { FolderModel } from "../models";
+import { FileSystemObjectModel } from "../models";
 import { mongoConnect } from "../mongodb";
 import { findOrCreateRootFolder } from "../queries/findOrCreateRootFolder";
 import { isValidId } from "../utils/isValidID";
@@ -32,55 +31,59 @@ export async function deleteFile(
     const session = await mongoose.startSession();
     await session.withTransaction(
         async (sess) => {
-            // Fetch the parent folder to get the file's S3 key
-            let folder;
-            if (isRoot) {
-                folder = await findOrCreateRootFolder(orgId, session);
-                parent = folder._id;
-            } else {
-                folder = await FolderModel.findById(parent)
-                    .session(sess)
-                    .exec();
+            try {
+                // Fetch the file object to get the S3 key
+                const file = await FileSystemObjectModel.findById(id).session(
+                    sess
+                );
+                if (!file || !file.s3Key) {
+                    throw new Error("File not found or missing S3 key");
+                }
+
+                await FileSystemObjectModel.deleteOne(id);
+
+                let folder;
+                if (isRoot) {
+                    folder = await findOrCreateRootFolder(orgId, session);
+                    parent = folder._id;
+                } else {
+                    folder = await FileSystemObjectModel.findById(parent)
+                        .session(sess)
+                        .exec();
+                }
+
+                // Remove from the parent if it's there...
+                if (folder && folder.children?.length) {
+                    const fileIndex = folder.children.findIndex(
+                        (child) => String(child) === String(id)
+                    );
+
+                    if (fileIndex !== -1) {
+                        // Remove the file reference from the parent folder
+                        folder.children.splice(fileIndex, 1);
+                        await FileSystemObjectModel.findByIdAndUpdate(parent, {
+                            $pull: { children: id },
+                        })
+                            .session(sess)
+                            .exec();
+                    }
+                }
+
+                // Delete the file from S3 if it has a valid key
+                const s3Key = file.s3Key;
+                if (s3Key && typeof s3Key === "string" && s3Key.length > 0) {
+                    const deleteObject = {
+                        Bucket: process.env.AWS_BUCKET_NAME,
+                        Key: s3Key,
+                    };
+                    await s3Client.send(new DeleteObjectCommand(deleteObject));
+                }
+
+                // Commit the transaction
+                await sess.commitTransaction();
+            } catch (err) {
+                console.log(err);
             }
-
-            if (!folder) {
-                throw new Error("Folder not found");
-            }
-
-            const file = folder.files.find(
-                (f: any) => String(f._id) === String(id)
-            );
-            if (!file) {
-                throw new Error("File not found");
-            }
-
-            const s3Key = file.s3Key; // Replace with actual field name for S3 key
-
-            // Update the parent folder to remove the file reference
-            await FolderModel.findByIdAndUpdate(
-                parent,
-                {
-                    $pull: {
-                        files: {
-                            _id: id,
-                        },
-                    },
-                },
-                { session: sess }
-            ).exec();
-
-            if (s3Key && typeof s3Key === "string" && s3Key.length > 0) {
-                const deleteObject = {
-                    Bucket: process.env.AWS_BUCKET_NAME,
-                    Key: s3Key,
-                };
-
-                await s3Client.send(new DeleteObjectCommand(deleteObject));
-            }
-
-            // Commit the transaction
-            await sess.commitTransaction();
-            revalidatePath(`/folder/${folderId}`);
         },
         { maxCommitTimeMS: 10000, retryWrites: true }
     );

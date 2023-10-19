@@ -33,7 +33,7 @@ export const SidebarMenuItem: React.FC<SidebarMenuItemProps> = ({
             ref={dropRef}
             className={classNames(
                 "my-1 rounded-sm flex justify-between items-center cursor-pointer py-1 px-3 border-2",
-                node.id === current ? "bg-blue-200" : "",
+                node.id === current ? "bg-secondary-200" : "",
                 isOver && !isBeingDragged
                     ? "border-white"
                     : "border-transparent"
@@ -41,7 +41,7 @@ export const SidebarMenuItem: React.FC<SidebarMenuItemProps> = ({
         >
             <Link
                 className={classNames(
-                    "cursor-pointer flex-1 truncate",
+                    "cursor-pointer flex-1 truncate text-white font-medium",
                     isOver && !isBeingDragged ? "opacity-60" : ""
                 )}
                 href={`/folder/${node.id}`}

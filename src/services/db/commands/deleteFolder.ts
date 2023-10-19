@@ -1,9 +1,10 @@
 "use server";
+
 import { s3Client } from "@/services/aws/s3";
 import { DeleteObjectsCommand } from "@aws-sdk/client-s3";
 import mongoose from "mongoose";
 import { revalidatePath } from "next/cache";
-import { FileModel, FolderModel, IFile, IFolder } from "../models";
+import { FileSystemObjectModel, IFileSystemObject } from "../models";
 import { mongoConnect } from "../mongodb";
 import { isValidId } from "../utils/isValidID";
 
@@ -17,29 +18,39 @@ export async function deleteFolder(folderId: string): Promise<any> {
     const session = await mongoose.startSession();
     await session.withTransaction(
         async (sess) => {
-            const deleteFilesFromS3 = async (folder: IFolder) => {
-                if (!folder.files.length) return;
+            const deleteFilesFromS3 = async (folder: IFileSystemObject) => {
+                if (!folder.children || !folder.children.length) return;
 
-                const objectIdentifiers = folder.files.map((file: IFile) => ({
-                    Key: file.s3Key,
-                }));
+                // Fetch children details
+                const childObjects = await FileSystemObjectModel.find({
+                    _id: { $in: folder.children },
+                })
+                    .session(sess)
+                    .exec();
 
-                const deleteParams = {
-                    Bucket: process.env.AWS_BUCKET_NAME,
-                    Delete: {
-                        Objects: objectIdentifiers,
-                        Quiet: false,
-                    },
-                };
+                // Filter out files and form the S3 delete params
+                const objectIdentifiers = childObjects
+                    .filter((child) => child.type === "file")
+                    .map((file) => ({ Key: file.s3Key }));
 
-                await s3Client.send(new DeleteObjectsCommand(deleteParams));
+                if (objectIdentifiers.length > 0) {
+                    const deleteParams = {
+                        Bucket: process.env.AWS_BUCKET_NAME,
+                        Delete: {
+                            Objects: objectIdentifiers,
+                            Quiet: false,
+                        },
+                    };
+
+                    await s3Client.send(new DeleteObjectsCommand(deleteParams));
+                }
             };
 
             // Recursive function to delete folder and its children
             const deleteFolderRecursively = async (
                 id: string | mongoose.Types.ObjectId
             ) => {
-                const folder = await FolderModel.findById(id)
+                const folder = await FileSystemObjectModel.findById(id)
                     .session(sess)
                     .exec();
                 if (!folder) {
@@ -49,13 +60,16 @@ export async function deleteFolder(folderId: string): Promise<any> {
                 // Delete files from S3
                 await deleteFilesFromS3(folder);
 
-                // Delete child files
-                await FileModel.deleteMany({ folderId: id })
+                // Delete child objects
+                await FileSystemObjectModel.deleteMany({ parent: id })
                     .session(sess)
                     .exec();
 
                 // Delete child folders recursively
-                const childFolders = await FolderModel.find({ parent: id })
+                const childFolders = await FileSystemObjectModel.find({
+                    parent: id,
+                    type: "folder",
+                })
                     .session(sess)
                     .exec();
                 for (const childFolder of childFolders) {
@@ -63,7 +77,9 @@ export async function deleteFolder(folderId: string): Promise<any> {
                 }
 
                 // Finally, delete the folder itself
-                await FolderModel.findByIdAndDelete(id).session(sess).exec();
+                await FileSystemObjectModel.findByIdAndDelete(id)
+                    .session(sess)
+                    .exec();
             };
 
             await deleteFolderRecursively(folderId);

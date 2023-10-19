@@ -83,10 +83,6 @@ export const GET = async (req: NextRequest) => {
         ) {
             const output = new PassThrough();
             const webStream = nodeStreamToWebStream(output);
-            output.on("finish", () => console.debug("PassThrough finished"));
-            output.on("error", (err) =>
-                console.debug("PassThrough error:", err)
-            );
 
             const params = {
                 Bucket: process.env.AWS_BUCKET_NAME,
@@ -121,12 +117,6 @@ export const GET = async (req: NextRequest) => {
 
             const webStream = nodeStreamToWebStream(output);
             archive.pipe(output);
-            output.on("finish", () => console.debug("PassThrough finished"));
-            output.on("error", (err) =>
-                console.debug("PassThrough error:", err)
-            );
-            archive.on("finish", () => console.debug("Archive finished"));
-            archive.on("error", (err) => console.debug("Archive error:", err));
 
             for (const item of filesAndFolders) {
                 if (item.type === "file") {

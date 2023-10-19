@@ -1,6 +1,6 @@
 "use server";
 import mongoose from "mongoose";
-import { FileModel, FolderModel, IFile } from "../models";
+import { FileSystemObjectModel, IFileSystemObject } from "../models";
 import { mongoConnect } from "../mongodb";
 import { findOrCreateRootFolder } from "../queries/findOrCreateRootFolder";
 import { isValidId } from "../utils/isValidID";
@@ -8,7 +8,7 @@ import { isValidId } from "../utils/isValidID";
 export const createFile = async (
     folderId: string,
     orgId: string,
-    data: Partial<IFile>
+    data: Partial<IFileSystemObject>
 ): Promise<any> => {
     if (!data || !data.name || !folderId) {
         throw new Error("Missing required fields for file creation.");
@@ -24,25 +24,39 @@ export const createFile = async (
     await session.withTransaction(
         async (session) => {
             // Create the new file
+            const newFileData = {
+                ...data,
+                type: "file", // Define the type as 'file'
+                orgId,
+            };
 
-            const newFile = new FileModel(data);
+            const newFile = new FileSystemObjectModel(newFileData); // Use the unified model
 
             // Update the folder
             let folder;
             if (folderId === "@root") {
                 folder = await findOrCreateRootFolder(orgId, session);
             } else {
-                folder = await FolderModel.findById(folderId).session(session);
+                newFile.parent = folderId;
+                folder = await FileSystemObjectModel.findById(folderId).session(
+                    session
+                );
             }
 
             if (!folder) {
                 throw new Error("Folder not found");
             }
 
-            folder.files.push(newFile); // Add the new file to the folder's files
-            folder.updatedAt = new Date(); // Update the lastUpdated date
+            if (!folder.children) {
+                folder.children = [];
+            }
 
+            folder.children.push(String(newFile._id));
+            folder.updatedAt = new Date();
+
+            await newFile.save({ session });
             await folder.save({ session });
+
             await session.commitTransaction();
         },
         { maxCommitTimeMS: 10000, retryWrites: true }

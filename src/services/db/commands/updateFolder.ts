@@ -1,12 +1,12 @@
 "use server";
 import mongoose from "mongoose";
-import { FolderModel, IFolder } from "../models/folder";
+import { FileSystemObjectModel } from "../models";
 import { mongoConnect } from "../mongodb";
 import { isValidId } from "../utils/isValidID";
 
 export async function updateFolder(
     folderId: string,
-    data: Partial<IFolder>
+    data: Partial<any>
 ): Promise<any> {
     if (!isValidId(folderId)) {
         throw new Error("Invalid folder ID.");
@@ -17,37 +17,50 @@ export async function updateFolder(
     const session = await mongoose.startSession();
     await session.withTransaction(
         async (sess) => {
-            const oldFolderData = await FolderModel.findById(folderId)
+            // Find the folder to update
+            const folderToUpdate = await FileSystemObjectModel.findById(
+                folderId
+            )
                 .session(sess)
                 .exec();
 
-            if (!oldFolderData) {
+            if (!folderToUpdate || folderToUpdate.type !== "folder") {
                 throw new Error("Folder not found.");
             }
 
-            await FolderModel.findByIdAndUpdate(folderId, data, {
-                new: true,
-                session: sess,
-            }).exec();
+            // Update folder data
+            for (const key in data) {
+                if (data.hasOwnProperty(key)) {
+                    (folderToUpdate as any)[key] = data[key];
+                }
+            }
+            await folderToUpdate.save({ session: sess });
 
-            // Update children array for old and new parent folders
+            // If the parent folder has changed, update the old and new parents
             if (
                 data.parent &&
-                String(data.parent) !== String(oldFolderData.parent)
+                String(data.parent) !== String(folderToUpdate.parent)
             ) {
-                if (oldFolderData.parent) {
-                    await FolderModel.findByIdAndUpdate(
-                        oldFolderData.parent,
-                        { $pull: { children: folderId } },
-                        { session: sess }
-                    ).exec();
-                }
+                // Remove from old parent folder
+                await FileSystemObjectModel.findByIdAndUpdate(
+                    folderToUpdate.parent,
+                    {
+                        $pull: { children: folderId },
+                    }
+                )
+                    .session(sess)
+                    .exec();
 
-                await FolderModel.findByIdAndUpdate(
-                    data.parent,
-                    { $push: { children: folderId } },
-                    { session: sess }
-                ).exec();
+                // Add to new parent folder
+                await FileSystemObjectModel.findByIdAndUpdate(data.parent, {
+                    $push: { children: folderId },
+                })
+                    .session(sess)
+                    .exec();
+
+                // Update the folder's parent
+                folderToUpdate.parent = data.parent;
+                await folderToUpdate.save({ session: sess });
             }
 
             await sess.commitTransaction();

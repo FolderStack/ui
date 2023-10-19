@@ -3,7 +3,7 @@ import { removeObjectIds } from "@/services/db/utils/removeObjectIds";
 import { toObjectId } from "@/services/db/utils/toObjectId";
 import { PageParamProps } from "@/types/params";
 import { getSortFilterAndPaginationParams } from "@/utils/getSortFilterAndPaginationParams";
-import { FolderModel, IFile, IFolder } from "../models";
+import { FileSystemObjectModel, IFileSystemObject } from "../models";
 import { mongoConnect } from "../mongodb";
 import { isValidId } from "../utils/isValidID";
 
@@ -23,14 +23,11 @@ export async function getFolderContents(params: PageParamProps) {
 
     const isRoot = folderId === "@root";
 
-    const matchConditionForFolders = {
+    const matchCondition = {
         parent: isRoot ? null : toObjectId(folderId),
-        root: { $ne: true }, // Exclude the virtual root folder from childFolders
+        root: { $ne: true }, // Exclude the virtual root folder
+        type: { $in: ["file", "folder"] }, // Add this line if you have a 'type' field
     };
-
-    const matchConditionForFiles = isRoot
-        ? { root: true } // Specifically match only the virtual root folder for files
-        : { _id: toObjectId(folderId) };
 
     const filterPipeline = [
         ...(filter.filterVisible === "1"
@@ -74,28 +71,13 @@ export async function getFolderContents(params: PageParamProps) {
 
     const countPipeline: any[] = [
         {
-            $match: {
-                $or: [matchConditionForFolders, matchConditionForFiles],
-            },
+            $match: matchCondition,
         },
+        ...filterPipeline,
         {
-            $facet: {
-                childFolders: [{ $match: { parent: folderId } }],
-                parentFiles: [
-                    { $match: { _id: folderId } },
-                    { $unwind: "$files" },
-                ],
-                ...filterPipeline,
-            },
-        },
-        {
-            $project: {
-                totalItems: {
-                    $add: [
-                        { $size: "$childFolders" },
-                        { $size: "$parentFiles" },
-                    ],
-                },
+            $group: {
+                _id: null,
+                totalItems: { $sum: 1 },
             },
         },
     ];
@@ -103,54 +85,9 @@ export async function getFolderContents(params: PageParamProps) {
     // Construct the aggregation pipeline
     let pipeline: any[] = [
         {
-            $match: {
-                $or: [matchConditionForFolders, matchConditionForFiles],
-            },
+            $match: matchCondition,
         },
-        {
-            $facet: {
-                childFolders: [
-                    {
-                        $match: matchConditionForFolders,
-                    },
-                    {
-                        $addFields: {
-                            type: "folder",
-                        },
-                    },
-                ],
-                parentFiles: [
-                    {
-                        $match: matchConditionForFiles,
-                    },
-                    {
-                        $unwind: "$files",
-                    },
-                    {
-                        $replaceRoot: { newRoot: "$files" },
-                    },
-                    ...filterPipeline,
-                    {
-                        $addFields: {
-                            type: "file",
-                        },
-                    },
-                ],
-            },
-        },
-        {
-            $project: {
-                allItems: {
-                    $concatArrays: ["$childFolders", "$parentFiles"],
-                },
-            },
-        },
-        {
-            $unwind: "$allItems",
-        },
-        {
-            $replaceRoot: { newRoot: "$allItems" },
-        },
+        ...filterPipeline,
         {
             $sort: {
                 [`${sortBy}`]: sort === "asc" ? 1 : -1,
@@ -167,8 +104,8 @@ export async function getFolderContents(params: PageParamProps) {
     await mongoConnect();
 
     const [items, count] = await Promise.allSettled([
-        FolderModel.aggregate(pipeline).exec(),
-        FolderModel.aggregate(countPipeline).exec(),
+        FileSystemObjectModel.aggregate(pipeline).exec(),
+        FileSystemObjectModel.aggregate(countPipeline).exec(),
     ]);
 
     if (items.status === "rejected") {
@@ -186,7 +123,7 @@ export async function getFolderContents(params: PageParamProps) {
     const totalItems = count.value[0]?.totalItems ?? 0;
 
     return {
-        items: removeObjectIds<(IFolder | IFile)[]>(items.value),
+        items: removeObjectIds<IFileSystemObject[]>(items.value),
         pagination: {
             totalItems,
             found: items.value.length,

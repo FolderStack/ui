@@ -8,8 +8,6 @@ export const GET = async (
     req: NextRequest,
     { params }: Pick<PageParamProps, "params">
 ) => {
-    const url = new URL(req.url);
-    const searchParams = Object.fromEntries(url.searchParams);
     const session = await getServerSession(authOptions);
     const userId = session?.user?.id;
     const orgId = session?.user?.orgId;
@@ -37,7 +35,7 @@ export const GET = async (
     }
 
     try {
-        const page = await getFolder({ params, searchParams });
+        const page = await getFolder(folderId);
 
         return new NextResponse(
             JSON.stringify({ success: true, ...(page ?? {}) }),

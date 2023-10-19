@@ -1,4 +1,5 @@
 "use client";
+import { isLocal } from "@/config/dev";
 import { signIn, useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
@@ -9,11 +10,11 @@ export default function Signin() {
 
     useEffect(() => {
         if (status === "unauthenticated") {
-            void signIn("credentials");
+            void signIn(isLocal ? "credentials" : "oauth");
         } else if (status === "authenticated") {
             void router.push("/");
         }
     }, [status]);
 
-    return <div></div>;
+    return <div>Signing in...</div>;
 }

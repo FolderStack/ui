@@ -1,13 +1,12 @@
 "use server";
-import { toObjectId } from "@/services/db/utils/toObjectId";
 import mongoose from "mongoose";
-import { FolderModel, IFile } from "../models";
+import { FileSystemObjectModel } from "../models";
 import { mongoConnect } from "../mongodb";
 import { isValidId } from "../utils/isValidID";
 
 export async function updateFile(
     fileId: string,
-    data: Partial<IFile>
+    data: Partial<any>
 ): Promise<any> {
     if (!isValidId(fileId)) {
         throw new Error("Invalid file ID.");
@@ -18,49 +17,48 @@ export async function updateFile(
     const session = await mongoose.startSession();
     await session.withTransaction(
         async (sess) => {
-            // Find the folder containing the file to update
-            const oldFolder = await FolderModel.findOne(
-                { "files._id": fileId },
-                { "files.$": 1 }
-            )
+            // Find the folder or file to update
+            const fileToUpdate = await FileSystemObjectModel.findById(fileId)
                 .session(sess)
                 .exec();
 
-            if (
-                !oldFolder ||
-                !oldFolder.files ||
-                oldFolder.files.length === 0
-            ) {
+            if (!fileToUpdate || fileToUpdate.type !== "file") {
                 throw new Error("File not found.");
             }
 
-            const oldFileData = oldFolder.files[0];
+            // Update file data
+            for (const key in data) {
+                if (data.hasOwnProperty(key)) {
+                    (fileToUpdate as any)[key] = data[key];
+                }
+            }
+            await fileToUpdate.save({ session: sess });
 
-            // Update file in the old folder
-            await FolderModel.updateOne(
-                { _id: oldFolder._id, "files._id": fileId },
-                { $set: { "files.$": data } },
-                { session: sess }
-            ).exec();
-
-            // Update files array for old and new parent folders if folderId has changed
+            // If the parent folder has changed, update the old and new parents
             if (
-                data.folderId &&
-                String(data.folderId) !== String(oldFileData.folderId)
+                data.parent &&
+                String(data.parent) !== String(fileToUpdate.parent)
             ) {
                 // Remove from old parent folder
-                await FolderModel.updateOne(
-                    { _id: oldFolder._id },
-                    { $pull: { files: { _id: fileId } } },
-                    { session: sess }
-                ).exec();
+                await FileSystemObjectModel.findByIdAndUpdate(
+                    fileToUpdate.parent,
+                    {
+                        $pull: { children: fileId },
+                    }
+                )
+                    .session(sess)
+                    .exec();
 
                 // Add to new parent folder
-                await FolderModel.updateOne(
-                    { _id: toObjectId(data.folderId) },
-                    { $push: { files: { _id: fileId, ...data } } },
-                    { session: sess }
-                ).exec();
+                await FileSystemObjectModel.findByIdAndUpdate(data.parent, {
+                    $push: { children: fileId },
+                })
+                    .session(sess)
+                    .exec();
+
+                // Update the file's parent
+                fileToUpdate.parent = data.parent;
+                await fileToUpdate.save({ session: sess });
             }
 
             await sess.commitTransaction();

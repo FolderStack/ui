@@ -53,14 +53,19 @@ export const POST = async (req: NextRequest, { params }: PageParamProps) => {
         const mimeType = file.type ?? "application/octetstream";
         const fileSize = file.size;
 
+        let prefix = process.env.AWS_BUCKET_PREFIX;
+        console.log({ prefix });
+        prefix = prefix?.length ? prefix + "/" : "";
+        const key = `${prefix}assets/${orgId}/${Date.now()}/${md5(name)}`;
+
         const putObject = {
             Bucket: process.env.AWS_BUCKET_NAME,
-            Key: `assets/${orgId}/${folderId}/${md5(name)}`,
+            Key: key,
             Body: Buffer.from(buffer),
             ContentType: mimeType,
         };
 
-        const s3Url = `https://${process.env.AWS_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${putObject.Key}`;
+        const s3Url = `https://${process.env.AWS_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${key}`;
 
         await s3Client.send(new PutObjectCommand(putObject));
 

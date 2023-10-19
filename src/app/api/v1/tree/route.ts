@@ -27,6 +27,7 @@ export const GET = async () => {
             }
         );
     } catch (error: any) {
+        console.log(error);
         return new NextResponse(
             JSON.stringify({ success: false, message: error.message }),
             { status: 500 }

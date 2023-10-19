@@ -1,8 +1,16 @@
+<<<<<<< Updated upstream
 import { IFile, IFolder } from "@/services/db/models";
 import { useEffect, useMemo, useState } from "react";
 import { useSelection } from "../../../../../../hooks/SelectContext";
 
 export function useSelectOnControlClick(item: IFile | IFolder) {
+=======
+import { IFileSystemObject } from "@/services/db/models";
+import { useEffect, useMemo, useState } from "react";
+import { useSelection } from "../../../../../../hooks/SelectContext";
+
+export function useSelectOnControlClick(item: IFileSystemObject) {
+>>>>>>> Stashed changes
     const { isSelected: selectedFn, add, remove } = useSelection();
 
     const isSelected = useMemo(

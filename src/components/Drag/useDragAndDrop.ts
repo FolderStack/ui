@@ -1,13 +1,21 @@
 "use client";
 
+<<<<<<< Updated upstream
 import { IFile, IFolder } from "@/services/db/models";
+=======
+import { IFileSystemObject } from "@/services/db/models";
+>>>>>>> Stashed changes
 import { useEffect, useMemo } from "react";
 import { useDrag, useDrop } from "react-dnd";
 import { useSelection } from "../../hooks/SelectContext";
 import { useDraggingState } from "./DragContext";
 
 export function useDragAndDrop(
+<<<<<<< Updated upstream
     item: IFolder | IFile,
+=======
+    item: IFileSystemObject,
+>>>>>>> Stashed changes
     onDrop?: (ids: string[]) => void
 ) {
     const { dragging, onDragChange, dragId } = useDraggingState();

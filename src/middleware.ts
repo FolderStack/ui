@@ -25,15 +25,26 @@ export function generateCsp() {
                 // `'nonce-${nonce}'`,
                 "'unsafe-inline'",
                 "*.googleapis.com",
-                "*.gstatic.com"
+                "*.gstatic.com",
             ],
         },
         {
             name: "connect-src",
-            values: ["'self'", "*.vercel-insights.com", "plausible.io", "*.googleapis.com"],
+            values: [
+                "'self'",
+                "*.vercel-insights.com",
+                "plausible.io",
+                "*.googleapis.com",
+            ],
         },
-        { name: "font-src", values: ["'self'", "data:", "*.gstatic.com", "*.googleapis.com"] },
-        { name: "img-src", values: ["'self'", "data:", "*.gstatic.com", '*.googleapis.com'] },
+        {
+            name: "font-src",
+            values: ["'self'", "data:", "*.gstatic.com", "*.googleapis.com"],
+        },
+        {
+            name: "img-src",
+            values: ["'self'", "data:", "*.gstatic.com", "*.googleapis.com"],
+        },
         { name: "worker-src", values: ["'self'", "blob:"] },
         { name: "frame-ancestors", values: ["'none'"] },
         { name: "form-action", values: ["*"] }, //'self'", "http://localhost:3000/api/auth/signin/australani
@@ -67,18 +78,18 @@ export async function middleware(request: NextRequest) {
             : "content-security-policy";
 
     // Set the CSP header so that `app-render` can read it and generate tags with the nonce
-    requestHeaders.set(headerKey, csp);
+    // requestHeaders.set(headerKey, csp);
 
     // create new response
     const response = NextResponse.next({
-        request: {
-            // New request headers
-            headers: requestHeaders,
-        },
+        // request: {
+        //     // New request headers
+        //     headers: requestHeaders,
+        // },
     });
 
     // Also set the CSP so that it is outputted to the browser
-    response.headers.set(headerKey, csp);
+    // response.headers.set(headerKey, csp);
 
     return response;
 }

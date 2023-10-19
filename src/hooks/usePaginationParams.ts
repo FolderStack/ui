@@ -15,8 +15,8 @@ export function usePaginationParams() {
 
     const change = (p: number, ps: number) => {
         const url = new URL(window.location.href);
-        url.searchParams.set("page", p.toString());
-        url.searchParams.set("pageSize", ps.toString());
+        url.searchParams.set("page", String(p));
+        url.searchParams.set("pageSize", String(ps));
 
         router.push(`/${url.pathname}?${url.searchParams.toString()}`);
     };

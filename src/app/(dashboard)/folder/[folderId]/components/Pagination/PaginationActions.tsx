@@ -53,8 +53,8 @@ export function PaginationActions({ totalItems }: PaginationActionsProps) {
 
     function onSubmit(newPage: number, newPageSize: number) {
         const url = new URL(window.location.href);
-        url.searchParams.set("page", newPage.toString());
-        url.searchParams.set("pageSize", newPageSize.toString());
+        url.searchParams.set("page", String(newPage));
+        url.searchParams.set("pageSize", String(newPageSize));
 
         selection.setState([]);
         router.push(url.pathname + url.search);

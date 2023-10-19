@@ -46,7 +46,7 @@ export function FileMenu({
             if (item.type === "file") {
                 await deleteFile(
                     item.id,
-                    folderId ? folderId.toString() : null,
+                    folderId ? String(folderId) : null,
                     orgId
                 );
             } else if (!item.root) {

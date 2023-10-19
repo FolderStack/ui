@@ -19,13 +19,13 @@ export function buildUrl({ params, searchParams }: PageParamProps) {
     const url = new URL(api.url + `/folders/${folderId}`);
 
     // url.searchParams.set("display", display.toString());
-    url.searchParams.set("page", page.toString());
-    url.searchParams.set("pageSize", pageSize.toString());
-    url.searchParams.set("sort", sort.toString());
-    url.searchParams.set("sortBy", sortBy.toString());
-    from && url.searchParams.set("from", from.toString());
-    to && url.searchParams.set("to", to.toString());
-    fileTypes && url.searchParams.set("fileTypes", fileTypes.toString());
+    url.searchParams.set("page", String(page));
+    url.searchParams.set("pageSize", String(pageSize));
+    url.searchParams.set("sort", String(sort));
+    url.searchParams.set("sortBy", String(sortBy));
+    from && url.searchParams.set("from", String(from));
+    to && url.searchParams.set("to", String(to));
+    fileTypes && url.searchParams.set("fileTypes", String(fileTypes));
 
     return url.toString();
 }

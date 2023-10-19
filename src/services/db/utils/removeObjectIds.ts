@@ -39,7 +39,7 @@ export function removeObjectIds<T>(obj: T): Sanitized<T> {
                 sanitized[key] = removeObjectIds(value);
             } else if (typeof value === "object" && value !== null) {
                 if (value instanceof mongoose.mongo.ObjectId) {
-                    sanitized[key] = value.toString();
+                    sanitized[key] = String(value);
                 } else {
                     sanitized[key] = removeObjectIds(value);
                 }

@@ -4,6 +4,7 @@ import { classNames } from "@/utils";
 import { useSession } from "next-auth/react";
 import Image from "next/image";
 import { useMemo, useRef, useState, useTransition } from "react";
+import { BiSolidFile } from "react-icons/bi";
 import { useSWRConfig } from "swr";
 import { useDragAndDrop } from "../../../../../../components/Drag/useDragAndDrop";
 import { useSelection } from "../../../../../../hooks/SelectContext";
@@ -28,6 +29,21 @@ export function File({ ...item }: any) {
         () => selectedFn(item.id),
         [item.id, selectedFn]
     );
+
+    const [imageLoaded, setImageLoaded] = useState(false);
+    const [image, setImage] = useState<string | null>(
+        `https://cdn.folderstack.io/` + item.s3Key + ".jpg"
+    );
+
+    const onImageError = () => {
+        console.debug("Image errored, removing it...");
+        setImageLoaded(true);
+        setImage(null);
+    };
+
+    const onImageLoad = () => {
+        setImageLoaded(true);
+    };
 
     const [fileMenuOpen, setFileMenuOpen] = useState(false);
 
@@ -109,14 +125,21 @@ export function File({ ...item }: any) {
             </div>
             <div className="p-4 space-y-4 mt-4">
                 <div className="w-full relative h-28 overflow-hidden select-none">
-                    <Image
-                        src={
-                            "https://via.placeholder.com/300x300.png?text=Missing+Thumbail"
-                        }
-                        layout="fill"
-                        objectFit="contain"
-                        alt="image"
-                    />
+                    {image ? (
+                        <Image
+                            src={image}
+                            layout="fill"
+                            objectFit="contain"
+                            alt="image"
+                            onError={onImageError}
+                            onLoad={onImageLoad}
+                        />
+                    ) : (
+                        <BiSolidFile
+                            style={{ width: "100%", height: "100%" }}
+                            className="text-primary-500"
+                        />
+                    )}
                 </div>
                 {!editing ? (
                     <div className="text-xs line-clamp-2 text-ellipsis">
@@ -124,7 +147,7 @@ export function File({ ...item }: any) {
                     </div>
                 ) : (
                     <input
-                        className="text-sm"
+                        className="rounded-sm border-0 text-sm w-full ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-primary-600"
                         type="text"
                         value={editValue}
                         onBlur={submitEdit}

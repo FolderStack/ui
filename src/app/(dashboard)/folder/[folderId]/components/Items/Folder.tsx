@@ -155,7 +155,7 @@ export function Folder({ ...item }: FolderProps) {
                         </div>
                     ) : (
                         <input
-                            className="text-sm"
+                            className="rounded-sm border-0 text-sm w-full ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-primary-600 "
                             type="text"
                             value={editValue}
                             onBlur={submitEdit}

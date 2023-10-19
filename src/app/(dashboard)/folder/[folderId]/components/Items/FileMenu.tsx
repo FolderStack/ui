@@ -85,21 +85,20 @@ export function FileMenu({
                         >
                             <Menu.Items className="-mt-2 p-0 absolute right-0 text-left z-10 w-28 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
                                 {canEdit && (
-                                    <>
-                                        <Menu.Item>
-                                            <div
-                                                onClick={toggleEdit}
-                                                className="hover:bg-gray-50 font-medium px-2 py-1 text-sm flex flex-row space-x-2 items-center hover:rounded-t-md"
-                                            >
-                                                <span>
-                                                    <RiEdit2Fill />
-                                                </span>
-                                                <span>Rename</span>
-                                            </div>
-                                            <hr />
-                                        </Menu.Item>
-                                    </>
+                                    <Menu.Item>
+                                        <div
+                                            onClick={toggleEdit}
+                                            className="hover:bg-gray-50 font-medium px-2 py-1 text-sm flex flex-row space-x-2 items-center hover:rounded-t-md"
+                                        >
+                                            <span>
+                                                <RiEdit2Fill />
+                                            </span>
+                                            <span>Rename</span>
+                                        </div>
+                                    </Menu.Item>
                                 )}
+                                {/** Complains about rendering a fragment if the hairline is inside the above Menu.Item */}
+                                {canEdit && <hr />}
                                 <Menu.Item>
                                     <div
                                         onClick={onDownload}

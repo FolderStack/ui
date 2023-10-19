@@ -50,9 +50,9 @@ export const authOptions: AuthOptions = {
                   clientSecret: process.env.OAUTH_CLIENT_SECRET,
                   type: "oauth",
                   issuer: process.env.OAUTH_ISSUER,
-                  jwks_endpoint: `${process.env.OAUTH_BASE_URL}?well-known=jwks`,
-                  token: `${process.env.OAUTH_BASE_URL}/oauth/token`,
-                  authorization: `${process.env.OAUTH_BASE_URL}/oauth/authorize`,
+                  jwks_endpoint: process.env.OAUTH_KEYS_ENDPOINT!,
+                  token: process.env.OAUTH_TOKEN_ENDPOINT!,
+                  authorization: process.env.OAUTH_AUTHORIZE_ENDPOINT!,
                   idToken: true,
                   checks: ["pkce", "state"],
                   profile(profile: any, tokens) {

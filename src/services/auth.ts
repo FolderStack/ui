@@ -82,6 +82,19 @@ export const authOptions: AuthOptions = {
                           process.env.OAUTH_LOGOUT_URL ??
                               process.env.NEXTAUTH_URL!,
                       ],
+                      token_endpoint_auth_method: "client_secret_basic",
+                      grant_types: [
+                          "authorization_code",
+                          "refresh_token",
+                          "client_credentials",
+                      ],
+                      response_mode: "query",
+                      scope: "openid",
+                      //   token_endpoint_auth_signing_alg: "RS256",
+                      //   introspection_endpoint_auth_method: "client_secret_basic",
+                      //   introspection_endpoint_auth_signing_alg: "RS256",
+                      //   revocation_endpoint_auth_method: "client_secret_basic",
+                      //   revocation_endpoint_auth_signing_alg: "RS256",
                   },
               }
             : CredentialsProvider({

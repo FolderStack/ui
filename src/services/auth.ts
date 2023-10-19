@@ -1,4 +1,5 @@
 import { isLocal } from "@/config/dev";
+import * as JWT from "jsonwebtoken";
 import md5 from "md5";
 import { AuthOptions } from "next-auth";
 import NextAuth from "next-auth/next";
@@ -15,12 +16,24 @@ export const authOptions: AuthOptions = {
             }
             if (user) {
                 token.user = user;
+
+                try {
+                    const decoded = JWT.decode(
+                        String((token as any).accessToken)
+                    ) as Record<string, string | number>;
+
+                    (token.user as any).role =
+                        decoded.permissions === "*" ? "admin" : "user";
+                } catch (err) {
+                    //
+                }
             }
             return token;
         },
         async session({ session, token }) {
             if (session) {
                 session.user = Object.assign({}, session.user, token.user);
+                session.user.orgId = process.env.ORG_ID!;
                 session = Object.assign({}, session, {
                     accessToken: token.accessToken,
                 });
@@ -36,28 +49,13 @@ export const authOptions: AuthOptions = {
                   clientId: process.env.OAUTH_CLIENT_ID,
                   clientSecret: process.env.OAUTH_CLIENT_SECRET,
                   type: "oauth",
-                  issuer: "https://furnx.whitepeak.digital/",
+                  issuer: "https://furnx.whitepeak.digital",
                   jwks_endpoint:
                       "https://furnx.whitepeak.digital?well-known=jwks",
                   token: "https://furnx.whitepeak.digital/oauth/token",
                   authorization:
                       "https://furnx.whitepeak.digital/oauth/authorize",
-                  userinfo: {
-                      async request(context) {
-                          const result = await fetch(
-                              "https://furnx.whitepeak.digital/oauth/me",
-                              {
-                                  headers: {
-                                      Authorization: `Bearer ${context.tokens.access_token}`,
-                                  },
-                              }
-                          );
-
-                          const data = await result.json();
-                          return data as any;
-                      },
-                  },
-                  idToken: false,
+                  idToken: true,
                   checks: ["pkce", "state"],
                   profile(profile: any, tokens) {
                       const emailhash = md5(
@@ -80,24 +78,9 @@ export const authOptions: AuthOptions = {
                       client_id: process.env.OAUTH_CLIENT_ID,
                       client_secret: process.env.OAUTH_CLIENT_SECRET,
                       redirect_uris: [
-                          "https://assets.furnx.whitepeak.digital/api/auth/callback/oauth",
+                          "http://localhost:3000/api/auth/callback/oauth",
                       ],
-                      post_logout_redirect_uris: [
-                          "https://furnx.whitepeak.digital",
-                      ],
-                      token_endpoint_auth_method: "client_secret_basic",
-                      grant_types: [
-                          "authorization_code",
-                          "refresh_token",
-                          "client_credentials",
-                      ],
-                      response_mode: "query",
-                      scope: "openid",
-                      token_endpoint_auth_signing_alg: "RS256",
-                      introspection_endpoint_auth_method: "client_secret_basic",
-                      introspection_endpoint_auth_signing_alg: "RS256",
-                      revocation_endpoint_auth_method: "client_secret_basic",
-                      revocation_endpoint_auth_signing_alg: "RS256",
+                      post_logout_redirect_uris: ["http://localhost:3000"],
                   },
               }
             : CredentialsProvider({

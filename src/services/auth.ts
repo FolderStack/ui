@@ -92,7 +92,7 @@ export const authOptions: AuthOptions = {
                           "client_credentials",
                       ],
                       response_mode: "query",
-                      scope: "openid profile email basic",
+                      scope: "basic",
                       token_endpoint_auth_signing_alg: "RS256",
                       introspection_endpoint_auth_method: "client_secret_basic",
                       introspection_endpoint_auth_signing_alg: "RS256",

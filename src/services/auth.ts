@@ -79,8 +79,12 @@ export const authOptions: AuthOptions = {
                       response_types: ["code"],
                       client_id: process.env.OAUTH_CLIENT_ID,
                       client_secret: process.env.OAUTH_CLIENT_SECRET,
-                      redirect_uris: ["https://url/api/auth/callback/oauth"],
-                      post_logout_redirect_uris: ["https://url/"],
+                      redirect_uris: [
+                          "https://assets.furnx.whitepeak.digital/api/auth/callback/oauth",
+                      ],
+                      post_logout_redirect_uris: [
+                          "https://furnx.whitepeak.digital",
+                      ],
                       token_endpoint_auth_method: "client_secret_basic",
                       grant_types: [
                           "authorization_code",

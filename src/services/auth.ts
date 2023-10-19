@@ -36,22 +36,17 @@ export const authOptions: AuthOptions = {
                   clientId: process.env.OAUTH_CLIENT_ID,
                   clientSecret: process.env.OAUTH_CLIENT_SECRET,
                   type: "oauth",
-                  issuer: "https://australani.whitepeak.digital/",
-                  jwks_endpoint:
-                      "https://australani.whitepeak.digital?well-known=jwks",
-                  token: "https://australani.whitepeak.digital/oauth/token",
-                  authorization:
-                      "https://australani.whitepeak.digital/oauth/authorize",
+                  issuer: "https://url/",
+                  jwks_endpoint: "https://url/.well-known/jwks",
+                  token: "https://url/oauth/token",
+                  authorization: "https://url/oauth/authorize",
                   userinfo: {
                       async request(context) {
-                          const result = await fetch(
-                              "https://australani.whitepeak.digital/oauth/me",
-                              {
-                                  headers: {
-                                      Authorization: `Bearer ${context.tokens.access_token}`,
-                                  },
-                              }
-                          );
+                          const result = await fetch("https://url/oauth/me", {
+                              headers: {
+                                  Authorization: `Bearer ${context.tokens.access_token}`,
+                              },
+                          });
 
                           const data = await result.json();
                           return data as any;

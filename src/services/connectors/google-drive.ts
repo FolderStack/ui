@@ -17,8 +17,6 @@ export class GoogleDriveFileSystemConnector extends FileSystemConnector {
     }
 
     async tree(folderId = "root"): Promise<FileSystemObject[]> {
-        this.checkPermission(); // Checking permission
-
         const params: drive_v3.Params$Resource$Files$List = {
             q: `'${folderId}' in parents and trashed = false`,
             fields: "files(id, name, mimeType)",
@@ -41,9 +39,30 @@ export class GoogleDriveFileSystemConnector extends FileSystemConnector {
     async getThumbnail(filePath: string): Promise<string | null> {
         return "";
     }
-
-    protected checkPermission() {
-        // Implement your Google Drive-specific permission logic
-        // You have access to this.organizationId and this.userId
+    getBulkThumbnails(
+        filePaths: string[]
+    ): Promise<Map<string, string | null>> {
+        throw new Error("Method not implemented.");
+    }
+    upload(filePath: string, content: Buffer): Promise<void> {
+        throw new Error("Method not implemented.");
+    }
+    download(filePath: string): Promise<Buffer> {
+        throw new Error("Method not implemented.");
+    }
+    rename(oldPath: string, newPath: string): Promise<void> {
+        throw new Error("Method not implemented.");
+    }
+    move(srcPath: string, destPath: string): Promise<void> {
+        throw new Error("Method not implemented.");
+    }
+    delete(filePath: string): Promise<void> {
+        throw new Error("Method not implemented.");
+    }
+    createReadStream(filePath: string): NodeJS.ReadableStream {
+        throw new Error("Method not implemented.");
+    }
+    createWriteStream(filePath: string, meta?: any): NodeJS.WritableStream {
+        throw new Error("Method not implemented.");
     }
 }

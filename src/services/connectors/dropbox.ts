@@ -14,8 +14,6 @@ export class DropboxFileSystemConnector extends FileSystemConnector {
     }
 
     async tree(folderPath: string = ""): Promise<FileSystemObject[]> {
-        this.checkPermission();
-
         const config = {
             headers: {
                 Authorization: `Bearer ${this.accessToken}`,
@@ -46,7 +44,30 @@ export class DropboxFileSystemConnector extends FileSystemConnector {
         return "";
     }
 
-    protected checkPermission() {
-        // Dropbox-specific permission checks here
+    getBulkThumbnails(
+        filePaths: string[]
+    ): Promise<Map<string, string | null>> {
+        throw new Error("Method not implemented.");
+    }
+    upload(filePath: string, content: Buffer): Promise<void> {
+        throw new Error("Method not implemented.");
+    }
+    download(filePath: string): Promise<Buffer> {
+        throw new Error("Method not implemented.");
+    }
+    rename(oldPath: string, newPath: string): Promise<void> {
+        throw new Error("Method not implemented.");
+    }
+    move(srcPath: string, destPath: string): Promise<void> {
+        throw new Error("Method not implemented.");
+    }
+    delete(filePath: string): Promise<void> {
+        throw new Error("Method not implemented.");
+    }
+    createReadStream(filePath: string): NodeJS.ReadableStream {
+        throw new Error("Method not implemented.");
+    }
+    createWriteStream(filePath: string, meta?: any): NodeJS.WritableStream {
+        throw new Error("Method not implemented.");
     }
 }

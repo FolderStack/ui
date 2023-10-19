@@ -14,8 +14,6 @@ export class OneDriveFileSystemConnector extends FileSystemConnector {
     }
 
     async tree(folderId = "root"): Promise<FileSystemObject[]> {
-        this.checkPermission();
-
         const url =
             folderId === "root"
                 ? "https://graph.microsoft.com/v1.0/me/drive/root/children"
@@ -41,9 +39,30 @@ export class OneDriveFileSystemConnector extends FileSystemConnector {
     async getThumbnail(filePath: string): Promise<string | null> {
         return "";
     }
-
-    protected checkPermission() {
-        // Implement your OneDrive-specific permission logic
-        // You have access to this.organizationId and this.userId
+    getBulkThumbnails(
+        filePaths: string[]
+    ): Promise<Map<string, string | null>> {
+        throw new Error("Method not implemented.");
+    }
+    upload(filePath: string, content: Buffer): Promise<void> {
+        throw new Error("Method not implemented.");
+    }
+    download(filePath: string): Promise<Buffer> {
+        throw new Error("Method not implemented.");
+    }
+    rename(oldPath: string, newPath: string): Promise<void> {
+        throw new Error("Method not implemented.");
+    }
+    move(srcPath: string, destPath: string): Promise<void> {
+        throw new Error("Method not implemented.");
+    }
+    delete(filePath: string): Promise<void> {
+        throw new Error("Method not implemented.");
+    }
+    createReadStream(filePath: string): NodeJS.ReadableStream {
+        throw new Error("Method not implemented.");
+    }
+    createWriteStream(filePath: string, meta?: any): NodeJS.WritableStream {
+        throw new Error("Method not implemented.");
     }
 }

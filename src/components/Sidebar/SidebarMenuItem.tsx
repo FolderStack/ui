@@ -1,6 +1,6 @@
 // SidebarMenuItem.tsx
 import { useMoveOnDrop } from "@/hooks/useMoveOnDrop";
-import { IFolder } from "@/services/db/models";
+import { IFileSystemObject } from "@/services/db/models";
 import { classNames } from "@/utils";
 import { Node } from "@/utils/buildTree";
 import Link from "next/link";
@@ -23,7 +23,10 @@ export const SidebarMenuItem: React.FC<SidebarMenuItemProps> = ({
 }) => {
     const { onDrop } = useMoveOnDrop(node.id);
     const { dragId } = useDraggingState();
-    const { dropRef, isOver } = useDragAndDrop(node as IFolder, onDrop);
+    const { dropRef, isOver } = useDragAndDrop(
+        node as IFileSystemObject,
+        onDrop
+    );
 
     // Can't use isBeingDragged from useDragAndDrop due to separate refs being used.
     const isBeingDragged = dragId === node.id;

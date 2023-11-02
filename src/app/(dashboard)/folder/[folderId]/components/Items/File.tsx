@@ -133,6 +133,7 @@ export function File({ ...item }: any) {
                             alt="image"
                             onError={onImageError}
                             onLoad={onImageLoad}
+                            unoptimized
                         />
                     ) : (
                         <BiSolidFile

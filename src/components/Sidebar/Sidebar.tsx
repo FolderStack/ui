@@ -16,6 +16,7 @@ export function Sidebar({ tree = [] as Node[] }) {
                             width={260}
                             height={220}
                             objectFit="contain"
+                            unoptimized
                         />
                     </Link>
                 </div>

@@ -32,7 +32,7 @@ export function File({ ...item }: any) {
 
     const [imageLoaded, setImageLoaded] = useState(false);
     const [image, setImage] = useState<string | null>(
-        `https://cdn.folderstack.io/` + item.s3Key + ".jpg"
+        process.env.NEXT_PUBLIC_CDN_URL + item.s3Key + ".jpg"
     );
 
     const onImageError = () => {

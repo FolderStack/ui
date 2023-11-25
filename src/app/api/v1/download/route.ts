@@ -24,20 +24,6 @@ const nodeStreamToWebStream = (
     });
 };
 
-function webStreamToNodeReadable(webStream: ReadableStream<any>): Readable {
-    const reader = webStream.getReader();
-    return new Readable({
-        async read() {
-            const { done, value } = await reader.read();
-            if (done) {
-                this.push(null);
-            } else {
-                this.push(Buffer.from(value));
-            }
-        },
-    });
-}
-
 export const GET = async (req: NextRequest) => {
     const session = await getServerSession(authOptions);
     const userId = session?.user?.id;

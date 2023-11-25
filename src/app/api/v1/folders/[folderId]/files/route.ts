@@ -1,9 +1,8 @@
 import { authOptions } from "@/services/auth";
-import { s3Client } from "@/services/aws/s3";
 import { createFile } from "@/services/db/commands/createFile";
 import { PageParamProps } from "@/types/params";
-import { PutObjectCommand } from "@aws-sdk/client-s3";
-import md5 from "md5";
+import { extractS3Key } from "@/utils/extractS3KeyFromUrl";
+import { getRequestBody } from "@/utils/getRequestBody";
 import { getServerSession } from "next-auth";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -35,10 +34,9 @@ export const POST = async (req: NextRequest, { params }: PageParamProps) => {
     }
 
     try {
-        const formData = await req.formData();
-        const file = formData.get("file") as File;
+        const data = await getRequestBody(req);
 
-        if (!file) {
+        if (!data) {
             return new NextResponse(
                 JSON.stringify({
                     success: false,
@@ -48,33 +46,24 @@ export const POST = async (req: NextRequest, { params }: PageParamProps) => {
             );
         }
 
-        const name = file.name;
-        const buffer = await file.arrayBuffer();
-        const mimeType = file.type ?? "application/octetstream";
-        const fileSize = file.size;
+        const { name, type = "application/octetstream", size, url } = data;
+        const key = extractS3Key(url);
 
-        let prefix = process.env.AWS_BUCKET_PREFIX;
-        console.log({ prefix });
-        prefix = prefix?.length ? prefix + "/" : "";
-        const key = `${prefix}assets/${orgId}/${Date.now()}/${md5(name)}`;
-
-        const putObject = {
-            Bucket: process.env.AWS_BUCKET_NAME,
-            Key: key,
-            Body: Buffer.from(buffer),
-            ContentType: mimeType,
-        };
-
-        const s3Url = `https://${process.env.AWS_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${key}`;
-
-        await s3Client.send(new PutObjectCommand(putObject));
+        if (!key) {
+            return new NextResponse(
+                JSON.stringify({
+                    success: false,
+                    message: "Couldn't parse url",
+                }),
+                { status: 400 }
+            );
+        }
 
         await createFile(folderId, orgId, {
             name,
-            fileSize,
-            mimeType,
-            s3Key: putObject.Key,
-            s3Url,
+            fileSize: size,
+            mimeType: type,
+            s3Key: key,
             createdBy: userId,
         });
 

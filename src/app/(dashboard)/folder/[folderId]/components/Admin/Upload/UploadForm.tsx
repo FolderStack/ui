@@ -72,14 +72,18 @@ export function UploadForm({ onDone }: UploadFormProps) {
     }
 
     async function presignUrlsAndCreateFileObjects(
+        folderId: string,
         fileArr: MiniFile[]
     ): Promise<UploadUrl[]> {
         try {
             const response = await axios.post(
-                `/`,
-                {
-                    files: [],
-                },
+                `/api/v1/folders/${folderId}/files/preupload`,
+                JSON.stringify({
+                    files: fileArr.map((f) => ({
+                        id: f.id,
+                        name: f.name,
+                    })),
+                }),
                 { signal: abortController.current?.signal }
             );
 
@@ -145,13 +149,16 @@ export function UploadForm({ onDone }: UploadFormProps) {
         e.preventDefault();
 
         // TODO: Handle uploading to the root directory... maybe use orgId as the id of that folder?
-        const folderId = params.folderId ?? null;
+        const folderId = (params.folderId ?? "@root").toString();
 
         startTransition(async () => {
             const limit = plimit(3);
             abortController.current = new AbortController();
 
-            const fileArr = await presignUrlsAndCreateFileObjects(files);
+            const fileArr = await presignUrlsAndCreateFileObjects(
+                folderId,
+                files
+            );
 
             const promises = fileArr.map(async (file, i) => {
                 if (!file || !file.file || !file.file.file || file.error)
@@ -171,7 +178,7 @@ export function UploadForm({ onDone }: UploadFormProps) {
                 return limit(() =>
                     axios
                         .post(
-                            `/api/v1/folders/${folderId ?? "@root"}/files`,
+                            `/api/v1/folders/${folderId}/files`,
                             JSON.stringify({
                                 ...file.file,
                                 key: file.url,

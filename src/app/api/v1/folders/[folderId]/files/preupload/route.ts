@@ -2,7 +2,8 @@ import { authOptions } from "@/services/auth";
 import { s3Client } from "@/services/aws/s3";
 import { PageParamProps } from "@/types/params";
 import { getRequestBody } from "@/utils/getRequestBody";
-import { createPresignedPost } from "@aws-sdk/s3-presigned-post";
+import { PutObjectCommand } from "@aws-sdk/client-s3";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import md5 from "md5";
 import { getServerSession } from "next-auth";
 import { NextRequest, NextResponse } from "next/server";
@@ -58,11 +59,16 @@ export const POST = async (req: NextRequest, { params }: PageParamProps) => {
                     name
                 )}`;
 
-                const { url } = await createPresignedPost(s3Client as any, {
-                    Bucket: process.env.AWS_BUCKET_NAME!,
-                    Key: key,
-                    Expires: 600,
-                });
+                const url = await getSignedUrl(
+                    s3Client as any,
+                    new PutObjectCommand({
+                        Bucket: process.env.AWS_BUCKET_NAME!,
+                        Key: key,
+                    }) as any,
+                    {
+                        expiresIn: 600,
+                    }
+                );
 
                 return { id: file.id, url };
             })

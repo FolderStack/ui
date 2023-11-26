@@ -49,6 +49,8 @@ export const POST = async (req: NextRequest, { params }: PageParamProps) => {
         const { name, type = "application/octetstream", size, url } = data;
         const key = extractS3Key(url);
 
+        console.log({ key });
+
         if (!key) {
             return new NextResponse(
                 JSON.stringify({

@@ -1,7 +1,6 @@
 "use client";
 import { classNames } from "@/utils";
 import axios, { AxiosError, AxiosProgressEvent, CanceledError } from "axios";
-import { randomUUID } from "crypto";
 import { throttle } from "lodash";
 import { useParams, useRouter } from "next/navigation";
 import plimit from "p-limit";
@@ -48,7 +47,7 @@ export function UploadForm({ onDone }: UploadFormProps) {
     const { getRootProps } = useDropzone({
         onDrop: (acceptedFiles) => {
             const fileArr = acceptedFiles.map((file) => ({
-                id: randomUUID(),
+                id: crypto.randomUUID(),
                 name: file.name,
                 size: file.arrayBuffer.length,
                 type: file.type,
@@ -145,6 +144,107 @@ export function UploadForm({ onDone }: UploadFormProps) {
         return [];
     }
 
+    async function uploadFileToS3(file: File, url: string) {
+        const formData = new FormData();
+        formData.append("file", file);
+
+        await axios.put(url, formData, {
+            headers: {
+                "Content-Type": file.type,
+            },
+            signal: abortController.current?.signal,
+        });
+    }
+
+    async function createFileInBackend(
+        folderId: string,
+        obj: UploadUrl,
+        index: number
+    ) {
+        if (!obj || !obj.file || !obj.file.file || obj.error) return;
+        const file = obj.file.file;
+
+        return axios
+            .post(
+                `/api/v1/folders/${folderId}/files`,
+                JSON.stringify({
+                    ...obj.file,
+                    url: obj.url,
+                    file: undefined,
+                }),
+                {
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    signal: abortController.current?.signal,
+                    onUploadProgress: throttle(
+                        (progressEvent: AxiosProgressEvent) => {
+                            const progress = Math.round(
+                                (progressEvent.loaded * 100) /
+                                    (progressEvent.total ?? 1)
+                            );
+                            if (progress < 100) {
+                                // Update the progress as usual if it's less than 100%
+                                updateProgress({
+                                    progress,
+                                    index,
+                                    file,
+                                });
+                            } else {
+                                // If progress is 100%, set an intermediate state like 99% until we're sure it's successful
+                                updateProgress({
+                                    progress: 99,
+                                    index,
+                                    file,
+                                });
+                            }
+                        },
+                        500
+                    ),
+                }
+            )
+            .then(() => {
+                updateProgress({
+                    progress: 100,
+                    index,
+                    file,
+                    confirmed: true,
+                });
+            })
+            .catch((err) => {
+                if (err instanceof AxiosError) {
+                    updateProgress({
+                        progress: -1,
+                        index,
+                        file,
+                        error: err.message,
+                        confirmed: true,
+                    });
+                    if (err.response?.status === 401) {
+                        abortController.current?.abort();
+                        abortController.current = null;
+
+                        const url = new URL(window.location.href);
+                        return router.replace(
+                            `/api/auth/signin?callbackUrl=${encodeURIComponent(
+                                url.pathname + url.search
+                            )}`
+                        );
+                    }
+                } else if (err instanceof CanceledError) {
+                    return;
+                }
+
+                updateProgress({
+                    progress: -1,
+                    index,
+                    file,
+                    confirmed: true,
+                    error: err?.message ?? "An unknown error occured",
+                });
+            });
+    }
+
     function handleSubmit(e: FormEvent<HTMLFormElement>) {
         e.preventDefault();
 
@@ -152,7 +252,7 @@ export function UploadForm({ onDone }: UploadFormProps) {
         const folderId = (params.folderId ?? "@root").toString();
 
         startTransition(async () => {
-            const limit = plimit(3);
+            const limitFn = plimit(3);
             abortController.current = new AbortController();
 
             const fileArr = await presignUrlsAndCreateFileObjects(
@@ -160,96 +260,34 @@ export function UploadForm({ onDone }: UploadFormProps) {
                 files
             );
 
-            const promises = fileArr.map(async (file, i) => {
-                if (!file || !file.file || !file.file.file || file.error)
-                    return;
-
-                const actualFile = file.file.file;
+            const promises = fileArr.map(async (obj, i) => {
+                if (!obj || !obj.file || !obj.file.file || obj.error) return;
+                const file = obj.file.file;
 
                 // Skip the file if it's already been uploaded.
                 // Useful when trying to re-upload because an error occured,
                 // but don't want to re-upload successful files.
-                const fileStatus = uploadProgress.find(
-                    (v) => v.file === actualFile
-                );
+                const fileStatus = uploadProgress.find((v) => v.file === file);
 
                 if (fileStatus?.progress === 100) return Promise.resolve();
 
-                return limit(() =>
-                    axios
-                        .post(
-                            `/api/v1/folders/${folderId}/files`,
-                            JSON.stringify({
-                                ...file.file,
-                                key: file.url,
-                                file: undefined,
-                            }),
-                            {
-                                headers: {
-                                    "Content-Type": "application/json",
-                                },
-                                signal: abortController.current?.signal,
-                                onUploadProgress: throttle(
-                                    (progressEvent: AxiosProgressEvent) => {
-                                        const progress = Math.round(
-                                            (progressEvent.loaded * 100) /
-                                                (progressEvent.total ?? 1)
-                                        );
-                                        if (progress < 100) {
-                                            // Update the progress as usual if it's less than 100%
-                                            updateProgress({
-                                                progress,
-                                                index: i,
-                                                file: actualFile,
-                                            });
-                                        } else {
-                                            // If progress is 100%, set an intermediate state like 99% until we're sure it's successful
-                                            updateProgress({
-                                                progress: 99,
-                                                index: i,
-                                                file: actualFile,
-                                            });
-                                        }
-                                    },
-                                    500
-                                ),
+                await limitFn(() =>
+                    Promise.allSettled([
+                        uploadFileToS3(file, obj.url!),
+                        createFileInBackend(folderId, obj, i),
+                    ])
+                        .then((results) => {
+                            for (const res of results) {
+                                if (res.status === "rejected") {
+                                    throw new Error("rejected");
+                                }
                             }
-                        )
-                        .then(() => {
-                            updateProgress({
-                                progress: 100,
-                                index: i,
-                                file: actualFile,
-                                confirmed: true,
-                            });
                         })
                         .catch((err) => {
-                            if (err instanceof AxiosError) {
-                                updateProgress({
-                                    progress: -1,
-                                    index: i,
-                                    file: actualFile,
-                                    error: err.message,
-                                    confirmed: true,
-                                });
-                                if (err.response?.status === 401) {
-                                    abortController.current?.abort();
-                                    abortController.current = null;
-
-                                    const url = new URL(window.location.href);
-                                    return router.replace(
-                                        `/api/auth/signin?callbackUrl=${encodeURIComponent(
-                                            url.pathname + url.search
-                                        )}`
-                                    );
-                                }
-                            } else if (err instanceof CanceledError) {
-                                return;
-                            }
                             updateProgress({
                                 progress: -1,
                                 index: i,
-                                file: actualFile,
+                                file,
                                 confirmed: true,
                                 error:
                                     err?.message ?? "An unknown error occured",
@@ -270,6 +308,7 @@ export function UploadForm({ onDone }: UploadFormProps) {
         () => uploadProgress.filter(({ progress }) => progress === -1).length,
         [uploadProgress]
     );
+
     const totalFinished = useMemo(
         () =>
             uploadProgress.filter(
@@ -305,9 +344,9 @@ export function UploadForm({ onDone }: UploadFormProps) {
     const submitText = useMemo(() => {
         if (pending) {
             if (uploadFinished) {
-                return "Storing";
+                return "Uploading";
             }
-            return "Uploading";
+            return "Processing";
         }
         return "Upload";
         // eslint-disable-next-line react-hooks/exhaustive-deps

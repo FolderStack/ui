@@ -40,7 +40,7 @@ export default function RootLayout({ children }: PropsWithChildren) {
                         <body
                             className={classNames(
                                 openSans.variable,
-                                "font-body md:flex min-h-screen max-h-screen"
+                                "font-body md:flex min-h-screen max-h-screen overflow-hidden"
                             )}
                         >
                             {children}

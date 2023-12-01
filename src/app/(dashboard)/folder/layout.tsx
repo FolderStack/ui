@@ -44,7 +44,7 @@ export default function FolderPageLayout(props: any) {
         <SelectionProvider items={folderData?.items ?? []}>
             <main className="w-full flex flex-row overflow-y-scroll">
                 {loadingTree ? <SidebarLoading /> : <Sidebar {...{ tree }} />}
-                <section className="p-6 flex-1">
+                <section className="p-6 flex-1 overflow-y-scroll">
                     <section id="query-actions" className="w-full space-y-8">
                         {loadingTree ? (
                             <QueryActionsLoading />
@@ -70,7 +70,9 @@ export default function FolderPageLayout(props: any) {
                         </div>
                     </section>
                     <div className="h-8" />
-                    <section id="folder-contents">{props.children}</section>
+                    <section id="folder-contents" className="pb-8">
+                        {props.children}
+                    </section>
                 </section>
             </main>
         </SelectionProvider>

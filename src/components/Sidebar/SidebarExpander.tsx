@@ -24,8 +24,9 @@ export function SidebarExpander({ children }: PropsWithChildren) {
                     width,
                     minWidth: INITIAL_WIDTH + "px",
                     maxWidth: MAX_WIDTH + "px",
+                    scrollbarWidth: 'none'
                 }}
-                className="h-full overflow-y-scroll"
+                className="h-full overflow-y-scroll sidebar"
             >
                 {children}
             </aside>
